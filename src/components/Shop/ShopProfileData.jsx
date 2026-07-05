@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { getAllProductsShop } from "../../redux/actions/product";
-import styles from "../../styles/styles";
 import ProductCard from "../Route/ProductCard/ProductCard";
 import Ratings from "../Products/Ratings";
 import { getAllEventsShop } from "../../redux/actions/event";
@@ -24,53 +23,30 @@ const ShopProfileData = ({ isOwner }) => {
     products && products.map((product) => product.reviews).flat();
 
   return (
-    <div className="w-full dark:bg-[#1f1f1f]">
-      <div className="flex w-full items-center justify-between">
-        <div className="w-full flex ">
-          <div className="flex items-center" onClick={() => setActive(1)}>
-            <h5
-              className={`font-semibold text-base md:text-md ${active === 1 ? "text-green-700" : "text-gray-700 dark:text-gray-300"
-                } cursor-pointer pr-5`}
-            >
-              Shop Products
-            </h5>
-          </div>
-          <div className="flex items-center" onClick={() => setActive(2)}>
-            <h5
-              className={`font-semibold text-base md:text-md ${active === 2 ? "text-green-700" : "text-gray-700 dark:text-gray-300"
-                } cursor-pointer pr-5`}
-            >
-              Running Events
-            </h5>
-          </div>
-
-          <div className="flex items-center" onClick={() => setActive(3)}>
-            <h5
-              className={`font-semibold text-base md:text-md ${active === 3 ? "text-green-700" : "text-gray-700 dark:text-gray-300"
-                } cursor-pointer pr-5`}
-            >
-              Shop Reviews
-            </h5>
-          </div>
-          <div>
-            {isOwner && (
-              <div>
-                <Link to="/dashboard">
-                  <h5
-                    className={`font-semibold text-base md:text-md ${active === 3 ? "text-green-700" : "text-gray-700 dark:text-gray-300"
-                      } cursor-pointer pr-5`}
-                  >
-                    Dashboard
-                  </h5>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
+    <div className="w-full">
+      <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-100 dark:border-gray-800 pb-4">
+        {[
+          { id: 1, label: "Shop Products" },
+          { id: 2, label: "Running Events" },
+          { id: 3, label: "Shop Reviews" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActive(tab.id)}
+            className={`marketplace-section-tab ${active === tab.id ? "is-active" : ""}`}
+          >
+            {tab.label}
+          </button>
+        ))}
+        {isOwner && (
+          <Link to="/dashboard" className="marketplace-section-tab ml-auto">
+            Dashboard
+          </Link>
+        )}
       </div>
-      <br />
       {active === 1 && (
-        <div className="flex flex-wrap justify-center md:justify-start gap-5 sm:gap-8 md:gap-5 lg:gap-5 mb-12">
+        <div className="marketplace-product-grid mb-12">
           {products &&
             // Create a shallow copy and sort it by createdAt (new to old)
             [...products]

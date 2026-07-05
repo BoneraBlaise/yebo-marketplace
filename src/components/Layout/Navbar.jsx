@@ -18,7 +18,7 @@ const Navbar = ({ active }) => {
     // Check if the base URL and query parameters match
     const isActive = currentUrl === url;
 
-    return isActive ? "text-[#29625d] text-sm" : "text-[#313131] text-sm 800px:dark:text-gray-200";
+    return isActive ? "text-yebone-primary text-sm" : "text-yebone-dark-text text-sm 800px:dark:text-gray-200";
   };
 
   return (

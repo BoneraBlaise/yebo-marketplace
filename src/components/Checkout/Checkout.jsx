@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import styles from "../../styles/styles";
 import { Country, State } from "country-state-city";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useEffect } from "react";
-import axios from "axios";
-import { server } from "../../server";
 import { toast } from "react-toastify";
 import { trackCommissionClick } from "../../redux/actions/order";
+import { addTocart, removeFromCart } from "../../redux/actions/cart";
 import { useReferral } from "../../context/ReferralContext";
+import { Container, Button } from "../ui";
+import { typography } from "../../design-system/typography";
+import CheckoutOrderSummary from "./CheckoutOrderSummary";
+import CheckoutCartItem from "./CheckoutCartItem";
+import CheckoutEmptyCart from "./CheckoutEmptyCart";
+import "./checkout.css";
 
 const Checkout = () => {
   const { user } = useSelector((state) => state.user);
@@ -34,15 +38,11 @@ const Checkout = () => {
 
   useEffect(() => {
     const handleReferralCode = () => {
-      // Get referral code from URL
       const urlParams = new URLSearchParams(window.location.search);
-      const refCode = urlParams.get('ref');
-      
+      const refCode = urlParams.get("ref");
+
       if (refCode) {
-        // Store referral code in localStorage
-        localStorage.setItem('referralCode', refCode);
-        
-        // Track the click
+        localStorage.setItem("referralCode", refCode);
         dispatch(trackCommissionClick(refCode));
       }
     };
@@ -50,13 +50,11 @@ const Checkout = () => {
     handleReferralCode();
   }, [dispatch]);
 
-  // Calculate prices including won bids
   const subTotalPrice = cart.reduce(
     (acc, item) => acc + item.qty * item.discountPrice,
     0
   );
 
-  // Calculate shipping based on price tiers
   const calculateShipping = (price) => {
     if (price >= 500000) return 10000;
     if (price >= 100000) return 5000;
@@ -69,14 +67,12 @@ const Checkout = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate address fields
     if (!address1 || !country || !city || !zipCode) {
       toast.error("Please fill in all shipping details!");
       return;
     }
 
-    // Add referral codes to cart items if applicable
-    const cartWithReferrals = cart.map(item => {
+    const cartWithReferrals = cart.map((item) => {
       const referralCode = referralProducts.get(item._id);
       return referralCode ? { ...item, referralCode } : item;
     });
@@ -99,97 +95,143 @@ const Checkout = () => {
       discountPrice: discountPrice || 0,
     };
 
-    // Handle different order types
     if (location.state?.wonBid) {
-      const wonBid = location.state.wonBid;
+      const wonBidState = location.state.wonBid;
       orderData = {
         ...orderData,
-        cart: cartWithReferrals.filter(item => item._id === wonBid._id),
-        totalPrice: wonBid.discountPrice + shipping,
-        subTotalPrice: wonBid.discountPrice,
-        orderType: 'won_bid',
-        bidId: wonBid.bidId
+        cart: cartWithReferrals.filter((item) => item._id === wonBidState._id),
+        totalPrice: wonBidState.discountPrice + shipping,
+        subTotalPrice: wonBidState.discountPrice,
+        orderType: "won_bid",
+        bidId: wonBidState.bidId,
       };
     } else if (location.state?.flashSale) {
       const flashSale = location.state.flashSale;
       orderData = {
         ...orderData,
-        cart: cartWithReferrals.filter(item => item._id === flashSale._id),
+        cart: cartWithReferrals.filter((item) => item._id === flashSale._id),
         totalPrice: flashSale.discountPrice + shipping,
         subTotalPrice: flashSale.discountPrice,
-        orderType: 'flash_sale'
+        orderType: "flash_sale",
       };
     } else {
-      // Regular order
       orderData = {
         ...orderData,
         totalPrice,
         subTotalPrice,
-        orderType: 'regular'
+        orderType: "regular",
       };
     }
 
-    // Save to localStorage
     localStorage.setItem("latestOrder", JSON.stringify(orderData));
-
-    // Navigate to payment
     navigate("/payment");
   };
 
   const discountPercentenge = couponCodeData ? discountPrice : "";
 
-  // Calculate total price including shipping
-  const totalPrice = cart.length > 0
-    ? (parseFloat(subTotalPrice) + shipping).toFixed(2)
-    : couponCodeData
+  const totalPrice =
+    cart.length > 0
+      ? (parseFloat(subTotalPrice) + shipping).toFixed(2)
+      : couponCodeData
       ? (subTotalPrice + shipping - discountPercentenge).toFixed(2)
       : (subTotalPrice + shipping).toFixed(2);
 
-  console.log(discountPercentenge);
+  const quantityChangeHandler = (data) => {
+    dispatch(addTocart(data));
+  };
+
+  const removeFromCartHandler = (data) => {
+    dispatch(removeFromCart(data));
+  };
+
+  if (!wonBid && cart.length === 0) {
+    return <CheckoutEmptyCart />;
+  }
 
   return (
-    <div className="w-full flex flex-col items-center py-8">
-      <div className="w-[90%] 1000px:w-[70%] block 800px:flex">
-        <div className="w-full 800px:w-[65%]">
-          <ShippingInfo
-            user={user}
-            country={country}
-            setCountry={setCountry}
-            city={city}
-            setCity={setCity}
-            userInfo={userInfo}
-            setUserInfo={setUserInfo}
-            address1={address1}
-            setAddress1={setAddress1}
-            address2={address2}
-            setAddress2={setAddress2}
-            zipCode={zipCode}
-            setZipCode={setZipCode}
-          />
+    <>
+      <Container className="py-8 lg:py-12 pb-28 lg:pb-12">
+        <div className="mb-8 yebone-fade-up">
+          <h1 className={`${typography.heading} mb-2`}>Checkout</h1>
+          <p className="text-gray-500 dark:text-gray-400">
+            Review your items and complete shipping details on Yebone.
+          </p>
         </div>
-        <div className="w-full 800px:w-[35%] 800px:mt-0 mt-8">
-          <CartData
-            handleSubmit={handleSubmit}
-            totalPrice={totalPrice}
-            shipping={shipping}
+
+        <div className="grid lg:grid-cols-3 gap-8 lg:gap-10 items-start">
+          <div className="lg:col-span-2 space-y-6 yebone-fade-up">
+            {!wonBid && cart.length > 0 && (
+              <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
+                <h2 className={`${typography.subheading} mb-5`}>
+                  Cart ({cart.length} {cart.length === 1 ? "item" : "items"})
+                </h2>
+                <div className="space-y-4">
+                  {cart.map((item, index) => (
+                    <CheckoutCartItem
+                      key={item._id || index}
+                      data={item}
+                      quantityChangeHandler={quantityChangeHandler}
+                      removeFromCartHandler={removeFromCartHandler}
+                      hasReferral={
+                        referralProducts.has(item._id) || item.referralCode
+                      }
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <ShippingInfo
+              user={user}
+              country={country}
+              setCountry={setCountry}
+              city={city}
+              setCity={setCity}
+              userInfo={userInfo}
+              setUserInfo={setUserInfo}
+              address1={address1}
+              setAddress1={setAddress1}
+              address2={address2}
+              setAddress2={setAddress2}
+              zipCode={zipCode}
+              setZipCode={setZipCode}
+            />
+          </div>
+
+          <CheckoutOrderSummary
             subTotalPrice={subTotalPrice}
+            shipping={shipping}
+            totalPrice={totalPrice}
+            discountAmount={discountPercentenge}
             couponCode={couponCode}
             setCouponCode={setCouponCode}
-            discountPercentenge={discountPercentenge}
+            handleSubmit={handleSubmit}
             isWonBid={!!wonBid}
             wonBid={wonBid}
           />
         </div>
+      </Container>
+
+      <div className="checkout-mobile-bar fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 py-3 flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-gray-500">Total</p>
+          <p className="font-Poppins font-bold text-yebone-primary text-lg tabular-nums">
+            RWF {Number(totalPrice).toLocaleString()}
+          </p>
+        </div>
+        <Button size="md" className="yebone-btn-lift shrink-0" onClick={handleSubmit}>
+          Pay now
+        </Button>
       </div>
-      <div
-        className={`${styles.button} w-[150px] 800px:w-[280px] mt-10`}
-        onClick={handleSubmit}
-      >
-        <h5 className="text-white">Go to Payment</h5>
-      </div>
-    </div>
+    </>
   );
 };
+
+const fieldClass =
+  "w-full h-11 px-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:border-yebone-primary focus:ring-4 focus:ring-yebone-primary/10 outline-none transition text-sm dark:text-white";
+
+const selectClass =
+  "w-full h-11 px-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:border-yebone-primary outline-none transition text-sm dark:text-white";
 
 const ShippingInfo = ({
   user,
@@ -205,232 +247,140 @@ const ShippingInfo = ({
   setAddress2,
   zipCode,
   setZipCode,
-}) => {
-  return (
-    <div className="w-full 800px:w-[95%] bg-white dark:bg-[#1f1f1f] dark:text-gray-200 rounded-md p-5 pb-8">
-      <h5 className="text-[18px] font-[500]">Shipping Address</h5>
-      <br />
-      <form>
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Full Name</label>
-            <input
-              type="text"
-              value={user?.name || ""}
-              required
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-gray-200 !w-[95%]`}
-              readOnly
-            />
-          </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">Email Address</label>
-            <input
-              type="email"
-              value={user?.email || ""}
-              required
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-gray-200`}
-              readOnly
-            />
-          </div>
-        </div>
-
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Phone Number</label>
-            <input
-              type="number"
-              required
-              value={user?.phoneNumber || ""}
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-gray-200 !w-[95%]`}
-              readOnly
-            />
-          </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">Zip Code</label>
-            <input
-              type="number"
-              value={zipCode || ""}
-              onChange={(e) => setZipCode(e.target.value)}
-              required
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-gray-200`}
-            />
-          </div>
-        </div>
-
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Country</label>
-            <select
-              className="w-[95%] border h-[40px] rounded-[5px] dark:bg-[#1f1f1f] dark:text-gray-200"
-              value={country}
-              onChange={(e) => setCountry(e.target.value)}
-            >
-              <option className="block pb-2" value="">
-                Choose your country
-              </option>
-              {Country &&
-                Country.getAllCountries().map((item) => (
-                  <option key={item.isoCode} value={item.isoCode}>
-                    {item.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">City</label>
-            <select
-              className="w-[95%] border h-[40px] rounded-[5px] dark:bg-[#1f1f1f] dark:text-gray-200"
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-            >
-              <option className="block pb-2" value="">
-                Choose your City
-              </option>
-              {State &&
-                State.getStatesOfCountry(country).map((item) => (
-                  <option key={item.isoCode} value={item.isoCode}>
-                    {item.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="w-full flex pb-3">
-          <div className="w-[50%]">
-            <label className="block pb-2">Address1</label>
-            <input
-              type="address"
-              required
-              value={address1}
-              onChange={(e) => setAddress1(e.target.value)}
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-gray-200 !w-[95%]`}
-            />
-          </div>
-          <div className="w-[50%]">
-            <label className="block pb-2">Address2</label>
-            <input
-              type="address"
-              value={address2}
-              onChange={(e) => setAddress2(e.target.value)}
-              required
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-gray-200`}
-            />
-          </div>
-        </div>
-
-        <div></div>
-      </form>
-      <h5
-        className="text-[18px] cursor-pointer inline-block"
-        onClick={() => setUserInfo(!userInfo)}
-      >
-        Choose From saved address
-      </h5>
-      {userInfo && (
+}) => (
+  <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
+    <h2 className={`${typography.subheading} mb-6`}>Shipping address</h2>
+    <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+      <div className="grid sm:grid-cols-2 gap-4">
         <div>
-          {user?.addresses?.map((item, index) => (
-            <div className="w-full flex mt-1" key={index}>
-              <input
-                type="checkbox"
-                className="mr-3 dark:bg-[#1f1f1f] dark:text-gray-200"
-                value={item.addressType}
-                onClick={() => {
-                  setAddress1(item.address1);
-                  setAddress2(item.address2);
-                  setZipCode(item.zipCode);
-                  setCountry(item.country);
-                  setCity(item.city);
-                }}
-              />
-              <h2>{item.addressType}</h2>
-            </div>
-          ))}
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Full name
+          </label>
+          <input type="text" value={user?.name || ""} readOnly className={fieldClass} />
         </div>
-      )}
-    </div>
-  );
-};
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Email
+          </label>
+          <input type="email" value={user?.email || ""} readOnly className={fieldClass} />
+        </div>
+      </div>
 
-const CartData = ({
-  handleSubmit,
-  totalPrice,
-  shipping,
-  subTotalPrice,
-  couponCode,
-  setCouponCode,
-  discountPercentenge,
-  isWonBid,
-  wonBid
-}) => {
-  const getShippingTierText = (price) => {
-    if (price >= 500000) return "(Premium Shipping)";
-    if (price >= 100000) return "(Express Shipping)";
-    if (price >= 50000) return "(Standard Shipping)";
-    return "(Basic Shipping)";
-  };
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Phone
+          </label>
+          <input type="number" value={user?.phoneNumber || ""} readOnly className={fieldClass} />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Zip code
+          </label>
+          <input
+            type="number"
+            value={zipCode || ""}
+            onChange={(e) => setZipCode(e.target.value)}
+            required
+            className={fieldClass}
+          />
+        </div>
+      </div>
 
-  return (
-    <div className="w-full bg-white dark:bg-gray-800 dark:text-white rounded-md p-5 pb-8">
-      {isWonBid ? (
-        <>
-          <div className="flex justify-between">
-            <h3 className="text-[16px] font-[400] text-[#000000a4] dark:text-gray-200">Won Bid Amount:</h3>
-            <h5 className="text-[18px] font-[600]">RWF {wonBid?.discountPrice?.toLocaleString() || "0"}</h5>
-          </div>
-          <br />
-          <div className="flex justify-between border-b pb-3">
-            <div>
-              <h3 className="text-[16px] font-[400] text-[#000000a4] dark:text-gray-200">Shipping:</h3>
-              <p className="text-xs text-gray-500">{getShippingTierText(wonBid?.discountPrice || 0)}</p>
-            </div>
-            <h5 className="text-[18px] font-[600]">RWF {shipping?.toLocaleString() || "0"}</h5>
-          </div>
-          <h5 className="text-[18px] font-[600] text-end pt-3">Total: RWF {totalPrice}</h5>
-        </>
-      ) : (
-        <>
-          <div className="flex justify-between">
-            <h3 className="text-[16px] font-[400] text-[#000000a4] dark:text-gray-200">subtotal:</h3>
-            <h5 className="text-[18px] font-[600]">RWF {subTotalPrice?.toLocaleString()}</h5>
-          </div>
-          <br />
-          <div className="flex justify-between">
-            <div>
-              <h3 className="text-[16px] font-[400] text-[#000000a4] dark:text-gray-200">shipping:</h3>
-              <p className="text-xs text-gray-500">{getShippingTierText(subTotalPrice)}</p>
-            </div>
-            <h5 className="text-[18px] font-[600]">RWF {shipping?.toLocaleString()}</h5>
-          </div>
-          <br />
-          <div className="flex justify-between border-b pb-3">
-            <h3 className="text-[16px] font-[400] text-[#000000a4] dark:text-gray-200">Discount:</h3>
-            <h5 className="text-[18px] font-[600]">
-              - {discountPercentenge ? "RWF " + discountPercentenge.toString() : null}
-            </h5>
-          </div>
-          <h5 className="text-[18px] font-[600] text-end pt-3">RWF {totalPrice}</h5>
-          <br />
-          <form onSubmit={handleSubmit}>
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Country
+          </label>
+          <select
+            className={selectClass}
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+          >
+            <option value="">Choose your country</option>
+            {Country?.getAllCountries().map((item) => (
+              <option key={item.isoCode} value={item.isoCode}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            City
+          </label>
+          <select className={selectClass} value={city} onChange={(e) => setCity(e.target.value)}>
+            <option value="">Choose your city</option>
+            {State?.getStatesOfCountry(country).map((item) => (
+              <option key={item.isoCode} value={item.isoCode}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Address line 1
+          </label>
+          <input
+            type="text"
+            required
+            value={address1}
+            onChange={(e) => setAddress1(e.target.value)}
+            className={fieldClass}
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
+            Address line 2
+          </label>
+          <input
+            type="text"
+            value={address2}
+            onChange={(e) => setAddress2(e.target.value)}
+            required
+            className={fieldClass}
+          />
+        </div>
+      </div>
+    </form>
+
+    <button
+      type="button"
+      className="mt-6 text-sm font-semibold text-yebone-primary hover:underline yebone-btn-lift"
+      onClick={() => setUserInfo(!userInfo)}
+    >
+      Choose from saved addresses
+    </button>
+
+    {userInfo && user?.addresses?.length > 0 && (
+      <div className="mt-4 space-y-2">
+        {user.addresses.map((item, index) => (
+          <label
+            key={index}
+            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-yebone-primary/40 cursor-pointer transition yebone-card-lift"
+          >
             <input
-              type="text"
-              className={`${styles.input} h-[40px] pl-2 dark:bg-gray-800 dark:text-gray-200`}
-              placeholder="Coupoun code"
-              value={couponCode}
-              onChange={(e) => setCouponCode(e.target.value)}
-              required
+              type="checkbox"
+              className="accent-yebone-primary"
+              value={item.addressType}
+              onChange={() => {
+                setAddress1(item.address1);
+                setAddress2(item.address2);
+                setZipCode(item.zipCode);
+                setCountry(item.country);
+                setCity(item.city);
+              }}
             />
-            <input
-              className={`w-full h-[40px] border border-[#29625d] text-center text-[#29625d] rounded-[3px] mt-8 cursor-pointer`}
-              required
-              value="Apply code"
-              type="submit"
-            />
-          </form>
-        </>
-      )}
-    </div>
-  );
-};
+            <span className="text-sm font-medium dark:text-white">{item.addressType}</span>
+          </label>
+        ))}
+      </div>
+    )}
+  </section>
+);
 
 export default Checkout;

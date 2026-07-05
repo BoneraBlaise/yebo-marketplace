@@ -1,73 +1,87 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import styles from "../../styles/styles";
-import ProductCard from "../Route/ProductCard/ProductCard";
+import { Container, SectionTitle, Button } from "../ui";
+import HomeProductCard from "../Home/HomeProductCard";
 
 const SuggestedProduct = ({ data }) => {
   const { allProducts } = useSelector((state) => state.products);
   const [productData, setProductData] = useState([]);
   const [visibleCount, setVisibleCount] = useState(4);
 
-  // Function to check similarity in product name (using first 5 characters)
   const checkNameSimilarity = (product, referenceProduct) => {
     const referenceNameSubstring = referenceProduct.name.slice(0, 5).toLowerCase();
-    return product.name.toLowerCase().includes(referenceNameSubstring) && product.category === referenceProduct.category;
+    return (
+      product.name.toLowerCase().includes(referenceNameSubstring) &&
+      product.category === referenceProduct.category
+    );
   };
 
   useEffect(() => {
     if (data && allProducts) {
-      // Filter products by category
       const filteredProducts = allProducts.filter(
-        (product) => product.category === data.category
+        (product) => product.category === data.category && product._id !== data._id
       );
 
-      // Get products with name similarity based on the first 5 characters
       const similarProducts = filteredProducts.filter((product) =>
         checkNameSimilarity(product, data)
       );
 
-      // If no similar products, display other products in the same category
       if (similarProducts.length === 0) {
-        setProductData(filteredProducts.slice(0, 8)); // Display up to 8 products from the same category
+        setProductData(filteredProducts.slice(0, 8));
       } else {
-        setProductData(similarProducts.slice(0, 8)); // Display up to 8 similar products
+        setProductData(similarProducts.slice(0, 8));
       }
     }
   }, [data, allProducts]);
 
-  // Handle the Load More button click
-  const handleLoadMore = () => {
-    setVisibleCount(visibleCount + 4); // Load 4 more products
-  };
+  if (!data || !productData.length) return null;
 
   return (
-    <div className="bg-slate-50 dark:bg-[#1f1f1f] dark:text-gray-200">
-      {data ? (
-        <div className={`p-4 ${styles.section} mb-20 w-[85%]`}>
-          <h2 className={`${styles.heading} text-[25px] font-[500] border-b mb-5`}>
-            Related Products
-          </h2>
-          {/* Switch to flex layout */}
-          <div className="flex flex-wrap justify-start gap-4 mb-12 ml-auto mr-auto">
-            {productData.slice(0, visibleCount).map((product, index) => (
-              <ProductCard data={product} key={index} />
-            ))}
+    <section className="pdp-section bg-yebone-light-gray/50 dark:bg-gray-950">
+      <Container>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <SectionTitle
+            title="Related products"
+            subtitle={`More ${data.category || "items"} you may like on Yebone.`}
+            align="left"
+            className="mb-0"
+          />
+          <div className="flex flex-wrap gap-3 shrink-0">
+            <Link to={`/products?category=${encodeURIComponent(data.category || "")}`}>
+              <Button variant="outline" size="sm" className="yebone-btn-lift">
+                Browse more
+              </Button>
+            </Link>
+            <Link to="/products">
+              <Button size="sm" className="yebone-btn-lift">
+                View all products
+              </Button>
+            </Link>
           </div>
-
-          {/* Show "Load More" button if there are more products */}
-          {productData.length > visibleCount && (
-            <div className="text-center mt-4">
-              <button
-                onClick={handleLoadMore}
-                className="bg-[#29625d] text-white hover:bg-black py-2 px-4 rounded"
-              >
-                Load More
-              </button>
-            </div>
-          )}
         </div>
-      ) : null}
-    </div>
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 justify-items-center lg:justify-items-stretch yebone-fade-up">
+          {productData.slice(0, visibleCount).map((product) => (
+            <div key={product._id} className="w-full flex justify-center">
+              <HomeProductCard data={product} compact />
+            </div>
+          ))}
+        </div>
+
+        {productData.length > visibleCount && (
+          <div className="text-center mt-10">
+            <Button
+              variant="outline"
+              onClick={() => setVisibleCount((c) => c + 4)}
+              className="yebone-btn-lift"
+            >
+              Load more
+            </Button>
+          </div>
+        )}
+      </Container>
+    </section>
   );
 };
 

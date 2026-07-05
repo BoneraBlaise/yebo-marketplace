@@ -101,9 +101,9 @@ const CreateProduct = () => {
   };
 
   return (
-    <div className="w-[90%] 800px:w-[50%] bg-white dark:bg-gray-900 shadow h-[80vh] rounded-[4px] p-3 overflow-y-scroll">
-      <h5 className="text-[30px] font-Poppins text-center dark:text-white">Create Product</h5>
-      <form onSubmit={handleSubmit}>
+    <div className="vendor-form-section yebone-surface yebone-fade-up max-h-[80vh] overflow-y-auto">
+      <h5 className="text-2xl font-Poppins font-semibold text-center dark:text-white mb-6">Create Product</h5>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <br />
         {/* Product Name */}
         <div>

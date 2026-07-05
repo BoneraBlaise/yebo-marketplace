@@ -7,9 +7,9 @@ const Careers = () => {
     <div className="px-6 md:w-[70%] w-[90%] mx-auto py-10">
       {/* Header Section */}
       <header className="text-center mb-16">
-        <h1 className="text-4xl font-bold text-[#29625d]">Join the Guriraline Team</h1>
+        <h1 className="text-4xl font-bold text-[#29625d]">Join the Yebone Team</h1>
         <p className="mt-4 text-lg  dark:text-gray-200">
-          At Guriraline, we're revolutionizing e-commerce with AI. Be part of our innovative journey to shape the future of online shopping in Rwanda.
+          At Yebone, we're revolutionizing e-commerce with AI. Be part of our innovative journey to shape the future of online shopping in Rwanda.
         </p>
       </header>
 
@@ -62,7 +62,7 @@ const Careers = () => {
 
       {/* Footer Section */}
       <footer className="text-center mt-16">
-        <p className="text-lg  dark:text-gray-200">Ready to join us? Send your application to <a href="mailto:careers@guriraline.com" className="text-blue-600 hover:underline">careers@guriraline.com</a></p>
+        <p className="text-lg  dark:text-gray-200">Ready to join us? Send your application to <a href="mailto:careers@yebone.com" className="text-blue-600 hover:underline">careers@yebone.com</a></p>
       </footer>
     </div>
   )

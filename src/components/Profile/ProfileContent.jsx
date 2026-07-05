@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
-  AiOutlineArrowRight,
   AiOutlineCamera,
   AiOutlineDelete,
 } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import { server } from "../../server";
 import styles from "../../styles/styles";
-import { DataGrid } from "@material-ui/data-grid";
-import { Button } from "@material-ui/core";
 import { Link } from "react-router-dom";
-import { MdTrackChanges } from "react-icons/md";
 import { RxCross1 } from "react-icons/rx";
 import { IoIosArrowForward } from "react-icons/io";
 import {
@@ -26,17 +22,18 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { getAllOrdersOfUser } from "../../redux/actions/order";
 import {
-  getCommissionDashboard,
-} from "../../redux/actions/order";
-import {
-  FaMoneyBillWave,
-  FaClock,
-  FaShoppingCart,
-  FaChartLine,
-} from "react-icons/fa";
+  DashboardHome,
+  DashboardWishlist,
+  ReferralCenter,
+  DashboardNotifications,
+  DashboardSettings,
+  DashboardOrderList,
+  DashboardEmptyState,
+} from "../Dashboard";
 import CommissionDashboard from "../Commission/CommissionDashboard";
+import { Button, Badge } from "../ui";
 
-const ProfileContent = ({ active }) => {
+const ProfileContent = ({ active, setActive }) => {
   const { user, error, successMessage, loading } = useSelector((state) => state.user);
   const { isSeller } = useSelector((state) => state.seller);
   const [name, setName] = useState(user && user.name);
@@ -96,10 +93,20 @@ const ProfileContent = ({ active }) => {
 
   return (
     <div className="w-full">
+      {active === 0 && <DashboardHome setActive={setActive} />}
+
+      {active === 10 && <DashboardWishlist />}
+
+      {active === 11 && <ReferralCenter />}
+
+      {active === 12 && <DashboardNotifications />}
+
+      {active === 13 && <DashboardSettings setActive={setActive} />}
+
       {/* profile */}
       {active === 1 && (
         <>
-          <div className="rounded-md border-[1px] m-2 px-3 py-2 text-sm font-medium ">
+          <div className="rounded-xl border border-yebone-primary/15 m-2 px-4 py-3 text-sm font-medium yebone-surface">
             {isSeller ? "Check your" : "Start Selling"}
             <Link
               className="w-[50px]"
@@ -115,10 +122,10 @@ const ProfileContent = ({ active }) => {
             <div className="relative">
               <img
                 src={user?.avatar?.url}
-                className="w-[150px] h-[150px] rounded-full object-cover border-[3px] border-[#3ad132]"
-                alt=""
+                className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-yebone-primary shadow-lg"
+                alt={user?.name || "Profile"}
               />
-              <div className="w-[30px] h-[30px] bg-[#0d9b4d] rounded-full flex items-center justify-center cursor-pointer absolute bottom-[5px] right-[5px]">
+              <div className="w-[36px] h-[36px] bg-yebone-primary rounded-full flex items-center justify-center cursor-pointer absolute bottom-[5px] right-[5px] yebone-btn-lift">
                 <input
                   type="file"
                   id="image"
@@ -134,8 +141,20 @@ const ProfileContent = ({ active }) => {
           </div>
           <br />
           <br />
-          <div className="w-full px-5 mb-20">
-            <form onSubmit={handleSubmit} aria-required={true}>
+          <div className="w-full px-2 md:px-5 mb-8">
+            <div className="mb-4">
+              <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <span>Profile completion</span>
+                <span>{user?.name && user?.email && user?.phoneNumber ? "100%" : "70%"}</span>
+              </div>
+              <div className="dashboard-chart-bar">
+                <div
+                  className="dashboard-chart-bar-fill"
+                  style={{ width: user?.name && user?.email && user?.phoneNumber ? "100%" : "70%" }}
+                />
+              </div>
+            </div>
+            <form onSubmit={handleSubmit} aria-required={true} className="space-y-4">
               <div className="w-full 800px:flex block pb-3">
                 <div className=" w-[100%] 800px:w-[50%]">
                   <label className="block pb-2">Full Name</label>
@@ -182,15 +201,9 @@ const ProfileContent = ({ active }) => {
                   />
                 </div>
               </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-[250px] h-[40px] border bg-[#29625d] text-center text-white rounded-[3px] mt-8 cursor-pointer ${
-                  loading ? 'opacity-70' : ''
-                }`}
-              >
-                {loading ? "Updating..." : "Update"}
-              </button>
+              <Button type="submit" disabled={loading} className="yebone-btn-lift mt-4">
+                {loading ? "Updating..." : "Update profile"}
+              </Button>
             </form>
           </div>
         </>
@@ -251,92 +264,12 @@ const AllOrders = () => {
     dispatch(getAllOrdersOfUser(user._id));
   }, [dispatch, user._id]);
 
-  const columns = [
-    {
-      field: "id",
-      headerName: "Order ID",
-      minWidth: 150,
-      flex: 0.7,
-      headerClassName: "dark:text-white", // Ensure white text in header
-      cellClassName: "dark:text-white", // Ensure white text in cells
-    },
-
-    {
-      field: "status",
-      headerName: "Status",
-      minWidth: 130,
-      flex: 0.7,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-
-    {
-      field: "itemsQty",
-      headerName: "Items Qty",
-      type: "number",
-      minWidth: 130,
-      flex: 0.7,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white", // Ensure white text in cells
-    },
-
-    {
-      field: "total",
-      headerName: "Total",
-      type: "number",
-      minWidth: 130,
-      flex: 0.8,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white", // Ensure white text in cells
-    },
-
-    {
-      field: " ",
-      flex: 1,
-      minWidth: 150,
-      headerName: "",
-      type: "number",
-      sortable: false,
-      headerClassName: "dark:text-white",
-      renderCell: (params) => {
-        return (
-          <Link to={`/user/order/${params.id}`}>
-            <Button className="dark:bg-black p-1 dark:bg-gray-800">
-              {" "}
-              {/* Ensure button is styled for dark mode */}
-              <AiOutlineArrowRight size={20} className="dark:text-white" />
-            </Button>
-          </Link>
-        );
-      },
-    },
-  ];
-
-  const row = [];
-
-  orders &&
-    orders.forEach((item) => {
-      row.push({
-        id: item._id,
-        itemsQty: item.cart.length,
-        total: "RWF " + item.totalPrice,
-        status: item.status,
-      });
-    });
-
   return (
-    <div className="pl-8 pt-1 dark:text-white">
-      {" "}
-      {/* Parent div for dark mode */}
-      <DataGrid
-        rows={row}
-        columns={columns}
-        pageSize={10}
-        disableSelectionOnClick
-        autoHeight
-        className="dark:text-white" // Ensure DataGrid is styled for dark mode
-      />
-    </div>
+    <DashboardOrderList
+      orders={orders || []}
+      emptyTitle="No orders yet"
+      emptyMessage="Your order history will appear here after you shop on Yebone."
+    />
   );
 };
 
@@ -352,90 +285,12 @@ const AllRefundOrders = () => {
   const eligibleOrders =
     orders && orders.filter((item) => item.status === "Processing refund");
 
-  const columns = [
-    {
-      field: "id",
-      headerName: "Order ID",
-      minWidth: 150,
-      flex: 0.7,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-
-    {
-      field: "status",
-      headerName: "Status",
-      minWidth: 130,
-      flex: 0.7,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-    {
-      field: "itemsQty",
-      headerName: "Items Qty",
-      type: "number",
-      minWidth: 130,
-      flex: 0.7,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-
-    {
-      field: "total",
-      headerName: "Total",
-      type: "number",
-      minWidth: 130,
-      flex: 0.8,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-
-    {
-      field: " ",
-      flex: 1,
-      minWidth: 150,
-      headerName: "",
-      type: "number",
-      sortable: false,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-      renderCell: (params) => {
-        return (
-          <>
-            <Link to={`/user/order/${params.id}`}>
-              <Button>
-                <AiOutlineArrowRight size={20} className="dark:text-white" />
-              </Button>
-            </Link>
-          </>
-        );
-      },
-    },
-  ];
-
-  const row = [];
-
-  eligibleOrders &&
-    eligibleOrders.forEach((item) => {
-      row.push({
-        id: item._id,
-        itemsQty: item.cart.length,
-        total: "RWF " + item.totalPrice,
-        status: item.status,
-      });
-    });
-
   return (
-    <div className="pl-8 pt-1">
-      <DataGrid
-        rows={row}
-        columns={columns}
-        pageSize={10}
-        autoHeight
-        disableSelectionOnClick
-        className="dark:text-white"
-      />
-    </div>
+    <DashboardOrderList
+      orders={eligibleOrders || []}
+      emptyTitle="No refund orders"
+      emptyMessage="Orders with refund status will appear here."
+    />
   );
 };
 
@@ -448,91 +303,13 @@ const TrackOrder = () => {
     dispatch(getAllOrdersOfUser(user._id));
   }, []);
 
-  const columns = [
-    {
-      field: "id",
-      headerName: "Order ID",
-      minWidth: 150,
-      flex: 0.7,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-
-    {
-      field: "status",
-      headerName: "Status",
-      minWidth: 130,
-      flex: 0.7,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-    {
-      field: "itemsQty",
-      headerName: "Items Qty",
-      type: "number",
-      minWidth: 130,
-      flex: 0.7,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-
-    {
-      field: "total",
-      headerName: "Total",
-      type: "number",
-      minWidth: 130,
-      flex: 0.8,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-    },
-
-    {
-      field: " ",
-      flex: 1,
-      minWidth: 150,
-      headerName: "",
-      type: "number",
-      sortable: false,
-      headerClassName: "dark:text-white",
-      cellClassName: "dark:text-white",
-
-      renderCell: (params) => {
-        return (
-          <>
-            <Link to={`/user/track/order/${params.id}`}>
-              <Button>
-                <MdTrackChanges size={20} className="dark:text-white" />
-              </Button>
-            </Link>
-          </>
-        );
-      },
-    },
-  ];
-
-  const row = [];
-
-  orders &&
-    orders.forEach((item) => {
-      row.push({
-        id: item._id,
-        itemsQty: item.cart.length,
-        total: "RWF " + item.totalPrice,
-        status: item.status,
-      });
-    });
-
   return (
-    <div className="pl-8 pt-1">
-      <DataGrid
-        rows={row}
-        columns={columns}
-        pageSize={10}
-        disableSelectionOnClick
-        autoHeight
-        className="dark:text-white"
-      />
-    </div>
+    <DashboardOrderList
+      orders={orders || []}
+      showTrack
+      emptyTitle="No orders to track"
+      emptyMessage="Place an order to start tracking delivery."
+    />
   );
 };
 
@@ -582,54 +359,45 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="w-full px-5">
-      <h1 className="block text-[25px] text-center font-[600] text-[#000000ba] dark:text-gray-200 pb-2">
-        Change Password
-      </h1>
-      <div className="w-full">
-        <form
-          aria-required
-          onSubmit={passwordChangeHandler}
-          className="flex flex-col items-center"
-        >
-          <div className=" w-[100%] 800px:w-[50%] mt-5">
-            <label className="block pb-2">Enter your old password</label>
-            <input
-              type="password"
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-white !w-[95%] mb-4 800px:mb-0`}
-              required
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-            />
-          </div>
-          <div className=" w-[100%] 800px:w-[50%] mt-2">
-            <label className="block pb-2">Enter your new password</label>
-            <input
-              type="password"
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-white !w-[95%] mb-4 800px:mb-0`}
-              required
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-          </div>
-          <div className=" w-[100%] 800px:w-[50%] mt-2">
-            <label className="block pb-2">Confirm your password</label>
-            <input
-              type="password"
-              className={`${styles.input} dark:bg-[#1f1f1f] dark:text-white !w-[95%] mb-4 800px:mb-0`}
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <input
-              className={`w-[95%] h-[40px] border bg-[#29625d] text-center text-white hover:bg-black rounded-[3px] mt-8 cursor-pointer`}
-              required
-              value="Update"
-              type="submit"
-            />
-          </div>
-        </form>
-      </div>
+    <div className="w-full max-w-lg mx-auto">
+      <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
+        Update your password to keep your account secure.
+      </p>
+      <form aria-required onSubmit={passwordChangeHandler} className="space-y-4">
+        <div>
+          <label className="block pb-2 text-sm font-medium">Enter your old password</label>
+          <input
+            type="password"
+            className={`${styles.input} dark:bg-[#1f1f1f] dark:text-white w-full rounded-xl`}
+            required
+            value={oldPassword}
+            onChange={(e) => setOldPassword(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block pb-2 text-sm font-medium">Enter your new password</label>
+          <input
+            type="password"
+            className={`${styles.input} dark:bg-[#1f1f1f] dark:text-white w-full rounded-xl`}
+            required
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block pb-2 text-sm font-medium">Confirm your password</label>
+          <input
+            type="password"
+            className={`${styles.input} dark:bg-[#1f1f1f] dark:text-white w-full rounded-xl`}
+            required
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+        </div>
+        <Button type="submit" disabled={loading} className="w-full yebone-btn-lift">
+          {loading ? "Updating..." : "Update password"}
+        </Button>
+      </form>
     </div>
   );
 };
@@ -853,55 +621,53 @@ const Address = () => {
         </div>
       )}
 
-      {/* My Addresses Section */}
-      <div className="flex w-full items-center justify-between">
-        <h1 className="text-[25px] font-semibold text-[#000000ba] dark:text-gray-200 pb-2">
-          My Addresses
-        </h1>
-        <button
-          onClick={() => setOpen(true)}
-          className="bg-[#29625d] text-white rounded-md px-4 py-2"
-        >
-          Add New
-        </button>
+      <div className="flex w-full items-center justify-between mb-6">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {user?.addresses?.length || 0} saved address(es)
+        </p>
+        <Button onClick={() => setOpen(true)} className="yebone-btn-lift" size="sm">
+          Add address
+        </Button>
       </div>
 
-      <br />
-
       {user && user.addresses.length === 0 && (
-        <h5 className="text-center pt-8 text-[18px]">
-          You don't have any saved address!
-        </h5>
+        <DashboardEmptyState
+          title="No saved addresses"
+          message="Add a delivery address for faster checkout."
+          actionLabel="Add address"
+          onAction={() => setOpen(true)}
+        />
       )}
 
+      <div className="grid sm:grid-cols-2 gap-4">
       {user &&
         user.addresses.map((item, index) => (
           <div
             key={index}
-            className="w-full bg-white dark:bg-[#1f1f1f] h-min 800px:h-[70px] rounded-[4px] flex items-center px-3 shadow justify-between pr-10 mb-5"
+            className="dashboard-address-card yebone-surface flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
           >
-            <div className="flex items-center">
-              <h5 className="pl-5 font-semibold">{item.addressType}</h5>
-            </div>
-            <div className="pl-8 flex items-center">
-              <h6 className="text-[12px] 800px:text-[unset]">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant={item.addressType === "Default" ? "primary" : "muted"}>
+                  {item.addressType}
+                </Badge>
+              </div>
+              <p className="text-sm dark:text-gray-200">
                 {item.address1} {item.address2}
-              </h6>
+              </p>
+              <p className="text-xs text-gray-500 mt-1">{user.phoneNumber}</p>
             </div>
-            <div className="pl-8 flex items-center">
-              <h6 className="text-[12px] 800px:text-[unset]">
-                {user.phoneNumber}
-              </h6>
-            </div>
-            <div className="min-w-[10%] flex items-center justify-between pl-8">
-              <AiOutlineDelete
-                size={25}
-                className="cursor-pointer"
-                onClick={() => handleDelete(item)}
-              />
-            </div>
+            <button
+              type="button"
+              className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 self-start"
+              onClick={() => handleDelete(item)}
+              aria-label="Delete address"
+            >
+              <AiOutlineDelete size={22} />
+            </button>
           </div>
         ))}
+      </div>
     </div>
   );
 };

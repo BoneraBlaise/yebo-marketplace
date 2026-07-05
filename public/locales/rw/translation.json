@@ -17,7 +17,7 @@
     "about": "Ibyerekeye twebwe",
     "contact": "Twandikire",
     "blog": "Inkuru",
-    "sellOnGuriraline": "Gurisha kuri Guriraline",
+    "sellOnYebone": "Gurisha kuri Yebone",
     "language": "Ururimi",
     "helpSupport": "Ubufasha",
     "sellWithUs": "Gurisha natwe",
@@ -89,9 +89,9 @@
     }
   },
   "hero": {
-    "tagline": "Urabishaka",
-    "subtagline": "Turabifite",
-    "subtitle": "GuriraLine iguha uburyo bworoshye bwo guhaha, ikakwereka ibyiza byo kugura ku bacuruzi bo mu Rwanda no ku rwego mpuzamahanga. Bona ibintu byiza ku biciro bitavugwa, byose hamwe ahantu hamwe. Gura mu mutekano no mu buryo bworoshye uyu munsi!",
+    "tagline": "Yebone.",
+    "subtagline": "Byose ahantu hamwe",
+    "subtitle": "Yebone iguha uburyo bworoshye bwo guhaha, ikakwereka ibyiza byo kugura ku bacuruzi bo mu Rwanda no ku rwego mpuzamahanga. Bona ibintu byiza ku biciro bitavugwa, byose hamwe ahantu hamwe. Gura mu mutekano no mu buryo bworoshye uyu munsi!",
     "shopNow": "Tangira Ugure",
     "learnMore": "Menya Birenzeho",
     "trendingNow": "Bikunzwe Nonaha",
@@ -188,7 +188,7 @@
     "signUp": "Iyandikishe"
   },
   "footer": {
-    "youNeedItWeGotIt": "Urabishaka, Turabifite!",
+    "brandSlogan": "Yebone. Byose ahantu hamwe.",
     "about us": "Ibyerekeye Twebwe",
     "careers": "Imirimo",
     "store locations": "Aho dukorera",

@@ -2,13 +2,17 @@ import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import { RxCross1 } from "react-icons/rx";
 import { IoBagHandleOutline } from "react-icons/io5";
-import { HiOutlineMinus, HiPlus } from "react-icons/hi";
-import styles from "../../styles/styles";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addTocart, removeFromCart } from "../../redux/actions/cart";
-import { toast } from "react-toastify";
 import { useReferral } from "../../context/ReferralContext";
+import { Button } from "../ui";
+import { typography } from "../../design-system/typography";
+import CheckoutCartItem from "../Checkout/CheckoutCartItem";
+import "../Checkout/checkout.css";
+
+const formatPrice = (price) =>
+  (price ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
 const Cart = ({ setOpenCart }) => {
   const { cart } = useSelector((state) => state.cart);
@@ -29,144 +33,94 @@ const Cart = ({ setOpenCart }) => {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full bg-[#0000004b] h-screen z-10">
+    <div
+      className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
+      onClick={() => setOpenCart(false)}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Shopping cart"
+    >
       <Helmet>
-        <title>Shopping Cart</title>
+        <title>Shopping Cart — Yebone</title>
       </Helmet>
-      <div className="fixed top-0 right-0 h-full w-[100%] 800px:w-[25%] bg-white dark:bg-[#1f1f1f] dark:text-gray-200 flex flex-col overflow-y-scroll hide-scrollbar justify-between shadow-sm">
+
+      <div
+        className="checkout-drawer fixed top-0 right-0 h-full w-full max-w-md bg-white dark:bg-gray-950 flex flex-col shadow-2xl border-l border-gray-100 dark:border-gray-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-gray-800">
+          <div className="flex items-center gap-2">
+            <IoBagHandleOutline size={24} className="text-yebone-primary" />
+            <h2 className={`${typography.subheading}`}>
+              Cart {cart?.length ? `(${cart.length})` : ""}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={() => setOpenCart(false)}
+            className="w-10 h-10 rounded-full hover:bg-yebone-light-gray dark:hover:bg-gray-800 flex items-center justify-center transition yebone-btn-lift"
+            aria-label="Close cart"
+          >
+            <RxCross1 size={22} />
+          </button>
+        </div>
+
         {cart && cart.length === 0 ? (
-          <div className="w-full h-screen flex items-center justify-center">
-            <div className="flex w-full justify-end pt-5 pr-5 fixed top-3 right-3">
-              <RxCross1
-                size={25}
-                className="cursor-pointer"
-                onClick={() => setOpenCart(false)}
-              />
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-20 h-20 rounded-2xl yebone-surface flex items-center justify-center mb-4">
+              <IoBagHandleOutline size={32} className="text-yebone-primary" />
             </div>
-            <h5>Cart Items is empty!</h5>
+            <p className="font-Poppins font-semibold text-lg mb-2 dark:text-white">
+              Your cart is empty
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Add items from Yebone to checkout.
+            </p>
+            <Link to="/products" onClick={() => setOpenCart(false)}>
+              <Button className="yebone-btn-lift">Continue shopping</Button>
+            </Link>
           </div>
         ) : (
           <>
-            <div>
-              <div className="flex w-full justify-end pt-5 pr-5">
-                <RxCross1
-                  size={25}
-                  className="cursor-pointer"
-                  onClick={() => setOpenCart(false)}
+            <div className="flex-1 overflow-y-auto hide-scrollbar p-4 space-y-3">
+              {cart.map((item, index) => (
+                <CheckoutCartItem
+                  key={item._id || index}
+                  data={item}
+                  compact
+                  showMoveToWishlist={false}
+                  quantityChangeHandler={quantityChangeHandler}
+                  removeFromCartHandler={removeFromCartHandler}
+                  hasReferral={referralProducts.has(item._id) || item.referralCode}
                 />
-              </div>
-              {/* Item length */}
-              <div className={`${styles.noramlFlex} p-4`}>
-                <IoBagHandleOutline size={25} />
-                <h5 className="pl-2 text-[20px] font-[500]">
-                  {cart && cart.length} items
-                </h5>
-              </div>
-
-              {/* cart Single Items */}
-              <br />
-              <div className="w-full border-t">
-                {cart &&
-                  cart.map((i, index) => (
-                    <CartSingle
-                      key={index}
-                      data={i}
-                      quantityChangeHandler={quantityChangeHandler}
-                      removeFromCartHandler={removeFromCartHandler}
-                    />
-                  ))}
-              </div>
+              ))}
             </div>
 
-            <div className="px-5 mb-20">
-              {/* checkout buttons */}
-              <Link to="/checkout">
-                <div
-                  className={`h-[45px] flex items-center justify-center w-[100%] bg-[#29625d] hover:bg-black rounded-full md:rounded-[5px]`}
-                >
-                  <h1 className="text-[#fff] text-[18px] font-[600]">
-                    Checkout Now (RWF {totalPrice})
-                  </h1>
-                </div>
+            <div className="p-5 border-t border-gray-100 dark:border-gray-800 bg-yebone-light-gray/30 dark:bg-gray-900/50 space-y-3">
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm text-gray-500">Subtotal</span>
+                <span className="font-Poppins font-bold text-xl text-yebone-primary tabular-nums">
+                  RWF {formatPrice(totalPrice)}
+                </span>
+              </div>
+              <p className="text-[11px] text-gray-400 text-center">
+                Shipping calculated at checkout
+              </p>
+              <Link to="/checkout" onClick={() => setOpenCart(false)}>
+                <Button size="lg" className="w-full yebone-btn-lift">
+                  Checkout · RWF {formatPrice(totalPrice)}
+                </Button>
+              </Link>
+              <Link
+                to="/products"
+                onClick={() => setOpenCart(false)}
+                className="block text-center text-sm font-semibold text-yebone-primary hover:underline"
+              >
+                Continue shopping
               </Link>
             </div>
           </>
         )}
-      </div>
-    </div>
-  );
-};
-
-const CartSingle = ({ data, quantityChangeHandler, removeFromCartHandler }) => {
-  const [value, setValue] = useState(data.qty || 1);
-  const totalPrice = data.discountPrice * value;
-  const { referralProducts } = useReferral();
-  const hasReferral = referralProducts.has(data._id) || data.referralCode;
-
-  const increment = (data) => {
-    if (data.stock < value) {
-      toast.error("Product stock limited!");
-    } else {
-      setValue(value + 1);
-      const updateCartData = { ...data, qty: value + 1 };
-      quantityChangeHandler(updateCartData);
-    }
-  };
-
-  const decrement = (data) => {
-    setValue(value === 1 ? 1 : value - 1);
-    const updateCartData = { ...data, qty: value === 1 ? 1 : value - 1 };
-    quantityChangeHandler(updateCartData);
-  };
-
-  return (
-    <div className="border-b p-4">
-      <div className="w-full flex items-center justify-between">
-        <div className="flex items-center">
-          <div>
-            <div
-              className={`bg-[#29625d] border border-[#29625d] rounded-full w-[25px] h-[25px] ${styles.noramlFlex} justify-center cursor-pointer`}
-              onClick={() => increment(data)}
-            >
-              <HiPlus size={18} color="#fff" />
-            </div>
-            <span className="pl-[10px]">{data.qty || 1}</span>
-            <div
-              className="bg-[#a7abb14f] rounded-full w-[25px] h-[25px] flex items-center justify-center cursor-pointer"
-              onClick={() => decrement(data)}
-            >
-              <HiOutlineMinus size={16} color="#7d879c" />
-            </div>
-          </div>
-          <img
-            src={`${data?.images[0]?.url}`}
-            alt=""
-            className="w-[100px] h-min ml-2 mr-2 rounded-[5px]"
-          />
-          <div className="pl-[5px]">
-            {/* Slice the product title to 12 characters */}
-            <h1 className="truncate w-[200px]">{data.name.length > 16 ? `${data.name.slice(0, 16)}...` : data.name}</h1>
-            <h4 className="font-[400] text-[15px] text-[#00000082] dark:text-gray-400">
-              RWF {data.discountPrice} * {value}
-            </h4>
-            <h4 className="font-[600] text-[17px] pt-[3px] text-[#29625d] font-Roboto">
-              RWF {totalPrice}
-            </h4>
-          </div>
-        </div>
-
-        {/* Show referral badge if product was referred */}
-        {hasReferral && (
-          <span className="absolute text-xs mt-[-100px] text-green-600 bg-green-100 px-2 py-1 rounded">
-            Referred
-          </span>
-        )}
-
-        {/* Cross Icon pushed to the end */}
-        <RxCross1
-          className="cursor-pointer text-2xl text-[#94392d] ml-auto"
-          onClick={() => removeFromCartHandler(data)}
-        />
       </div>
     </div>
   );

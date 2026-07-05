@@ -73,7 +73,7 @@ const Faq = () => {
               <p className="text-base text-gray-500 dark:text-gray-200">
                 If you're not satisfied with your purchase, we accept returns
                 within 14 days of delivery. To initiate a return, please email
-                us at support@guriraline.com with your order number and a
+                us at support@yebone.com with your order number and a
                 brief explanation of why you're returning the item.
               </p>
             </div>
@@ -171,7 +171,7 @@ const Faq = () => {
             <div className="mt-4">
               <p className="text-base text-gray-500 dark:text-gray-200">
                 You can contact our customer support team by emailing us at
-                support@guriraline.com, or by calling us at +250784019175
+                support@yebone.com, or by calling us at +250784019175
                 between the hours of 9am and 5pm CAT, Monday through Sunday.
               </p>
             </div>

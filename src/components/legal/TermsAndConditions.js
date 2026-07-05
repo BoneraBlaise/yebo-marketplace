@@ -12,7 +12,7 @@ const TermsAndConditions = () => {
           1. Introduction
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          Welcome to Guriraline! By accessing or using our platform, you agree
+          Welcome to Yebone! By accessing or using our platform, you agree
           to comply with and be bound by these Terms and Conditions. If you do
           not agree with these terms, please refrain from using our platform. We
           reserve the right to modify, update, or change these terms at any time.
@@ -36,7 +36,7 @@ const TermsAndConditions = () => {
           3. Changes to Terms
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          Guriraline reserves the right to amend or update these Terms and
+          Yebone reserves the right to amend or update these Terms and
           Conditions at any time. We will notify users of significant changes
           by posting the updated terms on this page, with the effective date
           clearly indicated. Continuing to use the platform after such changes
@@ -73,7 +73,7 @@ const TermsAndConditions = () => {
           6. Account Suspension and Termination
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          Guriraline reserves the right to suspend or terminate your account if
+          Yebone reserves the right to suspend or terminate your account if
           we suspect fraudulent activity, violation of terms, or unlawful use of
           our services. You may terminate your account at any time by contacting
           us through our support team.
@@ -121,7 +121,7 @@ const TermsAndConditions = () => {
           10. Limitation of Liability
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          To the fullest extent permitted by law, Guriraline will not be held
+          To the fullest extent permitted by law, Yebone will not be held
           liable for any indirect, incidental, or consequential damages arising
           from your use of the platform, including loss of data or business
           interruption. Our liability is limited to the amount you paid for the
@@ -134,7 +134,7 @@ const TermsAndConditions = () => {
           11. Indemnification
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          You agree to indemnify and hold harmless Guriraline, its affiliates,
+          You agree to indemnify and hold harmless Yebone, its affiliates,
           officers, and employees from any claims, damages, or expenses arising
           from your violation of these Terms and Conditions or misuse of the
           platform.
@@ -147,7 +147,7 @@ const TermsAndConditions = () => {
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
           These Terms and Conditions shall be governed by and construed in
-          accordance with the laws of the jurisdiction in which Guriraline
+          accordance with the laws of the jurisdiction in which Yebone
           operates, without regard to its conflict of law principles. Any legal
           disputes shall be resolved exclusively in the courts of that
           jurisdiction.
@@ -173,8 +173,8 @@ const TermsAndConditions = () => {
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
           These Terms and Conditions, along with any other legal notices or
-          agreements published by Guriraline on the platform, constitute the
-          entire agreement between you and Guriraline regarding your use of the
+          agreements published by Yebone on the platform, constitute the
+          entire agreement between you and Yebone regarding your use of the
           platform.
         </p>
       </section>
@@ -186,7 +186,7 @@ const TermsAndConditions = () => {
         <p className="dark:text-gray-200 text-gray-700 p-2">
           If you have any questions or concerns regarding these Terms and
           Conditions, please contact our support team at{" "}
-          <a href="mailto:support@guriraline.com">support@guriraline.com</a>.
+          <a href="mailto:support@yebone.com">support@yebone.com</a>.
         </p>
       </section>
     </div>

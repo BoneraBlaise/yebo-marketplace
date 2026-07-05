@@ -5,9 +5,12 @@ import React, { useEffect, useState } from "react";
 import {  AiOutlineEye } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { server } from "../../server";
+import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
+import AdminPageToolbar from "../Dashboard/admin/AdminPageToolbar";
 
 const AllEvents = () => {
   const [events, setEvents] = useState([]);
+  const [search, setSearch] = useState("");
   useEffect(() => {
    axios.get(`${server}/event/admin-all-events`, {withCredentials: true}).then((res) =>{
     setEvents(res.data.events);
@@ -91,14 +94,17 @@ const AllEvents = () => {
     });
 
   return (
-    <div className="w-full mx-8 pt-1 mt-10 bg-white dark:bg-[#1f1f1f]">
-      <DataGrid
-        rows={row}
-        columns={columns}
-        pageSize={10}
-        disableSelectionOnClick
-        autoHeight
-      />
+    <div className="yebone-fade-up space-y-4 p-1">
+      <AdminPageToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search events…" />
+      <VendorTableSection title="Platform events" subtitle="Event listings across all vendors">
+        <DataGrid
+          rows={search ? row.filter((r) => r.name?.toLowerCase().includes(search.toLowerCase())) : row}
+          columns={columns}
+          pageSize={10}
+          disableSelectionOnClick
+          autoHeight
+        />
+      </VendorTableSection>
     </div>
   );
 };

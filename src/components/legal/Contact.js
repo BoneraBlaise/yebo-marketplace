@@ -7,7 +7,7 @@ const Contact = () => {
       <div className="w=[90%] md:w-[70%] mx-auto px-4">
         {/* Header Section */}
         <header className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-black">Contact Guriraline</h1>
+          <h1 className="text-4xl font-bold text-black">Contact Yebone</h1>
           <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
             We’d love to hear from you! Feel free to reach out to us with any
             questions, inquiries, or feedback.
@@ -40,7 +40,7 @@ const Contact = () => {
                     d="M3 8l7 7 7-7"
                   />
                 </svg>
-                <span>support@guriraline.com</span>
+                <span>support@yebone.com</span>
               </li>
               <li className="flex items-center">
                 <svg

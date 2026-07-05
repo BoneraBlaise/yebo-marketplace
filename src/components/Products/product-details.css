@@ -1,0 +1,31 @@
+/* Product Details page-specific — shared tokens in design-system/global.css */
+
+.pdp-sticky-panel {
+  position: sticky;
+  top: 6rem;
+  align-self: start;
+}
+
+.pdp-gallery-zoom {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pdp-gallery-zoom:hover {
+  transform: scale(1.04);
+}
+
+.pdp-mobile-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+@media (min-width: 1024px) {
+  .pdp-mobile-bar {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp-gallery-zoom:hover {
+    transform: none;
+  }
+}

@@ -1,148 +1,165 @@
-import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom'; // Added useNavigate here for redirecting
-import { toast } from 'react-toastify';
-import { AiFillHeart, AiOutlineHeart } from 'react-icons/ai';
-import { addToWishlist, removeFromWishlist } from '../../../redux/actions/wishlist';
-import { useMediaQuery } from 'react-responsive';
-import MobileFlashSaleList from './MobileFlashSaleList';
-import { server } from '../../../server';
-import axios from 'axios';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { addToWishlist, removeFromWishlist } from "../../../redux/actions/wishlist";
+import { useMediaQuery } from "react-responsive";
+import MobileFlashSaleList from "./MobileFlashSaleList";
+import { server } from "../../../server";
+import axios from "axios";
+import { Button } from "../../ui";
+
 const FlashSaleList = ({ flashSales }) => {
-    const dispatch = useDispatch();
-    const { wishlist } = useSelector((state) => state.wishlist);
-    const navigate = useNavigate();  // Use navigate for redirection
-    const isMobile = useMediaQuery({ query: '(max-width: 900px)' });
+  const dispatch = useDispatch();
+  const { wishlist } = useSelector((state) => state.wishlist);
+  const navigate = useNavigate();
+  const isMobile = useMediaQuery({ query: "(max-width: 900px)" });
 
-    // Format price with commas
-    const formatPrice = (price) => {
-        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    };
-    const handleWishlistToggle = async (flashSale) => {
-        const isInWishlist = wishlist.some((item) => item._id === flashSale._id);
+  const formatPrice = (price) =>
+    price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-        try {
-            // Debugging: Check the flashSaleId before sending
-            console.log("Sending flashSaleId: ", flashSale._id);
+  const handleWishlistToggle = async (flashSale) => {
+    const isInWishlist = wishlist.some((item) => item._id === flashSale._id);
 
-            // Send request to backend to handle like/unlike
-            const response = await axios.put(
-                `${server}/flashsale/like-flashsale`,
-                { flashSaleId: flashSale._id }, // Send flashSaleId to handle like/unlike
-                {
-                    withCredentials: true,  // Ensure cookies are sent with the request
-                }
-            );
+    try {
+      const response = await axios.put(
+        `${server}/flashsale/like-flashsale`,
+        { flashSaleId: flashSale._id },
+        { withCredentials: true }
+      );
 
-            if (response.data.success) {
-                // If the response is successful, update the UI
-                if (isInWishlist) {
-                    dispatch(removeFromWishlist(flashSale)); // Dispatch action to remove from wishlist
-                    toast.info('Removed from wishlist!');
-                } else {
-                    dispatch(addToWishlist(flashSale)); // Dispatch action to add to wishlist
-                    toast.success('Added to wishlist!');
-                }
-            } else {
-                toast.error("Something went wrong!");
-            }
-        } catch (error) {
-            toast.error("Can not watch this product at the moment!");
-            console.error("Error during request:", error); // Log error for debugging
+      if (response.data.success) {
+        if (isInWishlist) {
+          dispatch(removeFromWishlist(flashSale));
+          toast.info("Removed from wishlist!");
+        } else {
+          dispatch(addToWishlist(flashSale));
+          toast.success("Added to wishlist!");
         }
-    };
-
-    // Handle making an offer (redirect to flash sale details page)
-    const handleMakeOffer = (flashSaleId) => {
-        navigate(`/flashsale/${flashSaleId}`);
-    };
-    if (isMobile) {
-        return <MobileFlashSaleList flashSales={flashSales} />;
+      } else {
+        toast.error("Something went wrong!");
+      }
+    } catch (error) {
+      toast.error("Can not watch this product at the moment!");
+      console.error("Error during request:", error);
     }
-    return (
-        <div className={`p-4 w-full mx-auto ${isMobile ? 'grid grid-cols-2 gap-4' : 'flex flex-col gap-4'}`}>
-            {flashSales.length === 0 ? (
-                <div>No flash sales available!</div>
-            ) : (
-                flashSales.map((flashSale) => {
-                    const isInWishlist = wishlist.some((item) => item._id === flashSale._id);
+  };
 
-                    // Check if the flash sale is "new" (created within the last 24 hours)
-                    const isNew = new Date() - new Date(flashSale.createdAt) < 24 * 60 * 60 * 1000;
-                    const discount = flashSale.originalPrice - flashSale.flashSalePrice;
-                    const showDiscountText = discount > 10000;
+  const handleMakeOffer = (flashSaleId) => {
+    navigate(`/flashsale/${flashSaleId}`);
+  };
 
-                    return (
-                        <div
-                            key={flashSale._id}
-                            className="flex border dark:border-1 dark:border-[#2b2b2b] transition-shadow duration-300 w-full h-[270px] max-w-full mx-auto relative"
-                        >
-                            {isNew && (
-                                <span className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                                    New
-                                </span>
-                            )}
-                            <Link to={`/flashsale/${flashSale._id}`} className="flex-shrink-0 flex items-center h-full">
-                                <img
-                                    src={flashSale.images[0]?.url}
-                                    alt={flashSale.name}
-                                    className="h-full w-[250px] rounded-l-lg bg-gray-200 object-cover bg-[#f1f1f1]"
-                                />
-                            </Link>
-                            <div className="flex-grow flex flex-col justify-between p-6">
-                                <div>
-                                    <Link to={`/flashsale/${flashSale._id}`}>
-                                        <h2 className="font-medium text-xl mb-2">
-                                            {flashSale.name.length > 360 ? `${flashSale.name.slice(0, 330)}...` : flashSale.name}
-                                        </h2>
-                                    </Link>
+  if (isMobile) {
+    return <MobileFlashSaleList flashSales={flashSales} />;
+  }
 
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h5 className="text-md font-semibold">
-                                            RWF {formatPrice(flashSale.flashSalePrice ? flashSale.flashSalePrice : flashSale.originalPrice)}
-                                        </h5>
+  return (
+    <div className="marketplace-product-grid w-full">
+      {flashSales.length === 0 ? (
+        <div className="col-span-full text-center text-gray-500">No flash sales available!</div>
+      ) : (
+        flashSales.map((flashSale) => {
+          const isInWishlist = wishlist.some((item) => item._id === flashSale._id);
+          const isNew =
+            new Date() - new Date(flashSale.createdAt) < 24 * 60 * 60 * 1000;
+          const stockTotal = flashSale.stock || flashSale.quantity || 100;
+          const stockLeft = flashSale.stockAvailable ?? flashSale.stock ?? 0;
+          const progress = Math.min(
+            100,
+            Math.max(0, ((stockTotal - stockLeft) / stockTotal) * 100)
+          );
 
-                                    </div>
-                                    <span className="font-bold text-xl mt-4 text-red-700 dark:text-red-400">
-                                        {flashSale.discountPercentage}% OFF
-                                    </span>
-                                </div>
+          return (
+            <article
+              key={flashSale._id}
+              className="yebone-card-lift group flex flex-col bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden bg-yebone-light-gray">
+                {isNew && (
+                  <span className="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-lg bg-green-500 text-white text-[10px] font-bold uppercase">
+                    New
+                  </span>
+                )}
+                <span className="absolute top-3 right-3 z-10 px-2 py-0.5 rounded-lg bg-red-500 text-white text-[10px] font-bold uppercase">
+                  {flashSale.discountPercentage}% OFF
+                </span>
+                <Link to={`/flashsale/${flashSale._id}`}>
+                  <img
+                    src={flashSale.images[0]?.url}
+                    alt={flashSale.name}
+                    className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out yebone-img-fade"
+                  />
+                </Link>
+              </div>
 
-                                <div className="flex mt-3">
-                                     <div className="flex items-center border px-3 rounded-full mr-2 dark:bg-[#2b2b2b]">
-                                                     {isInWishlist ? (
-                                                       <AiFillHeart
-                                                         size={35}
-                                                         className="cursor-pointer dark:bg-transparent p-1 rounded-full"
-                                                         onClick={() => handleWishlistToggle(flashSale, true)}
-                                                         color="#ffd496"
-                                                         title="Remove from wishlist"
-                                                       />
-                                                     ) : (
-                                                       <AiOutlineHeart
-                                                         size={35}
-                                                         className="cursor-pointer dark:bg-transparent p-1 rounded-full"
-                                                         onClick={() => handleWishlistToggle(flashSale, false)}
-                                                         title="Add to wishlist"
-                                                       />
-                                                     )}
-                                                     <span className="text-sm mr-2 text-green-700 dark:text-green-500">{flashSale.likes.length}</span>
-                                                   </div>
-                                <button
-                                    className="bg-[#29625d] text-white py-2 px-4 rounded-full transition duration-300 hover:bg-black"
-                                    onClick={() => handleMakeOffer(flashSale._id)} // Trigger the offer redirection
-                                    title="Make an offer"
-                                >
-                                    Buy Now
-                                </button>
-                            </div>
-                        </div>
-                        </div>
-    );
-})
-            )}
-        </div >
-    );
+              <div className="p-4 flex flex-col flex-1 gap-2">
+                <Link to={`/flashsale/${flashSale._id}`}>
+                  <h2 className="font-Poppins font-medium text-sm line-clamp-2 dark:text-white group-hover:text-yebone-primary transition">
+                    {flashSale.name}
+                  </h2>
+                </Link>
+
+                <div className="flex items-baseline gap-2">
+                  <p className="font-bold text-yebone-primary">
+                    RWF{" "}
+                    {formatPrice(
+                      flashSale.flashSalePrice
+                        ? flashSale.flashSalePrice
+                        : flashSale.originalPrice
+                    )}
+                  </p>
+                  {flashSale.originalPrice > flashSale.flashSalePrice && (
+                    <p className="text-xs text-gray-400 line-through">
+                      RWF {formatPrice(flashSale.originalPrice)}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-[11px] text-gray-500 mb-1">
+                    <span>Limited stock</span>
+                    <span className="text-red-500 font-semibold">{stockLeft} left</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-red-500 to-yebone-gold transition-all duration-500"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 mt-auto pt-2">
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm"
+                    onClick={() => handleWishlistToggle(flashSale)}
+                    aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
+                  >
+                    {isInWishlist ? (
+                      <AiFillHeart color="#ffd496" size={18} />
+                    ) : (
+                      <AiOutlineHeart size={18} />
+                    )}
+                    <span className="text-green-700 dark:text-green-500 text-xs">
+                      {flashSale.likes?.length || 0}
+                    </span>
+                  </button>
+                  <Button
+                    size="sm"
+                    className="flex-1 yebone-btn-lift"
+                    onClick={() => handleMakeOffer(flashSale._id)}
+                  >
+                    Buy Now
+                  </Button>
+                </div>
+              </div>
+            </article>
+          );
+        })
+      )}
+    </div>
+  );
 };
 
 export default FlashSaleList;

@@ -2,142 +2,201 @@ import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import EventCard from "../components/Events/EventCard";
 import Header from "../components/Layout/Header";
-import Footer from '../components/Layout/Footer';
-import Loader from "../components/Layout/Loader";
-import { Helmet } from 'react-helmet';
+import Footer from "../components/Layout/Footer";
+import { Helmet } from "react-helmet";
+import { IoCalendarOutline } from "react-icons/io5";
+import { Container, Button } from "../components/ui";
+import {
+  MarketplacePageHero,
+  MarketplaceListingSkeleton,
+  MarketplaceEmptyState,
+} from "../components/Marketplace";
+
 const EventsPage = () => {
   const { allEvents, isLoading } = useSelector((state) => state.events);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({});
   const eventsPerPage = 6;
 
-  if (isLoading) {
-    return <Loader />;
-  }
-
-  if (!allEvents || allEvents.length === 0) {
-    return (
-      <div>
-        <Header activeHeading={4} />
-        <div className="w-full max-w-screen-xl mx-auto mt-10 py-10 px-4">
-          <h4 className="text-center dark:text-gray-200">No Events Available!</h4>
-        </div>
-      </div>
-    );
-  }
-
   const determineCategory = (title, description) => {
     const combinedText = (title + " " + description).toLowerCase();
-    if (combinedText.includes("team vs team") || combinedText.includes("game") || combinedText.includes("match")) {
+    if (
+      combinedText.includes("team vs team") ||
+      combinedText.includes("game") ||
+      combinedText.includes("match")
+    ) {
       return "Sports";
     }
-    if (combinedText.includes("concert") || combinedText.includes("music") || combinedText.includes("dancing") || combinedText.includes("worship") || combinedText.includes("vinbing")) {
+    if (
+      combinedText.includes("concert") ||
+      combinedText.includes("music") ||
+      combinedText.includes("dancing") ||
+      combinedText.includes("worship") ||
+      combinedText.includes("vinbing")
+    ) {
       return "Music";
     }
-    if (combinedText.includes("theatre") || combinedText.includes("play") || combinedText.includes("drama")) {
+    if (
+      combinedText.includes("theatre") ||
+      combinedText.includes("play") ||
+      combinedText.includes("drama")
+    ) {
       return "Theatre";
     }
     return "Other";
   };
 
-  const filteredEvents = allEvents.filter((event) => {
+  const filteredEvents = (allEvents || []).filter((event) => {
     const eventCategory = determineCategory(event.title, event.description);
     const categoryMatch = filters.category ? eventCategory === filters.category : true;
     const dateMatch = filters.date ? event.date === filters.date : true;
     return categoryMatch && dateMatch;
   });
 
-  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
+  const totalPages = Math.ceil(filteredEvents.length / eventsPerPage) || 1;
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = filteredEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+  const shouldShowPagination = totalPages > 1;
 
   const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
   const handlePreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
-  const shouldShowPagination = totalPages > 1;
+  if (isLoading) {
+    return (
+      <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
+        <Header activeHeading={4} />
+        <Container className="py-8 lg:py-10">
+          <MarketplaceListingSkeleton count={6} />
+        </Container>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div>
+    <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
       <Helmet>
-        <title>All Events - Guriraline</title>
-        <meta name="description" content="Get access to the best events from Guriraline. Top deals and fast shipping." />
-        <meta property="og:title" content="Product Name - Guriraline" />
-        <meta property="og:description" content="Discover Events at Guriraline. Best prices guaranteed!" />
-        <meta property="og:image" content="https://example.com/product-image.jpg" />
+        <title>All Events - Yebone</title>
+        <meta
+          name="description"
+          content="Get access to the best events from Yebone. Top deals and fast shipping."
+        />
+        <meta property="og:title" content="Events - Yebone" />
+        <meta
+          property="og:description"
+          content="Discover Events at Yebone. Best prices guaranteed!"
+        />
       </Helmet>
       <Header activeHeading={4} />
-      <div className="flex justify-center flex-wrap w-full max-w-screen-xl mx-auto mt-10 mb-20">
-        {/* Sidebar for filters */}
-        <div className="md:w-[20%] w-full bg-white dark:bg-[#2b2b2b] p-4 rounded-lg shadow-lg mb-4 md:mb-0 p-4">
-          <h3 className="text-lg font-semibold mb-4 dark:text-white">Filters</h3>
-          <div className="mb-4">
-            <label className="block mb-2 dark:text-gray-200">Category</label>
-            <select
-              name="category"
-              className="w-full p-2 border border-gray-300 rounded dark:bg-[#1f1f1f] dark:text-white"
-              onChange={(e) => setFilters((prev) => ({ ...prev, category: e.target.value }))}>
-              <option value="">All</option>
-              <option value="Music">Music</option>
-              <option value="Sports">Sports</option>
-              <option value="Theatre">Theatre</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label className="block mb-2 dark:text-gray-200">Date</label>
-            <input
-              type="date"
-              name="date"
-              className="w-full p-2 border border-gray-300 rounded dark:text-white dark:bg-[#2b2b2b]"
-              onChange={(e) => setFilters((prev) => ({ ...prev, date: e.target.value }))} />
-          </div>
-        </div>
 
-        {/* Event cards */}
-        <div className="flex-1 flex flex-col md:pl-4">
-          <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-            {currentEvents.map((event) => (
-              <EventCard
-                key={event._id}
-                active={true}
-                data={event}
-                className="w-full sm:w-1/2 lg:w-1/3"  // Ensure 3 cards per row on large screens
-              />
-            ))}
-          </div>
+      <Container className="pt-6 lg:pt-8 pb-16">
+        <MarketplacePageHero
+          title="Events"
+          subtitle="Concerts, sports, theatre, and exclusive experiences — all on Yebone."
+          breadcrumbs={[
+            { label: "Home", to: "/" },
+            { label: "Events" },
+          ]}
+          count={filteredEvents.length}
+          badge="Live events"
+        />
 
-          {/* Pagination Controls */}
-          {shouldShowPagination && (
-            <div className="flex justify-center items-center mt-6 space-x-4">
-              <button
-                onClick={handlePreviousPage}
-                disabled={currentPage === 1}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors">
-                Previous
-              </button>
-              <span>
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage === totalPages}
-                className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors">
-                Next
-              </button>
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+          <aside className="w-full lg:w-[22%] marketplace-filter-panel yebone-surface shrink-0">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Filters</h3>
+            <div className="mb-4">
+              <label className="block mb-2 text-sm dark:text-gray-200">Category</label>
+              <select
+                name="category"
+                className="w-full p-2.5 dark:bg-[#1f1f1f] dark:text-white"
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, category: e.target.value }))
+                }
+              >
+                <option value="">All</option>
+                <option value="Music">Music</option>
+                <option value="Sports">Sports</option>
+                <option value="Theatre">Theatre</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
-          )}
+            <div>
+              <label className="block mb-2 text-sm dark:text-gray-200">Date</label>
+              <input
+                type="date"
+                name="date"
+                className="w-full p-2.5 dark:text-white dark:bg-[#1f1f1f]"
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, date: e.target.value }))
+                }
+              />
+            </div>
+          </aside>
+
+          <div className="flex-1">
+            {!allEvents?.length ? (
+              <MarketplaceEmptyState
+                icon={IoCalendarOutline}
+                title="No events available"
+                message="Check back soon for concerts, sports, and live experiences on Yebone."
+                actionLabel="Browse products"
+                actionTo="/products"
+              />
+            ) : filteredEvents.length === 0 ? (
+              <MarketplaceEmptyState
+                icon={IoCalendarOutline}
+                title="No events match your filters"
+                message="Try a different category or date to discover upcoming events."
+                actionLabel="Clear filters"
+                actionTo="/events"
+              />
+            ) : (
+              <>
+                <p className="marketplace-results-count mb-4">
+                  Showing {currentEvents.length} of {filteredEvents.length} events
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+                  {currentEvents.map((event) => (
+                    <EventCard key={event._id} active={true} data={event} />
+                  ))}
+                </div>
+
+                {shouldShowPagination && (
+                  <div className="flex justify-center items-center mt-8 gap-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                      className="yebone-btn-lift"
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-sm text-gray-600 dark:text-gray-300">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      size="sm"
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                      className="yebone-btn-lift"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      </Container>
+
       <Footer />
     </div>
   );

@@ -1,0 +1,32 @@
+/* Checkout & cart presentation — shared tokens in design-system/global.css */
+
+.checkout-sticky-summary {
+  position: sticky;
+  top: 6rem;
+  align-self: start;
+}
+
+.checkout-mobile-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+@media (min-width: 1024px) {
+  .checkout-mobile-bar {
+    display: none;
+  }
+}
+
+.checkout-drawer {
+  animation: checkout-slide-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes checkout-slide-in {
+  from { transform: translateX(100%); opacity: 0.8; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkout-drawer {
+    animation: none;
+  }
+}

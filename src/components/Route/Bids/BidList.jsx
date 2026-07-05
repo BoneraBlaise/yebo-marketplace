@@ -1,51 +1,95 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { HiOutlineClock, HiOutlineUser } from "react-icons/hi";
 
 const BidList = ({ bids }) => {
-  const formatPrice = (price) => {
-    return price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
+  const formatPrice = (price) =>
+    price?.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") || "0";
+
+  const getTimeRemaining = (endTime) => {
+    const diff = new Date(endTime) - new Date();
+    if (diff <= 0) return { label: "Ended", urgent: false };
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    if (hours > 48) return { label: `${Math.floor(hours / 24)}d left`, urgent: false };
+    if (hours < 6) return { label: `${hours}h ${minutes}m`, urgent: true };
+    return { label: `${hours}h ${minutes}m`, urgent: false };
   };
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 mb-8">
-      {bids?.map((bid) => (
-        <div 
-          key={bid._id} 
-          className="bg-white dark:bg-[#2b2b2b] rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col"
-        >
-          <div className="relative w-full aspect-square">
-            <img
-              src={bid?.auctionProduct?.images?.[0]?.url}
-              alt={bid?.auctionProduct?.name}
-              className="w-full h-full object-cover rounded-t-lg"
-            />
-            {bid?.isFlashSale && (
-              <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                Flash Sale
+    <div className="marketplace-product-grid mb-8">
+      {bids?.map((bid) => {
+        const time = getTimeRemaining(bid?.auctionEndTime);
+        const isActive = new Date(bid?.auctionEndTime) > new Date();
+
+        return (
+          <article
+            key={bid._id}
+            className="yebone-card-lift group flex flex-col bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden shadow-sm"
+          >
+            <div className="relative aspect-square overflow-hidden bg-yebone-light-gray">
+              <img
+                src={bid?.auctionProduct?.images?.[0]?.url}
+                alt={bid?.auctionProduct?.name}
+                className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out yebone-img-fade"
+              />
+              <span
+                className={`absolute top-3 left-3 px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase text-white ${
+                  isActive ? "bg-yebone-primary" : "bg-gray-500"
+                }`}
+              >
+                {isActive ? "Live" : "Closed"}
+              </span>
+              {bid?.isFlashSale && (
+                <span className="absolute top-3 right-3 px-2 py-0.5 rounded-lg bg-red-500 text-white text-[10px] font-bold uppercase">
+                  Flash
+                </span>
+              )}
+              {time.urgent && (
+                <span className="absolute bottom-3 left-3 px-2 py-0.5 rounded-lg bg-red-500 text-white text-[10px] font-semibold">
+                  Ending soon
+                </span>
+              )}
+            </div>
+
+            <div className="p-4 flex flex-col flex-grow gap-2">
+              <h3 className="font-Poppins font-medium text-sm line-clamp-2 dark:text-white group-hover:text-yebone-primary transition">
+                {bid?.auctionProduct?.name}
+              </h3>
+
+              <div>
+                <p className="text-[11px] text-gray-500 uppercase tracking-wide">Current bid</p>
+                <p className="text-yebone-primary font-bold">
+                  RWF {formatPrice(bid?.currentBid || bid?.startingBid)}
+                </p>
               </div>
-            )}
-          </div>
-          <div className="p-3 flex flex-col flex-grow">
-            <h3 className="font-medium text-gray-900 dark:text-white text-sm line-clamp-2 mb-1">
-              {bid?.auctionProduct?.name}
-            </h3>
-            <div className="text-[#29625d] font-semibold text-sm">
-              RWF {formatPrice(bid?.currentBid || bid?.startingBid)}
+
+              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                <HiOutlineClock className="shrink-0" />
+                <span className={time.urgent ? "text-red-500 font-semibold" : ""}>
+                  {time.label}
+                </span>
+              </div>
+
+              {bid?.shop?.name && (
+                <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <HiOutlineUser className="shrink-0" />
+                  <span className="truncate">{bid.shop.name}</span>
+                </div>
+              )}
+
+              <Link
+                to={`/bid/${bid._id}`}
+                className="mt-auto block w-full text-center rounded-xl bg-yebone-primary hover:bg-yebone-primary-dark text-white text-sm font-semibold py-2.5 transition yebone-btn-lift"
+              >
+                View auction
+              </Link>
             </div>
-            <div className="text-xs text-gray-500 mb-2">
-              Ends: {new Date(bid?.auctionEndTime).toLocaleDateString()}
-            </div>
-            <Link
-              to={`/bid/${bid._id}`}
-              className="mt-auto block w-full text-center bg-[#29625d] hover:bg-[#1f4f4a] text-white text-sm py-1.5 rounded-lg transition-colors"
-            >
-              View Details
-            </Link>
-          </div>
-        </div>
-      ))}
+          </article>
+        );
+      })}
     </div>
   );
 };
 
-export default BidList; 
+export default BidList;

@@ -8,11 +8,14 @@ import { server } from "../../server";
 import { toast } from "react-toastify";
 import { loadSeller } from "../../redux/actions/user";
 import { AiOutlineDelete } from "react-icons/ai";
+import VendorEarningsSummary from "../Dashboard/vendor/VendorEarningsSummary";
+import { Button } from "../ui";
 
 const WithdrawMoney = () => {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const { seller } = useSelector((state) => state.seller);
+  const { orders } = useSelector((state) => state.order);
   const [paymentMethod, setPaymentMethod] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState(50);
   const [bankInfo, setBankInfo] = useState({
@@ -26,7 +29,14 @@ const WithdrawMoney = () => {
 
   useEffect(() => {
     dispatch(getAllOrdersOfShop(seller._id));
-  }, [dispatch]);
+  }, [dispatch, seller._id]);
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -102,17 +112,20 @@ const WithdrawMoney = () => {
   const availableBalance = seller?.availableBalance.toFixed(2);
 
   return (
-    <div className="w-full h-[90vh] p-8">
-      <div className="w-full m-2 h-full rounded flex items-center justify-center flex-col text-center">
-        <h5 className="text-[20px] block pb-4">
-          Available Balance: RWF {availableBalance}
+    <div className="yebone-fade-up space-y-8 p-1">
+      <VendorEarningsSummary orders={orders} />
+
+      <div className="dashboard-section yebone-surface text-center py-10">
+        <h5 className="text-lg font-Poppins font-semibold dark:text-white pb-2">
+          Available Balance
         </h5>
-        <div
-          className={`${styles.button} text-white !h-[42px] !rounded`}
+        <p className="text-3xl font-semibold text-yebone-primary mb-6">RWF {availableBalance}</p>
+        <Button
+          className="yebone-btn-lift"
           onClick={() => (availableBalance < 50 ? error() : setOpen(true))}
         >
-          Withdraw
-        </div>
+          Withdraw funds
+        </Button>
       </div>
       {open && (
         <div className="w-full h-screen z-[9999] fixed top-0 left-0 flex items-center justify-center bg-[#0000004e]">

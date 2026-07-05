@@ -16,10 +16,10 @@ const LoginPage = () => {
   return (
     <div>
     <Helmet>
-        <title>Login | Guriraline</title>
-        <meta name="description" content="Login to your Guriraline account to access your orders and profile." />
-        <meta property="og:title" content="Login | Guriraline" />
-        <meta property="og:description" content="Login to Guriraline for personalized shopping experience." />
+        <title>Login | Yebone</title>
+        <meta name="description" content="Login to your Yebone account to access your orders and profile." />
+        <meta property="og:title" content="Login | Yebone" />
+        <meta property="og:description" content="Login to Yebone for a personalized shopping experience." />
       </Helmet>
 
         <Login />

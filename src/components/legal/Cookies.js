@@ -6,7 +6,7 @@ const Cookies = () => {
       <h1 className="text-3xl font-bold text-center mb-6 dark:text-white">Cookie Policy</h1>
 
       <p className="mb-4 p-2 dark:text-white">
-        At Guriraline, we use cookies and similar technologies to enhance your
+        At Yebone, we use cookies and similar technologies to enhance your
         user experience, personalize your interactions with our platform, and
         improve the performance of our website. By using our website, you
         consent to the use of cookies as outlined in this Cookie Policy. This
@@ -20,7 +20,7 @@ const Cookies = () => {
         visit websites. They are commonly used to remember user preferences,
         logins, and settings, as well as to track browsing behavior. Cookies can
         either be persistent (remaining on your device for a specified period)
-        or session-based (deleted when the browser is closed). Guriraline uses
+        or session-based (deleted when the browser is closed). Yebone uses
         cookies to offer a personalized browsing experience, allowing us to
         remember your preferences and improve the functionality of our website.
       </p>
@@ -62,7 +62,7 @@ const Cookies = () => {
         3. How We Use Cookies
       </h2>
       <p className="mb-4 p-2 dark:text-white">
-        The cookies we use on Guriraline help us improve your browsing
+        The cookies we use on Yebone help us improve your browsing
         experience by remembering your preferences and personalizing the content
         you see. They also allow us to analyze the performance of our platform,
         track user behavior, and make data-driven decisions to enhance
@@ -93,7 +93,7 @@ const Cookies = () => {
         5. Third-Party Cookies
       </h2>
       <p className="mb-4 p-2 dark:text-white">
-        Guriraline also uses third-party services that may place cookies on your
+        Yebone also uses third-party services that may place cookies on your
         device. These third parties may include advertising networks, analytics
         providers, and social media platforms. These cookies help provide
         targeted ads, track user interactions, and gather analytics about our
@@ -133,8 +133,8 @@ const Cookies = () => {
         Cookie Policy, please feel free to contact us. Our support team is
         available to provide further information or assist with any requests you
         may have. You can reach us at{" "}
-        <a href="mailto:support@guriraline.com" className="text-blue-500">
-          support@guriraline.com
+        <a href="mailto:support@yebone.com" className="text-blue-500">
+          support@yebone.com
         </a>
         , and we will be happy to assist you.
       </p>

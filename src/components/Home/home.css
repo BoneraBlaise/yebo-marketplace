@@ -1,0 +1,8 @@
+/* Homepage-specific layout — shared tokens in design-system/global.css */
+.home-page {
+  overflow-x: hidden;
+}
+
+.home-page main {
+  overflow-x: hidden;
+}

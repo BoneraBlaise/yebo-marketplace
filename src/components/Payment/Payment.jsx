@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import styles from "../../styles/styles";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
@@ -16,18 +15,22 @@ import {
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { PaystackButton } from "react-paystack";
-import { createOrder } from "../../redux/actions/order";
-import { useReferral } from '../../context/ReferralContext';
+import { MdLock } from "react-icons/md";
+import { HiOutlineSparkles } from "react-icons/hi";
+import { useReferral } from "../../context/ReferralContext";
+import { Container, Button } from "../ui";
+import { typography } from "../../design-system/typography";
+import CheckoutOrderSummary from "../Checkout/CheckoutOrderSummary";
+import CheckoutTrustBadges from "../Checkout/CheckoutTrustBadges";
+import "../Checkout/checkout.css";
 
-// Stripe's public key (Replace with your actual public key)
-const stripePromise = loadStripe("your-publishable-key-here"); // Replace with your Stripe public key
+const stripePromise = loadStripe("your-publishable-key-here");
 
 const Payment = () => {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(false);
   const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { referralProducts, clearAllReferrals } = useReferral();
 
   useEffect(() => {
@@ -38,21 +41,12 @@ const Payment = () => {
   }, []);
 
   useEffect(() => {
-    // Cleanup function
     return () => {
-      if (!window.location.pathname.includes('/order/success')) {
-        // Only clear if not navigating to success page
+      if (!window.location.pathname.includes("/order/success")) {
         localStorage.removeItem("latestOrder");
       }
     };
   }, []);
-
-  const calculateTotalForShop = (items) => {
-    return items.reduce((total, item) => {
-      const itemPrice = item.discountPrice || item.originalPrice;
-      return total + (itemPrice * item.qty);
-    }, 0);
-  };
 
   const createOrder = async (paymentInfo) => {
     try {
@@ -70,15 +64,15 @@ const Payment = () => {
         totalPrice: orderData.totalPrice,
         paymentInfo: {
           ...paymentInfo,
-          status: "Pending"
+          status: "Pending",
         },
         shipping: orderData.shipping,
         discountPrice: orderData.discountPrice,
         orderType: orderData.orderType,
         bidId: orderData.bidId,
         referralCodes: orderData.cart
-          .filter(item => item.referralCode)
-          .map(item => item.referralCode)
+          .filter((item) => item.referralCode)
+          .map((item) => item.referralCode),
       };
 
       const { data } = await axios.post(
@@ -88,14 +82,15 @@ const Payment = () => {
       );
 
       if (data.success) {
-        if (orderData.orderType === 'regular') {
+        if (orderData.orderType === "regular") {
           localStorage.removeItem("cartItems");
           if (window.referralContext) {
             window.referralContext.clearAllReferrals();
           }
         } else {
-          const updatedCart = JSON.parse(localStorage.getItem("cartItems") || "[]")
-            .filter(item => !orderData.cart.find(orderItem => orderItem._id === item._id));
+          const updatedCart = JSON.parse(localStorage.getItem("cartItems") || "[]").filter(
+            (item) => !orderData.cart.find((orderItem) => orderItem._id === item._id)
+          );
           localStorage.setItem("cartItems", JSON.stringify(updatedCart));
         }
 
@@ -119,7 +114,7 @@ const Payment = () => {
     }
     await createOrder({
       type: "Cash On Delivery",
-      status: "Pending"
+      status: "Pending",
     });
   };
 
@@ -131,197 +126,193 @@ const Payment = () => {
     }
     await createOrder({
       type: "Shop Payment",
-      status: "Pending"
+      status: "Pending",
     });
   };
 
+  if (loading) {
+    return (
+      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center gap-4">
+        <div className="w-12 h-12 rounded-full border-4 border-yebone-primary/20 border-t-yebone-primary animate-spin" />
+        <p className="text-gray-600 dark:text-gray-300 font-medium">Processing your order...</p>
+      </div>
+    );
+  }
+
   return (
-    <>
-      {loading ? (
-        <div className="w-full h-screen flex items-center justify-center">
-          <div className="flex items-center">
-            <div className="animate-spin mr-2">
-              {/* Add your loading spinner here */}
-            </div>
-            <span className="text-black dark:text-white">Processing your order...</span>
-          </div>
+    <Container className="py-8 lg:py-12 pb-28 lg:pb-12">
+      <div className="mb-8 yebone-fade-up">
+        <h1 className={`${typography.heading} mb-2`}>Payment</h1>
+        <p className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+          <MdLock size={16} className="text-yebone-primary" />
+          Secure payment powered by Yebone
+        </p>
+      </div>
+
+      <div className="grid lg:grid-cols-3 gap-8 lg:gap-10 items-start">
+        <div className="lg:col-span-2 yebone-fade-up">
+          <PaymentInfo
+            user={user}
+            orderData={orderData}
+            onCashOnDelivery={cashOnDeliveryHandler}
+            onShopPayment={PayViaShopInfo}
+          />
         </div>
-      ) : (
-        <div className="w-full flex flex-col items-center py-8">
-          <div className="w-[90%] 1000px:w-[70%] block 800px:flex">
-            <div className="w-full 800px:w-[65%]">
-              <PaymentInfo
-                user={user}
-                orderData={orderData}
-                onCashOnDelivery={cashOnDeliveryHandler}
-                onShopPayment={PayViaShopInfo}
-              />
-            </div>
-            <div className="w-full 800px:w-[35%] 800px:mt-0 mt-8">
-              {orderData && <CartData orderData={orderData} />}
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+
+        {orderData && (
+          <CheckoutOrderSummary
+            subTotalPrice={orderData.subTotalPrice}
+            shipping={orderData.shipping}
+            totalPrice={orderData.totalPrice}
+            discountAmount={orderData.discountPrice}
+            showCoupon={false}
+            showCheckoutButton={false}
+            sticky
+            continueShoppingHref="/products"
+          />
+        )}
+      </div>
+    </Container>
   );
 };
 
-const PaymentInfo = ({
-  onCashOnDelivery,
-  onShopPayment,
-  user,
-  orderData
-}) => {
+const PAYMENT_METHODS = [
+  {
+    id: 1,
+    title: "Pay with Paystack",
+    description: "Secure payment via Paystack — cards, mobile money, and more.",
+  },
+  {
+    id: 2,
+    title: "Cash on Delivery",
+    description: "Pay when your order is delivered to your door.",
+    actionLabel: "Confirm order",
+  },
+  {
+    id: 3,
+    title: "Shop Payment Info",
+    description: "Pay using payment details provided by the seller.",
+    actionLabel: "Confirm order",
+  },
+];
+
+const PaymentInfo = ({ onCashOnDelivery, onShopPayment, user, orderData }) => {
   const [select, setSelect] = useState(1);
 
   return (
-    <div className="w-full 800px:w-[95%] bg-[#fff] dark:bg-[#1f1f1f] dark:text-gray-200 rounded-md p-5 pb-8">
-      {/* Paystack Payment */}
-      <div>
-        <div className="flex w-full pb-5 border-b mb-2">
-          <div
-            className="w-[25px] h-[25px] rounded-full bg-transparent border-[3px] border-[#1d1a1ab4] dark:border-[#29625d] relative flex items-center justify-center"
-            onClick={() => setSelect(1)}
-          >
-            {select === 1 ? (
-              <div className="w-[13px] h-[13px] bg-[#1d1a1acb] dark:bg-[#28625d] rounded-full" />
-            ) : null}
-          </div>
-          <h4 className="text-[18px] pl-2 font-[600] text-[#000000b1] dark:text-white">
-            Pay with Paystack
-          </h4>
+    <div className="space-y-6">
+      <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
+        <h2 className={`${typography.subheading} mb-6`}>Payment method</h2>
+
+        <div className="space-y-3">
+          {PAYMENT_METHODS.map((method) => (
+            <div key={method.id}>
+              <button
+                type="button"
+                onClick={() => setSelect(method.id)}
+                className={`w-full flex items-start gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-300 yebone-btn-lift ${
+                  select === method.id
+                    ? "border-yebone-primary bg-yebone-primary/5 shadow-md shadow-yebone-primary/10"
+                    : "border-gray-100 dark:border-gray-800 hover:border-yebone-primary/30"
+                }`}
+              >
+                <span
+                  className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${
+                    select === method.id
+                      ? "border-yebone-primary"
+                      : "border-gray-300 dark:border-gray-600"
+                  }`}
+                >
+                  {select === method.id && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-yebone-primary" />
+                  )}
+                </span>
+                <div>
+                  <p className="font-Poppins font-semibold text-sm dark:text-white">
+                    {method.title}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                    {method.description}
+                  </p>
+                </div>
+              </button>
+
+              {select === method.id && method.id === 2 && (
+                <div className="mt-3 pl-9">
+                  <Button onClick={onCashOnDelivery} className="yebone-btn-lift">
+                    {method.actionLabel}
+                  </Button>
+                </div>
+              )}
+
+              {select === method.id && method.id === 3 && (
+                <div className="mt-3 pl-9">
+                  <Button onClick={onShopPayment} className="yebone-btn-lift">
+                    {method.actionLabel}
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-        {select === 1 && (
-          <div className="w-full">
-            <p className="text-[#111111b5] dark:text-gray-200 mb-4">
-              Secure payment via Paystack
-            </p>
-          </div>
-        )}
-      </div>
 
-      <br />
+        <CheckoutTrustBadges />
+      </section>
 
-      {/* Cash on Delivery */}
-      <div>
-        <div className="flex w-full pb-5 border-b mb-2">
-          <div
-            className="w-[25px] h-[25px] rounded-full bg-transparent border-[3px] border-[#1d1a1ab4] dark:border-[#29625d] relative flex items-center justify-center"
-            onClick={() => setSelect(2)}
-          >
-            {select === 2 ? (
-              <div className="w-[13px] h-[13px] bg-[#1d1a1acb] rounded-full" />
-            ) : null}
+      {orderData?.cart?.length > 0 && (
+        <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
+          <h2 className={`${typography.subheading} mb-5`}>Order review</h2>
+          <div className="space-y-4">
+            {orderData.cart.map((item, i) => (
+              <div key={item._id || i} className="flex gap-4 items-center">
+                <img
+                  src={item.images?.[0]?.url}
+                  alt=""
+                  className="w-16 h-16 rounded-xl object-cover shadow-md"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium line-clamp-2 dark:text-white">{item.name}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Qty {item.qty} · {item.shop?.name}
+                  </p>
+                </div>
+                <p className="font-semibold text-yebone-primary text-sm tabular-nums shrink-0">
+                  RWF {(item.discountPrice * item.qty).toLocaleString()}
+                </p>
+              </div>
+            ))}
           </div>
-          <h4 className="text-[18px] pl-2 font-[600] text-[#000000b1] dark:text-white">
-            Cash on Delivery
-          </h4>
-        </div>
-        {select === 2 ? (
-          <div className="w-full">
-            <p className="text-[#111111b5] dark:text-gray-200">
-              Pay when your order is delivered.
-            </p>
-            <br />
-            <button
-              className="text-white bg-[#29625d] py-2 px-5 rounded-md text-[18px]"
-              onClick={onCashOnDelivery}
-            >
-              Confirm Order
-            </button>
-          </div>
-        ) : null}
-      </div>
+          <p className="flex items-center gap-1.5 text-xs text-gray-400 mt-5">
+            <HiOutlineSparkles className="text-yebone-gold" size={14} />
+            Est. delivery 3–7 business days
+          </p>
+        </section>
+      )}
 
-      <br />
-
-      {/* Shop Payment Info */}
-      <div>
-        <div className="flex w-full pb-5 border-b mb-2">
-          <div
-            className="w-[25px] h-[25px] rounded-full bg-transparent border-[3px] border-[#1d1a1ab4] dark:border-[#29625d] relative flex items-center justify-center"
-            onClick={() => setSelect(3)}
-          >
-            {select === 3 ? (
-              <div className="w-[13px] h-[13px] bg-[#1d1a1acb] rounded-full" />
-            ) : null}
-          </div>
-          <h4 className="text-[18px] pl-2 font-[600] text-[#000000b1] dark:text-white">
-            Shop Payment Info
-          </h4>
-        </div>
-        {select === 3 ? (
-          <div className="w-full">
-            <p className="text-[#111111b5] dark:text-gray-200">
-              Pay with info provided by seller.
-            </p>
-            <br />
-            <button
-              className="text-white bg-[#29625d] py-2 px-5 rounded-md text-[18px]"
-              onClick={onShopPayment}
-            >
-              Confirm Order
-            </button>
-          </div>
-        ) : null}
-      </div>
-
-      {/* Shipping Address */}
-      <div className="mt-8">
-        <h4 className="text-[20px] font-[600] mb-4">Shipping Address:</h4>
-        <div className="text-[16px] text-gray-700 dark:text-gray-300">
-          <p>{user?.name}</p>
+      <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
+        <h2 className={`${typography.subheading} mb-4`}>Shipping to</h2>
+        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1 leading-relaxed">
+          <p className="font-semibold text-yebone-dark-text dark:text-white">{user?.name}</p>
           <p>{user?.email}</p>
           <p>{orderData?.shippingAddress?.address1}</p>
-          <p>{orderData?.shippingAddress?.country}</p>
-          <p>{orderData?.shippingAddress?.city}</p>
-          <p>{orderData?.shippingAddress?.zipCode}</p>
+          {orderData?.shippingAddress?.address2 && (
+            <p>{orderData.shippingAddress.address2}</p>
+          )}
+          <p>
+            {orderData?.shippingAddress?.city}, {orderData?.shippingAddress?.country}{" "}
+            {orderData?.shippingAddress?.zipCode}
+          </p>
           <p>{user?.phoneNumber}</p>
         </div>
-      </div>
+      </section>
     </div>
   );
 };
 
-const CartData = ({ orderData }) => {
-  const shipping = orderData?.shipping?.toFixed(2);
-
-  return (
-    <div className="w-full bg-[#fff] dark:bg-gray-800 dark:text-white rounded-md p-5 pb-8">
-      <div className="flex justify-between">
-        <h3 className="text-[16px] font-[400] text-[#000000a4] dark:text-gray-200">subtotal:</h3>
-        <h5 className="text-[18px] font-[600]">
-          RWF {orderData?.subTotalPrice}
-        </h5>
-      </div>
-      <br />
-      <div className="flex justify-between">
-        <h3 className="text-[16px] font-[400] text-[#000000a4] dark:text-gray-200">shipping:</h3>
-        <h5 className="text-[18px] font-[600]">RWF {shipping}</h5>
-      </div>
-      <br />
-      <div className="flex justify-between border-b pb-3">
-        <h3 className="text-[16px] font-[400] text-[#000000a4] dark:text-gray-200">Discount:</h3>
-        <h5 className="text-[18px] font-[600]">
-          {orderData?.discountPrice ? `RWF ${orderData.discountPrice}` : "-"}
-        </h5>
-      </div>
-      <h5 className="text-[18px] font-[600] text-end pt-3">
-        RWF {orderData?.totalPrice}
-      </h5>
-      <br />
-    </div>
-  );
-};
-
-// Wrapping the Payment component with Elements provider
-const PaymentWithElements = () => {
-  return (
-    <Elements stripe={stripePromise}>
-      <Payment />
-    </Elements>
-  );
-};
+const PaymentWithElements = () => (
+  <Elements stripe={stripePromise}>
+    <Payment />
+  </Elements>
+);
 
 export default PaymentWithElements;

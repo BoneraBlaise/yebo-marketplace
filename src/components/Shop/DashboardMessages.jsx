@@ -9,7 +9,8 @@ import styles from "../../styles/styles";
 import { TfiGallery } from "react-icons/tfi";
 import socketIO from "socket.io-client";
 import { format } from "timeago.js";
-import DashboardHeader from "./Layout/DashboardHeader";
+import DashboardEmptyState from "../Dashboard/DashboardEmptyState";
+import { FiMessageSquare } from "react-icons/fi";
 
 // Socket.io endpoint url
 const ENDPOINT = "https://guriraline-socket-awo9.onrender.com";
@@ -236,16 +237,21 @@ const DashboardMessages = () => {
   }, [messages]);
 
   return (
-    <div>
-      <div className="w-[98%] bg-white dark:bg-[#1f1f1f] h-[90vh] overflow-y-scroll hide-scrollbar rounded">
+    <div className="yebone-fade-up">
+      <div className="vendor-inbox-list dashboard-section yebone-surface min-h-[70vh] relative">
         {!open && (
           <>
-            <DashboardHeader />
-            <h1 className="text-center text-xl py-3 font-Poppins dark:text-white">
-              Shop inbox
-            </h1>
-            {/* All messages list */}
-            {conversations &&
+            <div className="p-4 border-b border-gray-100 dark:border-gray-800">
+              <h2 className="font-Poppins text-lg font-semibold dark:text-white">Shop inbox</h2>
+              <p className="text-sm text-gray-500">Customer conversations</p>
+            </div>
+            {conversations?.length === 0 ? (
+              <DashboardEmptyState
+                icon={FiMessageSquare}
+                title="No messages yet"
+                message="When customers reach out, conversations will appear here."
+              />
+            ) : (
               conversations.map((item, index) => (
                 <MessageList
                   data={item}
@@ -260,7 +266,8 @@ const DashboardMessages = () => {
                   setActiveStatus={setActiveStatus}
                   isLoading={isLoading}
                 />
-              ))}
+              ))
+            )}
           </>
         )}
 
@@ -319,8 +326,7 @@ const MessageList = ({
 
   return (
     <div
-      className={`w-full flex p-3 px-3 ${active === index ? "bg-[#00000010]" : "bg-transparent"
-        }  cursor-pointer`}
+      className={`vendor-inbox-item ${active === index ? "is-active" : ""}`}
       onClick={(e) =>
         setActive(index) ||
         handleClick(data._id) ||

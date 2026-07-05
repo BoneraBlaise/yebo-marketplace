@@ -5,16 +5,23 @@ import Header from "../components/Layout/Header";
 import ProductDetails from "../components/Products/ProductDetails";
 import SuggestedProduct from "../components/Products/SuggestedProduct";
 import { useSelector } from "react-redux";
+import { Container, PageMeta, ErrorState } from "../components/ui";
+import "../components/Products/product-details.css";
 
-const spinnerStyle = {
-  border: '8px solid #f3f3f3',
-  borderTop: '8px solid #29625d',
-  borderRadius: '50%',
-  width: '50px',
-  height: '50px',
-  animation: 'spin 1s linear infinite',
-  margin: 'auto',
-};
+const GallerySkeleton = () => (
+  <Container className="py-8">
+    <div className="grid lg:grid-cols-2 gap-10 animate-pulse">
+      <div className="aspect-square rounded-3xl pdp-skeleton" />
+      <div className="space-y-4">
+        <div className="h-6 w-3/4 rounded-lg pdp-skeleton" />
+        <div className="h-4 w-1/2 rounded-lg pdp-skeleton" />
+        <div className="h-24 rounded-2xl pdp-skeleton" />
+        <div className="h-12 rounded-xl pdp-skeleton" />
+        <div className="h-12 rounded-xl pdp-skeleton" />
+      </div>
+    </div>
+  </Container>
+);
 
 const ProductDetailsPage = () => {
   const { allProducts } = useSelector((state) => state.products);
@@ -23,43 +30,75 @@ const ProductDetailsPage = () => {
   const [data, setData] = useState(null);
   const [searchParams] = useSearchParams();
   const eventData = searchParams.get("isEvent");
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true); 
+    setIsLoading(true);
+    setNotFound(false);
     if (eventData !== null) {
-      const data = allEvents && allEvents.find((i) => i._id === id);
-      setData(data);
+      const found = allEvents && allEvents.find((i) => i._id === id);
+      setData(found || null);
+      if (allEvents?.length && !found) setNotFound(true);
     } else {
-      const data = allProducts && allProducts.find((i) => i._id === id);
-      setData(data);
+      const found = allProducts && allProducts.find((i) => i._id === id);
+      setData(found || null);
+      if (allProducts?.length && !found) setNotFound(true);
     }
   }, [allProducts, allEvents, id, eventData]);
+
   useEffect(() => {
-    if (data !== null) {
-      setIsLoading(false); 
+    if (data !== null || notFound) {
+      setIsLoading(false);
     }
-  }, [data]);
+  }, [data, notFound]);
+
+  const metaTitle = data?.name || (notFound ? "Product not found" : "Product");
+  const metaDescription =
+    data?.description?.replace(/<[^>]+>/g, "").slice(0, 160) ||
+    "View product details on Yebone marketplace.";
 
   return (
-    <div>
-      <Header />
+    <div className="bg-yebone-light-gray dark:bg-gray-950 min-h-screen flex flex-col">
+      <PageMeta
+        title={metaTitle}
+        description={metaDescription}
+        ogType="product"
+        ogImage={data?.images?.[0]?.url || "/favicon.svg"}
+        noIndex={notFound}
+        jsonLd={
+          data
+            ? {
+                "@context": "https://schema.org",
+                "@type": "Product",
+                name: data.name,
+                description: metaDescription,
+                image: data.images?.[0]?.url,
+                offers: {
+                  "@type": "Offer",
+                  price: data.discountPrice || data.originalPrice,
+                  priceCurrency: "RWF",
+                },
+              }
+            : undefined
+        }
+      />
+      <Header activeHeading={3} />
 
-      {/* Show custom loading spinner while data is being fetched */}
-      {isLoading ? (
-        <div className="flex justify-center items-center h-[80vh]">
-        <div style={spinnerStyle}></div> {/* Inline style for the spinner */}
-        </div>
-      ) : (
-        <>
-          {/* Once data is loaded, show the product details */}
-          <ProductDetails data={data} />
-
-          {!eventData && data && (
-            <SuggestedProduct data={data} />
-          )}
-        </>
-      )}
+      <main id="main-content" className="flex-1">
+        {isLoading ? (
+          <GallerySkeleton />
+        ) : notFound ? (
+          <Container>
+            <ErrorState variant="404" title="Product not found" message="This product may have been removed or is unavailable." />
+          </Container>
+        ) : (
+          <>
+            <ProductDetails data={data} />
+            {!eventData && data && <SuggestedProduct data={data} />}
+          </>
+        )}
+      </main>
 
       <Footer />
     </div>

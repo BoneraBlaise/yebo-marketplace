@@ -69,99 +69,106 @@ const ShopSettings = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen p-4 bg-gray-100 dark:bg-transparent">
-      <div className="flex flex-col items-center w-full max-w-4xl bg-white dark:bg-[#1f1f1f] rounded-lg shadow-lg p-6">
-        <div className="relative flex items-center justify-center mb-6">
+    <div className="yebone-fade-up space-y-6 p-1">
+      <div className="dashboard-section yebone-surface max-w-3xl mx-auto">
+        <h2 className="font-Poppins text-xl font-semibold mb-6 dark:text-white text-center">
+          Store settings
+        </h2>
+
+        <div className="relative flex items-center justify-center mb-8">
           <img
             src={avatar || seller.avatar?.url}
             alt="Shop Avatar"
-            className="w-32 h-32 rounded-full object-cover border"
+            className="w-32 h-32 rounded-full object-cover border-4 border-yebone-primary/20"
           />
-          <div className="absolute bottom-0 right-0 bg-gray-200 rounded-full p-2 cursor-pointer">
-            <input
-              type="file"
-              id="image"
-              className="hidden"
-              onChange={handleImage}
-            />
+          <div className="absolute bottom-0 right-1/2 translate-x-16 bg-yebone-primary rounded-full p-2.5 cursor-pointer shadow-lg">
+            <input type="file" id="image" className="hidden" onChange={handleImage} />
             <label htmlFor="image">
-              <AiOutlineCamera className="text-gray-700 dark:text-green-700" />
+              <AiOutlineCamera className="text-white" />
             </label>
           </div>
         </div>
 
-        <form className="w-full space-y-4" onSubmit={updateHandler}>
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Name</label>
-            <input
-              type="text"
-              placeholder="Enter shop name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={`${styles.input} dark:bg-[#1f1f1f] w-full`}
-              required
-            />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Manual Payment</label>
-            <input
-              type="text"
-              placeholder="Enter Manual Payment"
-              value={paymentInfo}
-              onChange={(e) => setPaymentInfo(e.target.value)}
-              className={`${styles.input} dark:bg-[#1f1f1f] w-full`}
-            />
-          </div>
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Description</label>
-            <input
-              type="text"
-              placeholder="Enter shop description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className={`${styles.input} dark:bg-[#1f1f1f] w-full`}
-            />
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Address</label>
-            <input
-              type="text"
-              placeholder="Enter shop address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className={`${styles.input} dark:bg-[#1f1f1f] w-full`}
-              required
-            />
+        <form className="w-full space-y-6" onSubmit={updateHandler}>
+          <div className="vendor-form-section yebone-surface">
+            <h3 className="font-Poppins font-semibold mb-4 dark:text-white">Store profile</h3>
+            <div className="space-y-4">
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Name</label>
+                <input
+                  type="text"
+                  placeholder="Enter shop name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
+                  required
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Description</label>
+                <input
+                  type="text"
+                  placeholder="Enter shop description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Manual Payment</label>
+                <input
+                  type="text"
+                  placeholder="Enter Manual Payment"
+                  value={paymentInfo}
+                  onChange={(e) => setPaymentInfo(e.target.value)}
+                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Phone Number</label>
-            <input
-              type="tel"
-              placeholder="Enter shop phone number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className={`${styles.input} dark:bg-[#1f1f1f] w-full`}
-              required
-            />
-          </div>
-
-          <div className="flex flex-col space-y-2">
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Zip Code</label>
-            <input
-              type="text"
-              placeholder="Enter shop zip code"
-              value={zipCode}
-              onChange={(e) => setZipcode(e.target.value)}
-              className={`${styles.input} dark:bg-[#1f1f1f] w-full`}
-              required
-            />
+          <div className="vendor-form-section yebone-surface">
+            <h3 className="font-Poppins font-semibold mb-4 dark:text-white">Contact & address</h3>
+            <div className="space-y-4">
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Address</label>
+                <input
+                  type="text"
+                  placeholder="Enter shop address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
+                  required
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Phone Number</label>
+                <input
+                  type="tel"
+                  placeholder="Enter shop phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
+                  required
+                />
+              </div>
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Zip Code</label>
+                <input
+                  type="text"
+                  placeholder="Enter shop zip code"
+                  value={zipCode}
+                  onChange={(e) => setZipcode(e.target.value)}
+                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
+                  required
+                />
+              </div>
+            </div>
           </div>
 
           <button
             type="submit"
-            className={`${styles.input} w-full py-2 bg-[#29625d] text-white font-semibold rounded`}
+            className="w-full py-3 bg-yebone-primary hover:opacity-90 text-white font-semibold rounded-xl transition-opacity yebone-btn-lift"
           >
             Update Shop
           </button>

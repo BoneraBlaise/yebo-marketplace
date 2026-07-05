@@ -4,12 +4,20 @@ import { useSearchParams, useNavigate, Link, useLocation } from "react-router-do
 import { getAllBids, getMyWinningBids } from "../redux/actions/bids";
 import Footer from "../components/Layout/Footer";
 import Header from "../components/Layout/Header";
-import Loader from "../components/Layout/Loader";
 import { Helmet } from "react-helmet";
 import BidList from "../components/Route/Bids/BidList";
 import DropDownFilter from "../components/Layout/DropDownFilter";
-import { RiEqualizerLine } from "react-icons/ri";
 import { categoriesData } from "../static/data";
+import { Container } from "../components/ui";
+import { HiOutlineCollection } from "react-icons/hi";
+import {
+  MarketplacePageHero,
+  MarketplaceListingSkeleton,
+  MarketplaceSectionTabs,
+  MarketplaceSortSelect,
+  MarketplaceMobileFilterButton,
+  MarketplaceEmptyState,
+} from "../components/Marketplace";
 import { addTocart } from "../redux/actions/cart";
 import { toast } from "react-toastify";
 
@@ -217,72 +225,57 @@ const BidsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Bids - Guriraline Bids</title>
-        <meta name="description" content="Browse a wide range of bids at Guriraline." />
+        <title>Bids - Yebone</title>
+        <meta name="description" content="Browse a wide range of bids at Yebone." />
       </Helmet>
-      <div className="bg-white dark:bg-[#1f1f1f] dark:text-gray-200 min-h-screen">
+      <div className="marketplace-page dark:text-gray-200 min-h-screen">
         <Header activeHeading={3} />
 
+        <Container className="pt-6 lg:pt-8 pb-4">
+          <MarketplacePageHero
+            title="Auctions"
+            subtitle="Bid on exclusive items — live auctions with real-time countdowns."
+            breadcrumbs={[
+              { label: "Home", to: "/" },
+              { label: "Auctions" },
+            ]}
+            count={filteredData.length}
+            searchTerm={searchTerm}
+            badge="Live bidding"
+          />
+        </Container>
+
         <div className="w-full mx-auto px-2 sm:px-4">
-          {/* Show the loader only once */}
           {isLoading ? (
-            <div className="flex justify-center items-center w-full min-h-screen">
-              <Loader />
-            </div>
+            <Container className="py-8">
+              <MarketplaceListingSkeleton />
+            </Container>
           ) : (
             <div>
-              {/* Add Breadcrumb Navigation */}
-              <div className="w-full px-4 py-2 mb-4 mt-2">
-                <div className="max-w-[1200px] mx-auto">
-                  <div className="flex items-center space-x-2">
-                    {sections.map((section, index) => (
-                      <React.Fragment key={section.path}>
-                        <button
-                          onClick={() => handleSectionChange(section.path)}
-                          className={`text-sm font-medium transition-colors ${
-                            location.pathname === section.path
-                              ? "text-white bg-[#29625d] rounded-xl px-2 py-1"
-                              : "text-gray-600 dark:text-gray-400 hover:text-[#29625d] dark:hover:text-[#29625d]"
-                          }`}
-                        >
-                          {section.name}
-                        </button>
-                        {index < sections.length - 1 && (
-                          <span className="text-gray-400"></span>
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                </div>
-              </div>
+              <Container className="pb-4">
+                <MarketplaceSectionTabs
+                  sections={sections}
+                  activePath={location.pathname}
+                  onChange={handleSectionChange}
+                />
+              </Container>
 
-              {/* Show search term if present */}
               {searchTerm && (
-                <div className="w-full px-4 py-2 bg-white dark:bg-[#1f1f1f] mb-4">
-                  <div className="max-w-[1200px] mx-auto">
-                    <div className="text-sm text-gray-600 dark:text-gray-300">
-                      Showing auction results for "{searchTerm}"
-                    </div>
-                  </div>
-                </div>
+                <Container className="pb-4">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 yebone-surface rounded-xl px-4 py-3">
+                    Showing auction results for &ldquo;{searchTerm}&rdquo;
+                  </p>
+                </Container>
               )}
 
-              {/* Display different scenarios */}
               {!allBids?.length && !winningBids?.length ? (
-                // No bids at all
-                <div className="flex flex-col items-center justify-center min-h-[400px]">
-                  <img 
-                    src="/no-bids.png" 
-                    alt="No bids" 
-                    className="w-64 h-64 object-contain mb-4"
-                  />
-                  <p className="text-xl font-medium text-gray-600 dark:text-gray-300">
-                    No active bids available at the moment
-                  </p>
-                  <p className="text-gray-500 dark:text-gray-400 mt-2">
-                    Please check back later for new auctions
-                  </p>
-                </div>
+                <MarketplaceEmptyState
+                  icon={HiOutlineCollection}
+                  title="No auctions available"
+                  message="Check back later for new live auctions on Yebone."
+                  actionLabel="Browse products"
+                  actionTo="/products"
+                />
               ) : (
                 <>
                   {/* Winning Bids Section - Only show if user is authenticated */}
@@ -352,24 +345,20 @@ const BidsPage = () => {
 
                   {/* Active Bids Section */}
                   {filteredData.length > 0 ? (
-                    <div className="flex justify-center items-start flex-wrap w-full mb-10">
-                      {/* Button to toggle Dropdown Filter for Mobile */}
-                      <div className="block lg:hidden w-full p-4">
-                        <button
-                          onClick={() => setDropdownOpen(!dropdownOpen)}
-                          className="bg-[#29625d] text-white py-2 px-4 rounded"
-                        >
-                          <RiEqualizerLine />
-                        </button>
-                        {dropdownOpen && (
+                    <Container className="flex justify-center items-start flex-wrap w-full mb-10 gap-6 lg:gap-8">
+                      <MarketplaceMobileFilterButton
+                        open={dropdownOpen}
+                        onToggle={() => setDropdownOpen(!dropdownOpen)}
+                      />
+                      {dropdownOpen && (
+                        <div id="marketplace-mobile-filters" className="lg:hidden w-full pb-4">
                           <DropDownFilter
                             categoryData={categoryData}
                             handleCategoryChange={handleCategoryChange}
                           />
-                        )}
-                      </div>
-                      {/* Filter Sidebar for Desktop */}
-                      <div className="hidden lg:block w-[20%] p-6 mx-2 lg:mx-0">
+                        </div>
+                      )}
+                      <div className="hidden lg:block w-full lg:w-[22%] marketplace-filter-panel yebone-surface">
                         <h2 className="font-bold text-lg mb-4 text-gray-800 dark:text-white">
                           Filter Options
                         </h2>
@@ -494,43 +483,32 @@ const BidsPage = () => {
                         </div>
                       </div>
 
-                      {/* Bids List Area */}
-                      <div className="flex-grow w-full lg:w-[70%] p-4 mx-2 lg:mx-0">
-                        <div className="flex justify-end mb-4 px-4">
-                          <div className="relative inline-block">
-                            <select
-                              value={sortBy}
-                              onChange={(e) => handleSort(e.target.value)}
-                              className="appearance-none bg-white dark:bg-[#2b2b2b] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-gray-500 cursor-pointer text-sm"
-                            >
-                              <option value="">Sort By</option>
-                              {sortOptions.map((option) => (
-                                <option key={option.value} value={option.value}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-200">
-                              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                              </svg>
-                            </div>
-                          </div>
+                      <div className="flex-grow w-full lg:w-[72%]">
+                        <div className="marketplace-results-toolbar">
+                          <p className="marketplace-results-count">
+                            {filteredData.length} auction{filteredData.length === 1 ? "" : "s"}
+                          </p>
+                          <MarketplaceSortSelect
+                            value={sortBy}
+                            onChange={(e) => handleSort(e.target.value)}
+                            options={sortOptions}
+                          />
                         </div>
                         <BidList bids={filteredData} />
                       </div>
-                    </div>
+                    </Container>
                   ) : (
-                    <div className="flex flex-col items-center justify-center min-h-[200px] mt-4">
-                      <p className="text-xl font-medium text-gray-600 dark:text-gray-300">
-                        No active bids available
-                      </p>
-                      {winningBids?.length > 0 && (
-                        <p className="text-gray-500 dark:text-gray-400 mt-2">
-                          But you can view your winning bids above
-                        </p>
-                      )}
-                    </div>
+                    <MarketplaceEmptyState
+                      icon={HiOutlineCollection}
+                      title="No active bids match your filters"
+                      message={
+                        winningBids?.length > 0
+                          ? "Adjust your filters or view your winning bids above."
+                          : "Try clearing filters or check back for new auctions."
+                      }
+                      actionLabel="Browse products"
+                      actionTo="/products"
+                    />
                   )}
                 </>
               )}

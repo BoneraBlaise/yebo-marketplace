@@ -12,7 +12,7 @@ const PrivacyPolicy = () => {
           1. Introduction
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          At Guriraline, we recognize the importance of privacy and are deeply
+          At Yebone, we recognize the importance of privacy and are deeply
           committed to safeguarding the personal information of our users. We
           understand that the trust you place in us when using our platform is
           built on the confidence that your data will be treated with respect,
@@ -26,7 +26,7 @@ const PrivacyPolicy = () => {
           experience and to offer you personalized services. This includes
           personal information such as your name, contact details, and data related to your interactions with our platform,
           such as browsing activity and purchase history. Additionally,
-          Guriraline uses advanced technologies such as artificial intelligence
+          Yebone uses advanced technologies such as artificial intelligence
           (AI) to analyze user behaviors, preferences, and trends in order to
           improve the services we provide.
         </p>
@@ -38,7 +38,7 @@ const PrivacyPolicy = () => {
           rights you have with regard to your data.
         </p>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          We want you to feel confident while interacting with Guriraline. By
+          We want you to feel confident while interacting with Yebone. By
           accessing or using our website and services, you explicitly consent to
           the practices described in this policy, including the collection and
           use of your personal data. If you do not agree with the terms of this
@@ -69,7 +69,7 @@ const PrivacyPolicy = () => {
           3. Use of AI and Behavioral Data
         </h2>
         <p className="dark:text-white text-gray-700">
-          At Guriraline, we utilize advanced artificial intelligence (AI)
+          At Yebone, we utilize advanced artificial intelligence (AI)
           technologies to thoroughly analyze and understand your interactions
           with our platform. This includes a range of data points, such as your
           preferences, browsing patterns, search history, and purchase activity.
@@ -89,7 +89,7 @@ const PrivacyPolicy = () => {
           4. How We Use Your Information
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          At Guriraline, we utilize the data we collect to enhance your entire
+          At Yebone, we utilize the data we collect to enhance your entire
           experience on our platform. This includes facilitating smooth and
           secure transactions by processing your payment information and
           managing your orders efficiently. Our goal is to ensure that every
@@ -118,7 +118,7 @@ const PrivacyPolicy = () => {
           5. Sharing Your Information
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          At Guriraline, we are committed to ensuring that your personal
+          At Yebone, we are committed to ensuring that your personal
           information remains secure and private. We do not share your personal
           data with third parties, except for trusted service providers who
           assist us in providing our services, such as payment processors,
@@ -139,7 +139,7 @@ const PrivacyPolicy = () => {
           6. Data Security
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          At Guriraline, we prioritize the security of your personal information
+          At Yebone, we prioritize the security of your personal information
           and are committed to safeguarding it against any potential threats. We
           implement industry-leading encryption methods and robust security
           protocols to ensure that your data is protected from unauthorized
@@ -158,7 +158,7 @@ const PrivacyPolicy = () => {
           7. Cookies and Tracking Technologies
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          At Guriraline, we utilize cookies and similar tracking technologies to
+          At Yebone, we utilize cookies and similar tracking technologies to
           enhance your overall experience on our platform. These tools help us
           to better understand how you interact with our website, allowing us to
           optimize its functionality, analyze site traffic, and provide
@@ -218,7 +218,7 @@ const PrivacyPolicy = () => {
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
           Our platform may contain links to third-party websites or services
-          that are not owned or controlled by Guriraline. These external sites
+          that are not owned or controlled by Yebone. These external sites
           have their own privacy practices, terms of use, and content, which may
           differ from ours. As such, we are not responsible for the privacy
           practices, security measures, or the content provided by these
@@ -236,7 +236,7 @@ const PrivacyPolicy = () => {
           11. Children's Privacy
         </h2>
         <p className="dark:text-gray-200 text-gray-700 p-2">
-          At Guriraline, we take the privacy and protection of personal
+          At Yebone, we take the privacy and protection of personal
           information seriously, and as part of this commitment, we do not
           knowingly collect or solicit personal information from individuals
           under the age of 18. We are dedicated to maintaining a safe and secure
@@ -281,7 +281,7 @@ const PrivacyPolicy = () => {
           preferences, or have concerns about your data, please don’t hesitate
           to reach out to our dedicated support team. You can contact us
           directly at{" "}
-          <a href="mailto:support@guriraline.com">support@guriraline.com</a>,
+          <a href="mailto:support@yebone.com">support@yebone.com</a>,
           and we will make it a priority to address your concerns as quickly and
           thoroughly as possible. Your privacy is important to us, and we are
           committed to ensuring that your experience with our platform remains

@@ -17,7 +17,7 @@
     "about": "About Us",
     "contact": "Contact",
     "blog": "Blog",
-    "sellOnGuriraline": "Sell on Guriraline",
+    "sellOnYebone": "Sell on Yebone",
     "language": "Language",
     "helpSupport": "Help & Support",
     "sellWithUs": "Sell with Us",
@@ -43,9 +43,9 @@
     "viewAll": "View All"
   },
   "hero": {
-    "tagline": "You Need it",
-    "subtagline": "We got it",
-    "subtitle": "GuriraLine offers a seamless shopping experience, connecting you to the best deals from local and international vendors. Discover amazing products at unbeatable prices, all in one place. Shop with confidence and convenience today!",
+    "tagline": "Yebone.",
+    "subtagline": "Everything in one place",
+    "subtitle": "Yebone offers a seamless shopping experience, connecting you to the best deals from local and international vendors. Discover amazing products at unbeatable prices, all in one place. Shop with confidence and convenience today!",
     "shopNow": "Shop Now",
     "learnMore": "Learn More",
     "trendingNow": "Trending Now"
@@ -136,7 +136,7 @@
     "signUp": "Sign up"
   },
   "footer": {
-    "youNeedItWeGotIt": "You need it, we got it!",
+    "brandSlogan": "Yebone. Everything in one place.",
     "about us": "About us",
     "careers": "Careers",
     "store locations": "Store Locations",

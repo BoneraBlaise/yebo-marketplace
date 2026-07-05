@@ -1,16 +1,11 @@
-import React from 'react'
-import DashboardHeader from '../../components/Shop/Layout/DashboardHeader'
-import Footer from '../../components/Layout/Footer'
+import React from "react";
+import VendorDashboardLayout from "../../components/Dashboard/VendorDashboardLayout";
 import OrderDetails from "../../components/Shop/OrderDetails";
 
-const ShopOrderDetails = () => {
-  return (
-    <div>
-         <DashboardHeader />
-         <OrderDetails />
-          <Footer />
-    </div>
-  )
-}
+const ShopOrderDetails = () => (
+  <VendorDashboardLayout active={2} bare>
+    <OrderDetails />
+  </VendorDashboardLayout>
+);
 
-export default ShopOrderDetails
+export default ShopOrderDetails;

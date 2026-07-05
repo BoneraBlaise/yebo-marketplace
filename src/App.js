@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, Suspense } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
@@ -83,8 +83,9 @@ import PrivacyPolicyPage from "./pages/legal/PrivacyPolicyPage.js";
 import BlogPage from "./pages/legal/BlogPage.js";
 import AboutPage from "./pages/legal/AboutPage.js";
 import BlogDetailsPage from "./pages/legal/BlogDetailsPage.js";
-//Preloader
-import Preloader from "./components/preloader/Preloader";
+import NotFoundPage from "./pages/NotFoundPage.jsx";
+import ErrorBoundary from "./components/Layout/ErrorBoundary";
+import Loader from "./components/Layout/Loader";
 //Bids and Flashsales
 import { getAllFlashSales } from "./redux/actions/flashSale.js";
 import { getActiveBids } from "./redux/actions/bids.js";
@@ -107,11 +108,7 @@ const GoogleAnalytics = () => {
 };
 
 // Fallback loading component for Suspense
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white"></div>
-  </div>
-);
+const LoadingFallback = () => <Loader />;
 
 const App = () => {
   useEffect(() => {
@@ -123,28 +120,10 @@ const App = () => {
     Store.dispatch(getActiveBids());
   }, []);
 
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate loading time and fetch data
-    Promise.all([
-      Store.dispatch(loadUser()),
-      Store.dispatch(loadSeller()),
-      Store.dispatch(getAllProducts()),
-      Store.dispatch(getAllEvents()),
-      Store.dispatch(getAllFlashSales()),
-      Store.dispatch(getActiveBids()),
-    ]).then(() => {
-      // Add a minimum delay of 2 seconds for the preloader
-      setTimeout(() => {
-        setLoading(false);
-      }, 200);
-    });
-  }, []);
-
   return (
     <BrowserRouter>
       <ReferralProvider>
+        <ErrorBoundary>
         <GoogleAnalytics />
         <Suspense fallback={<LoadingFallback />}>
         <div>
@@ -450,6 +429,7 @@ const App = () => {
                 </ProtectedRoute>
               } 
             />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
         <ToastContainer
@@ -466,6 +446,7 @@ const App = () => {
           className="custom-toast-container" // Add custom class name for easier targeting
         />
         </Suspense>
+        </ErrorBoundary>
       </ReferralProvider>
     </BrowserRouter>
   );

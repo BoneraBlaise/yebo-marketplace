@@ -88,7 +88,7 @@ const Blog = () => {
   return (
     <div className="px-6 py-10 bg-gray-100 dark:bg-[#1f1f1f]">
       <header className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-black dark:text-white">Guriraline Blog</h1>
+        <h1 className="text-4xl font-bold text-black dark:text-white">Yebone Blog</h1>
         <p className="mt-4 text-lg text-gray-700 dark:text-gray-300">Stay updated with the latest trends in AI-powered eCommerce, innovations in Rwanda, and much more!</p>
       </header>
 

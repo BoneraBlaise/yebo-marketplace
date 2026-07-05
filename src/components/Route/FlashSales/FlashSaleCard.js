@@ -2,20 +2,26 @@ import React, { useState, useEffect } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { useDispatch } from "react-redux";
 import { addTocart } from "../../../redux/actions/cart";
-import { formatDistanceToNow } from "date-fns"; // For the timer
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import styles from "../../../styles/styles";
+
+const formatTimeLeft = (endTime) => {
+  const diff = new Date(endTime) - new Date();
+  if (Number.isNaN(diff) || diff <= 0) return "Sale ended";
+  const hours = Math.floor(diff / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  if (hours > 24) return `${Math.floor(hours / 24)} days left`;
+  return `${hours}h ${minutes}m left`;
+};
 
 const FlashSaleCard = ({ data }) => {
   const [timeLeft, setTimeLeft] = useState("");
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(formatDistanceToNow(new Date(data.endTime), { addSuffix: true }));
-    }, 1000);
-
+    const update = () => setTimeLeft(formatTimeLeft(data.endTime));
+    update();
+    const interval = setInterval(update, 60000);
     return () => clearInterval(interval);
   }, [data.endTime]);
 
@@ -66,7 +72,7 @@ const FlashSaleCard = ({ data }) => {
           </div>
         </Link>
         <p className="text-[12px] text-gray-500 mt-2">
-          {timeLeft} left in sale
+          {timeLeft}
         </p>
       </div>
 

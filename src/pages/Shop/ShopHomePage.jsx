@@ -1,26 +1,25 @@
-import React from 'react';
-import styles from '../../styles/styles';
+import React from "react";
 import ShopInfo from "../../components/Shop/ShopInfo";
 import ShopProfileData from "../../components/Shop/ShopProfileData";
-import Header from '../../components/Layout/Header';
-import Footer from '../../components/Layout/Footer';
-const ShopHomePage = () => {
-  return (
-    <div className=''>
-      <Header />
-      <div className={`${styles.section} bg-gray-100 dark:bg-[#1f1f1f]`}>
-        <div className="flex flex-col md:flex-row justify-center w-full py-10 space-y-6 md:space-y-0 md:space-x-6">
-          <div className="w-full md:w-1/4 bg-white dark:bg-[#1f1f1f] rounded-md shadow-md overflow-y-auto max-h-[90vh] top-0">
-            <ShopInfo isOwner={true} />
-          </div>
-          <div className="w-full flex flex-wrap justify-center gap-4 md:gap-6 mt-6 md:mt-0 mb-10 ml-auto mr-auto">
-            <ShopProfileData isOwner={true} />
-          </div>
-        </div>
+import Header from "../../components/Layout/Header";
+import Footer from "../../components/Layout/Footer";
+import { Container } from "../../components/ui";
+
+const ShopHomePage = () => (
+  <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
+    <Header />
+    <Container className="py-8 lg:py-10">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <aside className="w-full lg:w-1/4 lg:sticky lg:top-24 lg:self-start max-h-[90vh] overflow-y-auto">
+          <ShopInfo isOwner={true} />
+        </aside>
+        <main className="w-full lg:w-3/4">
+          <ShopProfileData isOwner={true} />
+        </main>
       </div>
-      <Footer />
-    </div>
-  )
-}
+    </Container>
+    <Footer />
+  </div>
+);
 
 export default ShopHomePage;

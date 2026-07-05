@@ -45,13 +45,13 @@ const Hero = () => {
           <div className="mb-16 lg:mb-0 lg:max-w-lg lg:pr-5">
             <div className="max-w-xl mb-6">
               <div>
-                <p className="inline-block px-3 py-px mb-4 text-xs font-semibold tracking-wider uppercase bg-teal-accent-400 text-teal-900 rounded-full">
-                  Guriraline.com
+                <p className="inline-block px-3 py-px mb-4 text-xs font-semibold tracking-wider uppercase bg-yebone-gold text-yebone-dark-text rounded-full">
+                  Yebone.com
                 </p>
               </div>
               <h2 className="font-sans text-5xl font-bold tracking-tight text-gray-900 dark:text-gray-200 sm:text-6xl sm:leading-none max-w-lg mb-6">
-               {t("hero.tagline")} !<br className="hidden md:block" />
-              <span className="inline-block text-[#fed592] font-extrabold">{t("hero.subtagline")}.</span>
+               {t("hero.tagline")}<br className="hidden md:block" />
+              <span className="inline-block text-yebone-gold font-extrabold">{t("hero.subtagline")}.</span>
               </h2>
               <p className="text-gray-700 dark:text-gray-200 text-base md:text-lg mb-6">
               {t("hero.subtitle")}
@@ -78,22 +78,22 @@ const Hero = () => {
             <div className="w-full h-80 relative z-[9]">
               <Slider {...settings}>
                 <div>
-                  <img className="object-cover w-full h-full outline-none border-none" src={image1} alt="guriraline-slider1" />
+                  <img className="object-cover w-full h-full outline-none border-none" src={image1} alt="Yebone slider 1" />
                 </div>
                 <div>
-                  <img className="object-cover w-full h-full outline-none border-none" src={image2} alt="guriraline-slider2" />
+                  <img className="object-cover w-full h-full outline-none border-none" src={image2} alt="Yebone slider 2" />
                 </div>
                 <div>
-                  <img className="object-cover w-full h-full outline-none border-none" src={image3} alt="guriraline-slider3" />
+                  <img className="object-cover w-full h-full outline-none border-none" src={image3} alt="Yebone slider 3" />
                 </div>
                 <div>
-                  <img className="object-contain w-full h-full outline-none border-none" src={image4} alt="guriraline-slider4" />
+                  <img className="object-contain w-full h-full outline-none border-none" src={image4} alt="Yebone slider 4" />
                 </div>
               </Slider>
             </div>
 
-            <div className="absolute top-2/4 left-1/2 transform -translate-x-1/2 text-[#fed592] font-extrabold text-8xl z-0 opacity-30">
-              <h1 className="tracking-widest">Guriraline</h1>
+            <div className="absolute top-2/4 left-1/2 transform -translate-x-1/2 text-yebone-gold font-extrabold text-8xl z-0 opacity-30">
+              <h1 className="tracking-widest">Yebone</h1>
             </div>
           </div>
 

@@ -1,22 +1,11 @@
-import React from 'react'
-import DashboardHeader from '../../components/Shop/Layout/DashboardHeader'
-import DashboardSideBar from '../../components/Shop/Layout/DashboardSideBar'
-import CreateFlashSale from '../../components/Shop/CreateFlashSale';
-const ShopCreateFlashSale = () => {
-  return (
-    <div>
-      <DashboardHeader />
-      <div className="flex items-center justify-between w-full">
-        <div className="w-[80px] 800px:w-[330px] mb10">
-          <DashboardSideBar active={4} />
-        </div>
-        <div className="w-full justify-center flex mb-10">
-          <CreateFlashSale />
-        </div>
-      </div>
-     
-    </div>
-  )
-}
+import React from "react";
+import VendorDashboardLayout from "../../components/Dashboard/VendorDashboardLayout";
+import CreateFlashSale from "../../components/Shop/CreateFlashSale";
 
-export default ShopCreateFlashSale
+const ShopCreateFlashSale = () => (
+  <VendorDashboardLayout active={12}>
+    <CreateFlashSale />
+  </VendorDashboardLayout>
+);
+
+export default ShopCreateFlashSale;

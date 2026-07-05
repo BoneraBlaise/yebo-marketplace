@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { getAllUsers } from "../../redux/actions/user";
 import { DataGrid } from "@material-ui/data-grid";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -10,12 +9,15 @@ import { RxCross1 } from "react-icons/rx";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import AdminPageToolbar from "../Dashboard/admin/AdminPageToolbar";
+import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
 
 const AllUsers = () => {
   const dispatch = useDispatch();
   const { users } = useSelector((state) => state.user);
   const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState("");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     dispatch(getAllUsers());
@@ -108,18 +110,17 @@ const AllUsers = () => {
     });
 
   return (
-    <div className="w-full flex justify-center pt-5">
-      <div className="w-[97%]">
-        <h3 className="text-[22px] font-Poppins pb-2">All Users</h3>
-        <div className="w-full min-h-[45vh] bg-white dark:bg-[#1f1f1f] rounded">
-          <DataGrid
-            rows={row}
-            columns={columns}
-            pageSize={10}
-            disableSelectionOnClick
-            autoHeight
-          />
-        </div>
+    <div className="yebone-fade-up space-y-4 p-1">
+      <AdminPageToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search customers…" />
+      <VendorTableSection title="Customer management" subtitle="Users, roles, and account status">
+        <DataGrid
+          rows={search ? row.filter((r) => r.name?.toLowerCase().includes(search.toLowerCase()) || r.email?.toLowerCase().includes(search.toLowerCase())) : row}
+          columns={columns}
+          pageSize={10}
+          disableSelectionOnClick
+          autoHeight
+        />
+      </VendorTableSection>
         {open && (
           <div className="w-full fixed top-0 left-0 z-[999] bg-[#00000039] flex items-center justify-center h-screen">
             <div className="w-[95%] 800px:w-[40%] min-h-[20vh] bg-white rounded shadow p-5">
@@ -146,7 +147,6 @@ const AllUsers = () => {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };

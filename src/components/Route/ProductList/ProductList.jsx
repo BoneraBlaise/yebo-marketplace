@@ -10,6 +10,7 @@ import {
 } from "../../../redux/actions/wishlist";
 import { addTocart } from "../../../redux/actions/cart";
 import MobileProductCard from "../ProductCard/MobileProductCard";
+import HomeProductCard from "../../Home/HomeProductCard";
 import { useMediaQuery } from "react-responsive";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -259,28 +260,17 @@ const ProductList = ({ products }) => {
     saveToRecentlyViewed(product);
   };
 
+  if (!products?.length) {
+    return null;
+  }
+
   return (
     <div
-      className={`p-4 w-full mx-auto ${isMobile ? "grid grid-cols-2 gap-4" : "flex flex-col gap-4"}`}
+      className={`w-full mx-auto ${
+        isMobile ? "grid grid-cols-2 gap-3 sm:gap-4 p-2" : "marketplace-product-grid p-1"
+      }`}
     >
       {products.map((product) => {
-        const isInWishlist = wishlist.some((item) => item._id === product._id);
-
-        const addToCartHandler = (id) => {
-          const isItemExists = cart.find((i) => i._id === id);
-          if (isItemExists) {
-            toast.error("Item already in cart!");
-          } else {
-            if (product.stock < 1) {
-              toast.error("Product stock limited!");
-            } else {
-              const cartData = { ...product, qty: 1 };
-              dispatch(addTocart(cartData));
-              toast.success("Item added to cart successfully!");
-            }
-          }
-        };
-
         if (isMobile) {
           return (
             <MobileProductCard
@@ -291,125 +281,13 @@ const ProductList = ({ products }) => {
           );
         }
 
-        const isNew = new Date() - new Date(product.createdAt) < 24 * 60 * 60 * 1000;
-        const discount = product.originalPrice - product.discountPrice;
-        const showDiscountText = discount > 10000;
-
         return (
           <div
             key={product._id}
-            className="flex border dark:border-1 dark:border-[#2b2b2b] transition-shadow duration-300 w-full h-[270px] max-w-full mx-auto relative overflow-hidden"
+            className="flex justify-center"
             onClick={() => handleProductClick(product)}
           >
-            {/* Sold Out Badge */}
-            {product.stock === 0 && (
-              <div className="absolute top-[20px] left-[-50px] transform -rotate-45 bg-red-500 text-white py-1 px-16 text-sm font-bold z-50 shadow-md">
-                {t("product.soldOut")}
-              </div>
-            )}
-
-            {product.featured && (
-              <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                {t("product.featured")}
-              </span>
-            )}
-            {isNew && (
-              <span className="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-                {t("product.new")}
-              </span>
-            )}
-            <Link
-              to={`/product/${product._id}`}
-              className="flex-shrink-0 flex items-center h-full"
-            >
-              <img
-                src={product.images[0]?.url}
-                alt={product.name}
-                className="h-full w-[250px] object-cover bg-[#f1f1f1]"
-              />
-            </Link>
-            <div className="flex-grow flex flex-col justify-between p-6">
-              <div>
-                <Link to={`/product/${product._id}`}>
-                  <h2 className="font-medium text-xl mb-2">
-                    {product.name.length > 360
-                      ? `${product.name.slice(0, 330)}...`
-                      : product.name}
-                  </h2>
-                </Link>
-
-                <div className="flex justify-between items-center mb-2">
-                  <h5 className="text-md font-semibold">
-                    RWF{" "}
-                    {formatPrice(
-                      product.discountPrice
-                        ? product.discountPrice
-                        : product.originalPrice
-                    )}
-                  </h5>
-                  <span className="font-medium text-sm mt-4 text-[#68d284]">
-                    {product.stock} {t("product.inStock")}
-                  </span>
-                </div>
-
-                <div className="flex mt-1">
-                  <Ratings rating={product.ratings} /> {product.reviews.length}{" "}
-                  {t("product.reviews")}
-                </div>
-
-                {product.bestdeal && (
-                  <p className="text-sm text-[#29625d] font-bold">{t("product.bestDeal")}</p>
-                )}
-
-                {product.bestdeal && showDiscountText && (
-                  <p className="text-sm text-red-500 font-bold">{t("product.onDiscount")}</p>
-                )}
-
-                <p
-                  className={`text-sm font-medium mt-2 ${product.shop.isVerified ? "text-gray-500" : "text-gray-500"
-                    }`}
-                >
-                  {product.shop.isVerified ? (
-                    <>
-                      <MdVerifiedUser size={24} className="inline-block" />{" "}
-                      {t("product.verifiedSeller")}
-                    </>
-                  ) : (
-                    ""
-                  )}
-                </p>
-              </div>
-
-              <div className="flex mt-3">
-                <div className="flex items-center border px-3 rounded-full mr-2">
-                  {isInWishlist ? (
-                    <AiFillHeart
-                      size={35}
-                      className="cursor-pointer dark:bg-transparent p-1 rounded-full"
-                      onClick={() => handleWishlistToggle(product, true)}
-                      color="#ffd496"
-                      title={t("product.removeFromWishlist")}
-                    />
-                  ) : (
-                    <AiOutlineHeart
-                      size={35}
-                      className="cursor-pointer dark:bg-transparent p-1 rounded-full"
-                      onClick={() => handleWishlistToggle(product, false)}
-                      title={t("product.addToWishlist")}
-                    />
-                  )}
-                  <span className="text-sm mr-2 text-green-700">
-                    {product.likes.length}
-                  </span>
-                </div>
-                <button
-                  onClick={() => addToCartHandler(product._id)}
-                  className="text-sm p-2 px-3 bg-[#29625d] hover:bg-[#000000] text-white rounded-full cursor-pointer"
-                >
-                  {t("product.addToCart")}
-                </button>
-              </div>
-            </div>
+            <HomeProductCard data={product} compact />
           </div>
         );
       })}

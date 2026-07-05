@@ -10,6 +10,7 @@ import Loader from "../Layout/Loader";
 import { server } from "../../server";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
 
 const AllCoupons = () => {
   const { t } = useTranslation(); // Initialize translation
@@ -161,23 +162,25 @@ const AllCoupons = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="w-full mx-8 pt-1 mt-10 bg-white dark:bg-[#1f1f1f]">
-          <div className="w-full flex justify-end">
+        <div className="yebone-fade-up space-y-4 p-1">
+          <div className="flex justify-end">
             <div
-              className={`${styles.button} !w-max !h-[45px] px-3 !rounded-[5px] mr-3 mb-3`}
+              className={`${styles.button} !w-max !h-[45px] px-4 !rounded-xl mr-3 yebone-btn-lift`}
               onClick={() => setOpen(true)}
             >
               <span className="text-white">{t("coupons.createCouponCode")}</span>
             </div>
           </div>
-          <DataGrid
-            rows={row}
-            columns={columns}
-            pageSize={10}
-            disableSelectionOnClick
-            autoHeight
-            className="dark:bg-[#1f1f1f]"
-          />
+          <VendorTableSection title="Discount codes" subtitle="Manage coupon usage and expiration">
+            <DataGrid
+              rows={row}
+              columns={columns}
+              pageSize={10}
+              disableSelectionOnClick
+              autoHeight
+              className="dark:bg-[#1f1f1f]"
+            />
+          </VendorTableSection>
           {open && (
             <div className="fixed top-0 left-0 w-full h-screen bg-[#00000062] z-[20000] flex items-center justify-center">
               <div className="w-[90%] 800px:w-[40%] h-[80vh] bg-white dark:bg-[#1f1f1f] rounded-md shadow p-4 overflow-y-auto hide-scrollbar">

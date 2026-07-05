@@ -6,6 +6,10 @@ import { Link } from "react-router-dom";
 import Loader from "../Layout/Loader";
 import { getAllOrdersOfShop } from "../../redux/actions/order";
 import { AiOutlineArrowRight } from "react-icons/ai";
+import { HiOutlineShoppingBag } from "react-icons/hi";
+import VendorCustomersSummary from "../Dashboard/vendor/VendorCustomersSummary";
+import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
+import DashboardEmptyState from "../Dashboard/DashboardEmptyState";
 
 const AllOrders = () => {
   const { orders, isLoading } = useSelector((state) => state.order);
@@ -15,7 +19,14 @@ const AllOrders = () => {
 
   useEffect(() => {
     dispatch(getAllOrdersOfShop(seller._id));
-  }, [dispatch]);
+  }, [dispatch, seller._id]);
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [orders]);
 
   const getOrderType = (order) => {
     if (order.cart?.some(item => item.isFlashSale)) return "Flash Sale";
@@ -155,25 +166,25 @@ const AllOrders = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="w-full mx-8 pt-1 mt-10 bg-white dark:bg-[#1f1f1f]">
+        <div className="yebone-fade-up space-y-8 p-1">
+          <VendorCustomersSummary orders={orders} />
           {row.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-[400px]">
-              <p className="text-xl font-medium text-gray-600 dark:text-gray-300">
-                No orders found
-              </p>
-              <p className="text-gray-500 dark:text-gray-400 mt-2">
-                You haven't received any orders yet
-              </p>
-            </div>
-          ) : (
-            <DataGrid
-              rows={row}
-              columns={columns}
-              pageSize={10}
-              disableSelectionOnClick
-              autoHeight
-              className="dark:bg-[#1f1f1f]"
+            <DashboardEmptyState
+              icon={HiOutlineShoppingBag}
+              title="No orders found"
+              message="You haven't received any orders yet."
             />
+          ) : (
+            <VendorTableSection title="Order management" subtitle="Track fulfillment, payments, and status">
+              <DataGrid
+                rows={row}
+                columns={columns}
+                pageSize={10}
+                disableSelectionOnClick
+                autoHeight
+                className="dark:bg-[#1f1f1f]"
+              />
+            </VendorTableSection>
           )}
         </div>
       )}

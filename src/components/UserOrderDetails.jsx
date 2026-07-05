@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { BsFillBagFill } from "react-icons/bs";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import styles from "../styles/styles";
-import { Helmet } from 'react-helmet';
+import { Helmet } from "react-helmet";
 import { getAllOrdersOfUser } from "../redux/actions/order";
 import { server } from "../server";
 import { RxCross1 } from "react-icons/rx";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Container, Badge, Button } from "./ui";
+import DashboardOrderTimeline from "./Dashboard/DashboardOrderTimeline";
+import { typography } from "../design-system/typography";
 
 const UserOrderDetails = () => {
   const { orders } = useSelector((state) => state.order);
@@ -65,60 +66,66 @@ const UserOrderDetails = () => {
   };
 
   return (
-    <div className={`py-4 min-h-screen dark:text-gray-200 ${styles.section}`}>
+    <div className="dashboard-page min-h-screen dark:text-gray-200 py-8">
       <Helmet>
-        <title>Order Details</title>
+        <title>Order Details | Yebone</title>
       </Helmet>
-      <div className="w-full flex items-center justify-between">
-        <div className="flex items-center">
-          <BsFillBagFill size={30} color="crimson" />
-          <h1 className="pl-2 text-[25px]">Order Details</h1>
-        </div>
-      </div>
+      <Container>
+        <div className="yebone-fade-up space-y-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <Badge variant="primary" className="mb-3">Order details</Badge>
+              <h1 className={`${typography.heading} text-2xl`}>Order #{data?._id?.slice(0, 8)}</h1>
+              <p className="text-sm text-gray-500 mt-1">Placed on {data?.createdAt?.slice(0, 10)}</p>
+            </div>
+            {data?.status && <Badge variant="outline">{data.status}</Badge>}
+          </div>
 
-      <div className="w-full flex items-center justify-between pt-6">
-        <h5 className="text-[#00000084] dark:text-green-600">
-          Order ID: <span>#{data?._id?.slice(0, 8)}</span>
-        </h5>
-        <h5 className="text-[#00000084] dark:text-green-600">
-          Placed on: <span>{data?.createdAt?.slice(0, 10)}</span>
-        </h5>
-      </div>
+          {data && (
+            <div className="dashboard-section yebone-surface">
+              <h2 className="font-semibold mb-4 dark:text-white">Delivery progress</h2>
+              <DashboardOrderTimeline status={data.status} />
+            </div>
+          )}
 
-      {/* order items */}
-      <br />
-      <br />
+          <div className="dashboard-section yebone-surface space-y-4">
+            <h2 className="font-semibold dark:text-white">Products</h2>
       {data &&
         data?.cart.map((item, index) => {
           return (
-            <div className="w-full flex items-start mb-5">
+            <div key={index} className="w-full flex items-start gap-4 pb-4 border-b border-gray-100 dark:border-gray-800 last:border-0">
               <img
                 src={`${item.images[0]?.url}`}
                 alt=""
-                className="w-[80x] h-[80px]"
+                className="w-20 h-20 rounded-xl object-cover"
               />
-              <div className="w-full">
-                <h5 className="pl-3 text-[18px] font-[700]">{item.name}</h5>
-                <h5 className="pl-3 text-[20px] text-[#00000091] dark:text-gray-200">
+              <div className="w-full flex-1">
+                <h5 className="font-semibold dark:text-white">{item.name}</h5>
+                <h5 className="text-yebone-primary font-medium mt-1">
                   RWF {item.discountPrice} x {item.qty}
                 </h5>
               </div>
-              {!item.isReviewed && data?.status === "Delivered" ? <div
-                className="bg-black w-[200px] p-1 rounded-md text-center text-[#fff]"
-                onClick={() => setOpen(true) || setSelectedItem(item)}
-              >
-                Rate Order
-              </div> : (
-                null
-              )}
+              {!item.isReviewed && data?.status === "Delivered" ? (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setOpen(true);
+                    setSelectedItem(item);
+                  }}
+                  className="yebone-btn-lift shrink-0"
+                >
+                  Rate order
+                </Button>
+              ) : null}
             </div>
-          )
+          );
         })}
+          </div>
 
       {/* review popup */}
       {open && (
-        <div className="w-full fixed top-0 left-0 h-screen bg-[#0005] z-50 flex items-center justify-center">
-          <div className="w-[90%] h-min bg-[#fff] shadow rounded-md p-3">
+        <div className="w-full fixed top-0 left-0 h-screen bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white dark:bg-gray-900 shadow-xl rounded-2xl p-6 yebone-fade-up">
             <div className="w-full flex justify-end p-3">
               <RxCross1
                 size={30}
@@ -191,57 +198,50 @@ const UserOrderDetails = () => {
                 className="mt-2 w-[95%] border p-2 outline-none"
               ></textarea>
             </div>
-            <div
-              className={`${styles.button} text-white text-[20px] ml-3`}
-              onClick={rating > 1 ? reviewHandler : null}
+            <Button
+              type="button"
+              className="w-full yebone-btn-lift mt-4"
+              disabled={rating <= 1}
+              onClick={reviewHandler}
             >
-              Submit
-            </div>
+              Submit review
+            </Button>
           </div>
         </div>
       )}
 
-      <div className="border-t w-full text-right">
-        <h5 className="pt-3 text-[18px]">
-          Total Price: <strong>RWF {data?.totalPrice}</strong>
-        </h5>
-      </div>
-      <br />
-      <br />
-      <div className="w-full 800px:flex items-center">
-        <div className="w-full 800px:w-[60%]">
-          <h4 className="pt-3 text-[20px] font-[600]">Shipping Address:</h4>
-          <h4 className="pt-3 text-[16px]">
-            {data?.shippingAddress.address1 +
-              " " +
-              data?.shippingAddress.address2}
-          </h4>
-          <h4 className=" text-[16px]">{data?.shippingAddress.country}</h4>
-          <h4 className=" text-[16px]">{data?.shippingAddress.city}</h4>
-          <h4 className=" text-[16px]">{data?.user?.phoneNumber}</h4>
+      <div className="grid md:grid-cols-2 gap-4">
+        <div className="dashboard-section yebone-surface">
+          <h4 className="font-semibold mb-3 dark:text-white">Shipping address</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            {data?.shippingAddress?.address1} {data?.shippingAddress?.address2}
+            <br />
+            {data?.shippingAddress?.city} {data?.shippingAddress?.country}
+            <br />
+            {data?.user?.phoneNumber}
+          </p>
         </div>
-        <div className="w-full 800px:w-[40%]">
-          <h4 className="pt-3 text-[20px]">Payment Info:</h4>
-          <h4>
-            Status:{" "}
-            {data?.paymentInfo?.status ? data?.paymentInfo?.status : "Not Paid"}
-          </h4>
-          <br />
-          {
-            data?.status === "Delivered" && (
-              <div className={`${styles.button} text-white`}
-                onClick={refundHandler}
-              >Give a Refund</div>
-            )
-          }
+        <div className="dashboard-section yebone-surface">
+          <h4 className="font-semibold mb-3 dark:text-white">Payment summary</h4>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Status: {data?.paymentInfo?.status || "Not Paid"}
+          </p>
+          <p className="text-xl font-bold text-yebone-primary mt-3">
+            Total: RWF {data?.totalPrice}
+          </p>
+          {data?.status === "Delivered" && (
+            <Button onClick={refundHandler} variant="outline" className="mt-4 yebone-btn-lift">
+              Request refund
+            </Button>
+          )}
         </div>
       </div>
-      <br />
+
       <Link to="/">
-        <div className={`${styles.button} text-white`}>Send Message</div>
+        <Button variant="ghost" className="mt-4">Contact support</Button>
       </Link>
-      <br />
-      <br />
+        </div>
+      </Container>
     </div>
   );
 };

@@ -1,0 +1,291 @@
+/**
+ * Yebone global presentation system — shared across all pages.
+ * Aliases: yebone-* (canonical), home-*, pdp-* (backward compatible)
+ */
+
+@keyframes yebone-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes yebone-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes yebone-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes yebone-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+@keyframes yebone-pulse-dot {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+@keyframes yebone-scan-line {
+  0% { transform: translateY(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(280px); opacity: 0; }
+}
+
+@keyframes yebone-img-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes yebone-tab-indicator {
+  from { opacity: 0; transform: scaleX(0.6); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes yebone-accordion {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 500px; }
+}
+
+/* Glass */
+.yebone-glass,
+.home-glass,
+.pdp-glass {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* Skeleton */
+.yebone-skeleton,
+.home-skeleton,
+.pdp-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(41, 98, 93, 0.06) 0%,
+    rgba(254, 213, 146, 0.14) 50%,
+    rgba(41, 98, 93, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: yebone-shimmer 1.8s ease-in-out infinite;
+}
+
+.dark .yebone-skeleton,
+.dark .home-skeleton,
+.dark .pdp-skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(254, 213, 146, 0.1) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* Card elevation — unified across marketplace */
+.yebone-card-lift,
+.home-card-lift,
+.pdp-card-lift {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease;
+}
+
+.yebone-card-lift:hover,
+.home-card-lift:hover,
+.pdp-card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 20px 40px -12px rgba(41, 98, 93, 0.18),
+    0 8px 16px -8px rgba(0, 0, 0, 0.08);
+}
+
+.dark .yebone-card-lift:hover,
+.dark .home-card-lift:hover,
+.dark .pdp-card-lift:hover {
+  box-shadow:
+    0 20px 40px -12px rgba(41, 98, 93, 0.25),
+    0 8px 16px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* Buttons */
+.yebone-btn-lift,
+.home-btn-lift,
+.pdp-btn-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.yebone-btn-lift:hover:not(:disabled),
+.home-btn-lift:hover:not(:disabled),
+.pdp-btn-lift:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.yebone-btn-lift:active:not(:disabled),
+.home-btn-lift:active,
+.pdp-btn-lift:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Motion */
+.yebone-fade-up,
+.home-fade-up,
+.pdp-fade-in {
+  animation: yebone-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.yebone-img-fade,
+.home-img-fade,
+.pdp-img-fade {
+  animation: yebone-img-in 0.5s ease-out both;
+}
+
+.yebone-animate-float,
+.home-animate-float {
+  animation: yebone-float 4s ease-in-out infinite;
+}
+
+.home-animate-float-delay { animation: yebone-float 4s ease-in-out 0.6s infinite; }
+.home-animate-float-delay-2 { animation: yebone-float 4s ease-in-out 1.2s infinite; }
+
+.yebone-pulse-dot,
+.home-pulse-dot {
+  animation: yebone-pulse-dot 2s ease-in-out infinite;
+}
+
+.yebone-scan-line,
+.home-scan-line,
+.pdp-scan-line {
+  animation: yebone-scan-line 3.5s ease-in-out infinite;
+}
+
+.home-placeholder-pulse,
+.home-ai-scan {
+  animation: yebone-pulse 3s ease-in-out infinite;
+}
+
+.home-section-enter {
+  animation: yebone-fade-up 0.5s ease-out both;
+}
+
+/* Premium surface */
+.yebone-surface {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(246, 246, 245, 0.9) 50%,
+    rgba(254, 213, 146, 0.08) 100%
+  );
+  border: 1px solid rgba(41, 98, 93, 0.08);
+  box-shadow:
+    0 4px 24px -4px rgba(41, 98, 93, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.dark .yebone-surface {
+  background: linear-gradient(
+    145deg,
+    rgba(17, 24, 23, 0.95) 0%,
+    rgba(10, 18, 17, 0.98) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.4);
+}
+
+.yebone-tab-indicator {
+  animation: yebone-tab-indicator 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.yebone-accordion-content {
+  animation: yebone-accordion 0.35s ease-out both;
+  overflow: hidden;
+}
+
+/* Section spacing */
+.yebone-section,
+.home-section {
+  padding-top: 4.5rem;
+  padding-bottom: 4.5rem;
+}
+
+.pdp-section {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
+@media (min-width: 1024px) {
+  .yebone-section,
+  .home-section {
+    padding-top: 6rem;
+    padding-bottom: 6rem;
+  }
+  .pdp-section {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yebone-animate-float,
+  .home-animate-float,
+  .home-animate-float-delay,
+  .home-animate-float-delay-2,
+  .yebone-pulse-dot,
+  .home-pulse-dot,
+  .yebone-scan-line,
+  .home-scan-line,
+  .pdp-scan-line,
+  .yebone-skeleton,
+  .home-skeleton,
+  .pdp-skeleton,
+  .yebone-fade-up,
+  .home-fade-up,
+  .pdp-fade-in,
+  .home-section-enter,
+  .yebone-tab-indicator,
+  .yebone-accordion-content {
+    animation: none;
+  }
+
+  .yebone-card-lift:hover,
+  .home-card-lift:hover,
+  .pdp-card-lift:hover {
+    transform: none;
+  }
+}
+
+/* Accessibility */
+.yebone-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.75rem;
+  background: #29625d;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: top 0.2s ease;
+}
+
+.yebone-skip-link:focus {
+  top: 1rem;
+  outline: 2px solid #ffd496;
+  outline-offset: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(41, 98, 93, 0.6);
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}

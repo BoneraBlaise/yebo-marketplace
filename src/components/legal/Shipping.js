@@ -3,10 +3,10 @@ import React from "react";
 const Shipping = () => {
   return (
     <div className="p-6 w-[70%] mx-auto">
-      <h1 className="text-3xl dark:text-white font-bold text-center mb-6">Shipping & Deliveries by Guriraline</h1>
+      <h1 className="text-3xl dark:text-white font-bold text-center mb-6">Shipping & Deliveries by Yebone</h1>
 
       <p className="mb-4 text-gray-600 dark:text-gray-200">
-        At Guriraline, we aim to provide our customers with the best possible
+        At Yebone, we aim to provide our customers with the best possible
         shopping experience. We offer reliable delivery services for local
         orders within Rwanda. This Shipping Policy outlines the details
         regarding our shipping practices, delivery charges, and other important
@@ -74,8 +74,8 @@ const Shipping = () => {
         If you have any questions or concerns regarding shipping, delivery
         charges, or your order, please feel free to contact our support team.
         You can reach us at{" "}
-        <a href="mailto:support@guriraline.com" className="text-blue-500">
-          support@guriraline.com
+        <a href="mailto:support@yebone.com" className="text-blue-500">
+          support@yebone.com
         </a>
         , and we will assist you promptly.
       </p>

@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Footer from "../components/Layout/Footer";
 import Header from "../components/Layout/Header";
-import Loader from "../components/Layout/Loader";
 import { Helmet } from "react-helmet";
 import FlashSaleList from "../components/Route/FlashSaleList/FlashSaleList";
 import { getAllFlashSales } from "../redux/actions/flashSale"; // Ensure the action is imported
-import DropDownFilter from "../components/Layout/DropDownFilter"; // Import DropDownFilter
-import { RiEqualizerLine } from "react-icons/ri"; // Icon for dropdown
+import DropDownFilter from "../components/Layout/DropDownFilter";
 import { categoriesData } from "../static/data";
+import { Container } from "../components/ui";
+import { IoFlashOutline } from "react-icons/io5";
+import {
+  MarketplacePageHero,
+  MarketplaceListingSkeleton,
+  MarketplaceEmptyState,
+  MarketplaceMobileFilterButton,
+  MarketplaceSectionTabs,
+} from "../components/Marketplace";
 const FlashSalePage = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const categoryData = searchParams.get("category");
     const searchTerm = searchParams.get("search") || "";
@@ -111,23 +119,55 @@ const FlashSalePage = () => {
         setIsDailyDeal(!isDailyDeal);
     };
 
+    const sections = [
+        { name: "Products", path: "/products" },
+        { name: "Auctions", path: "/bids" },
+        { name: "Flash", path: "/flash-sales" },
+    ];
+
     return (
         <>
             {isLoading || !flashSales ? (
-                <Loader />
+                <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
+                    <Header activeHeading={4} />
+                    <Container className="py-8 lg:py-10">
+                        <MarketplaceListingSkeleton />
+                    </Container>
+                    <Footer />
+                </div>
             ) : (
                 <div>
                     <Helmet>
-                        <title>Flash Sale | Guriraline</title>
+                        <title>Flash Sale | Yebone</title>
                         <meta
                             name="description"
-                            content="Browse a wide range of flash sale flashsales at Guriraline."
+                            content="Browse a wide range of flash sale products at Yebone."
                         />
                     </Helmet>
-                    <div className="bg-white dark:bg-[#1f1f1f] dark:text-gray-200 min-h-screen">
+                    <div className="marketplace-page dark:text-gray-200 min-h-screen">
                         <Header activeHeading={4} />
-                        <div className="flex justify-center items-start flex-wrap w-full mb-10">
-                            <div className="hidden lg:block w-[20%] p-6 mx-2 lg:mx-0">
+                        <Container className="pt-6 lg:pt-8 pb-4">
+                            <MarketplacePageHero
+                                title="Flash Sales"
+                                subtitle="Limited-time deals with countdown urgency — grab them before they're gone."
+                                breadcrumbs={[
+                                    { label: "Home", to: "/" },
+                                    { label: "Flash Sales" },
+                                ]}
+                                count={filteredData.length}
+                                badge="Limited time"
+                            />
+                            <MarketplaceSectionTabs
+                                sections={sections}
+                                activePath="/flash-sales"
+                                onChange={(path) => {
+                                    const params = searchParams.toString();
+                                    navigate(`${path}${params ? `?${params}` : ""}`);
+                                }}
+                            />
+                        </Container>
+                        <Container className="flex justify-center items-start flex-wrap w-full mb-10 gap-6 lg:gap-8">
+                            <div className="hidden lg:block w-full lg:w-[22%] marketplace-filter-panel yebone-surface">
                                 <h2 className="font-bold text-lg mb-4 text-gray-800 dark:text-white">
                                     Filter Options
                                 </h2>
@@ -252,36 +292,40 @@ const FlashSalePage = () => {
                                 </div>
                             </div>
 
-                            <div className="flex-grow w-full lg:w-[70%] p-4 mx-2 lg:mx-0">
+                            <div className="flex-grow w-full lg:w-[72%]">
+                                <p className="marketplace-results-count mb-4">
+                                    {filteredData.length} flash sale{filteredData.length === 1 ? "" : "s"}
+                                </p>
                                 {filteredData.length > 0 ? (
                                     <FlashSaleList flashSales={filteredData} />
                                 ) : (
-                                    <h1 className="text-center w-full pb-[100px] text-[20px]">
-                                        No Flash Sale Found!
-                                    </h1>
+                                    <MarketplaceEmptyState
+                                        icon={IoFlashOutline}
+                                        title="No flash sales found"
+                                        message="No deals match your filters right now. Check back soon or browse all products."
+                                        actionLabel="Browse products"
+                                        actionTo="/products"
+                                    />
                                 )}
                             </div>
-                        </div>
+                        </Container>
                         <Footer />
                     </div>
                 </div>
             )}
 
-            {/* Button to toggle Dropdown Filter for Mobile */}
-            <div className="block lg:hidden w-full p-4">
-                <button
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="bg-[#29625d] text-white py-2 px-4 rounded"
-                >
-                    <RiEqualizerLine />
-                </button>
-                {dropdownOpen && (
+            <MarketplaceMobileFilterButton
+                open={dropdownOpen}
+                onToggle={() => setDropdownOpen(!dropdownOpen)}
+            />
+            {dropdownOpen && (
+                <div id="marketplace-mobile-filters" className="lg:hidden px-4 pb-4">
                     <DropDownFilter
                         categoryData={categoryData}
                         handleCategoryChange={handleCategoryChange}
                     />
-                )}
-            </div>
+                </div>
+            )}
         </>
     );
 };

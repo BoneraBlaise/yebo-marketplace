@@ -1,22 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import Header from "../components/Layout/Header";
-import Hero from "../components/Route/Hero/Hero";
-import Categories from "../components/Route/Categories/Categories";
-import BestDeals from "../components/Route/BestDeals/BestDeals";
-import FeaturedProduct from "../components/Route/FeaturedProduct/FeaturedProduct";
-import Events from "../components/Events/Events";
-import Footer from "../components/Layout/Footer";
-import EventsBanner from '../components/Events/EventsBanner';
-import RecentlyViewed from '../components/Route/Recent/RecentlyViewed';
+import React, { useState, useEffect, Suspense, lazy } from "react";
+import { Helmet } from "react-helmet";
 import { useSelector } from "react-redux";
-import { useTranslation } from "react-i18next";
+import {
+  HomeHeader,
+  HomeHero,
+  HomeFeatureStrip,
+} from "../components/Home";
+import ProductCardSkeleton from "../components/Home/ProductCardSkeleton";
+import { Container } from "../components/ui";
+import "../components/Home/home.css";
 
+const HomeCategories = lazy(() => import("../components/Home/HomeCategories"));
+const HomeProductRails = lazy(() => import("../components/Home/HomeProductRails"));
+const HomeAIExperience = lazy(() => import("../components/Home/HomeAIExperience"));
+const HomeAIPicks = lazy(() => import("../components/Home/HomeAIPicks"));
+const HomeEventsBanner = lazy(() => import("../components/Home/HomeEventsBanner"));
+const HomeEventsSection = lazy(() => import("../components/Home/HomeEventsSection"));
+const HomeVerifiedVendors = lazy(() => import("../components/Home/HomeVerifiedVendors"));
+const HomeReviews = lazy(() => import("../components/Home/HomeReviews"));
+const HomeRecentlyViewed = lazy(() => import("../components/Home/HomeRecentlyViewed"));
+const HomeNewsletter = lazy(() => import("../components/Home/HomeNewsletter"));
+const HomeFooter = lazy(() => import("../components/Home/HomeFooter"));
+
+const SectionFallback = () => (
+  <div className="home-section home-section-enter">
+    <Container>
+      <ProductCardSkeleton count={3} />
+    </Container>
+  </div>
+);
 
 const HomePage = () => {
-  const { t } = useTranslation();
+  const { isAuthenticated } = useSelector((state) => state.user);
   const [isMobile, setIsMobile] = useState(false);
-  const [isBannerVisible, setIsBannerVisible] = useState(false);
-  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const [isBannerVisible, setIsBannerVisible] = useState(true);
 
   useEffect(() => {
     const handleResize = () => {
@@ -25,30 +42,88 @@ const HomePage = () => {
       setIsBannerVisible(width > 900);
     };
 
-    // Set initial value
     handleResize();
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen dark:bg-[#1f1f1f]">
-      <Header activeHeading={1} />
-      <div className={`flex-grow ${isMobile ? 'px-2' : 'px-4'}`}>
-        <Hero />
-        <Categories />
-        <BestDeals />
-        {isBannerVisible ? (
-          <EventsBanner />
-        ) : (
-          <Events isMobile={isMobile} /> 
-        )}
-        <FeaturedProduct />
-        {isAuthenticated && <RecentlyViewed />}
+    <>
+      <Helmet>
+        <title>Yebone | Shop Smarter — Everything in one place</title>
+        <meta
+          name="description"
+          content="Discover millions of products across Africa with AI-powered virtual try-on. Yebone — everything in one place."
+        />
+      </Helmet>
+
+      <div className="home-page flex flex-col min-h-screen bg-yebone-light-gray dark:bg-gray-950">
+        <HomeHeader activeHeading={1} />
+
+        <main className="scroll-smooth">
+          {/* 1. Hero */}
+          <HomeHero />
+
+          {/* 2. Marketplace Benefits */}
+          <HomeFeatureStrip />
+
+          {/* 3. Marketplace Categories */}
+          <Suspense fallback={<SectionFallback />}>
+            <HomeCategories />
+          </Suspense>
+
+          {/* 4. Trending Products */}
+          <Suspense fallback={<SectionFallback />}>
+            <HomeProductRails />
+          </Suspense>
+
+          {/* 5. AI Shopping Experience */}
+          <Suspense fallback={<SectionFallback />}>
+            <HomeAIExperience />
+          </Suspense>
+
+          {/* 6. AI Picks */}
+          <Suspense fallback={<SectionFallback />}>
+            <HomeAIPicks />
+          </Suspense>
+
+          {/* 7. Events */}
+          <Suspense fallback={<SectionFallback />}>
+            {isBannerVisible ? (
+              <HomeEventsBanner />
+            ) : (
+              <HomeEventsSection isMobile={isMobile} />
+            )}
+          </Suspense>
+
+          {/* 8. Verified Vendors */}
+          <Suspense fallback={<SectionFallback />}>
+            <HomeVerifiedVendors />
+          </Suspense>
+
+          {/* 9. Customer Reviews */}
+          <Suspense fallback={<SectionFallback />}>
+            <HomeReviews />
+          </Suspense>
+
+          {isAuthenticated && (
+            <Suspense fallback={<SectionFallback />}>
+              <HomeRecentlyViewed />
+            </Suspense>
+          )}
+
+          {/* 10. Newsletter */}
+          <Suspense fallback={<SectionFallback />}>
+            <HomeNewsletter />
+          </Suspense>
+        </main>
+
+        {/* 11. Footer */}
+        <Suspense fallback={null}>
+          <HomeFooter />
+        </Suspense>
       </div>
-      <Footer />
-    </div>
+    </>
   );
 };
 

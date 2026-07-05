@@ -18,7 +18,7 @@
   .spinner > div {
     width: 18px;
     height: 18px;
-    background-color: #29625d;
+    background-color: var(--yebone-primary-green, #29625d);
     border-radius: 100%;
     display: inline-block;
     margin: 0 3px;

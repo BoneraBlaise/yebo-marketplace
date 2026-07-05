@@ -1,15 +1,32 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow: /cart/
-Disallow: /checkout/
-Disallow: /login/
-Disallow: /shop-login/
-Disallow: /admin-dashboard/
-Disallow: /dashboard/
-Disallow: /shop-create/
+Disallow: /cart
+Disallow: /checkout
+Disallow: /payment
+Disallow: /login
+Disallow: /shop-login
+Disallow: /profile
+Disallow: /inbox
+Disallow: /admin/
+Disallow: /admin-users
+Disallow: /admin-orders
+Disallow: /admin-sellers
+Disallow: /admin-products
+Disallow: /admin-events
+Disallow: /admin-withdraw-request
+Disallow: /dashboard
+Disallow: /dashboard-
+Disallow: /settings
+Disallow: /commission/
 
-Allow: /products/
-Allow: /best-selling/
+Allow: /
+Allow: /products
+Allow: /best-selling
+Allow: /events
+Allow: /flash-sales
+Allow: /bids
+Allow: /faq
+Allow: /about
+Allow: /contact
 
-# Sitemap location
-Sitemap: https://www.guriraline.com/sitemap.xml
+Sitemap: https://www.yebone.com/sitemap.xml

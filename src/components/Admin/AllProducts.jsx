@@ -1,18 +1,16 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { AiOutlineEye } from "react-icons/ai";
+import { Link } from "react-router-dom";
 import { Button } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
-import React, { useEffect } from "react";
-import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
-import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { getAllProductsShop } from "../../redux/actions/product";
-import { deleteProduct } from "../../redux/actions/product";
-import Loader from "../Layout/Loader";
-import axios from "axios";
 import { server } from "../../server";
-import { useState } from "react";
+import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
+import AdminPageToolbar from "../Dashboard/admin/AdminPageToolbar";
 
 const AllProducts = () => {
   const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     axios.get(`${server}/product/admin-all-products`, {withCredentials: true}).then((res) => {
@@ -97,17 +95,18 @@ const AllProducts = () => {
     });
 
   return (
-    <>
-        <div className="w-full mx-8 pt-1 mt-10 bg-white dark:bg-[#1f1f1f]">
-          <DataGrid
-            rows={row}
-            columns={columns}
-            pageSize={10}
-            disableSelectionOnClick
-            autoHeight
-          />
-        </div>
-    </>
+    <div className="yebone-fade-up space-y-4 p-1">
+      <AdminPageToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search products…" />
+      <VendorTableSection title="Product catalog" subtitle="Platform-wide product management">
+        <DataGrid
+          rows={search ? row.filter((r) => r.name?.toLowerCase().includes(search.toLowerCase())) : row}
+          columns={columns}
+          pageSize={10}
+          disableSelectionOnClick
+          autoHeight
+        />
+      </VendorTableSection>
+    </div>
   );
 };
 

@@ -1,29 +1,11 @@
-import React from 'react'
-import DashboardHeader from '../../components/Shop/Layout/DashboardHeader'
-import DashboardSideBar from '../../components/Shop/Layout/DashboardSideBar'
-import BottomNav from '../../components/Layout/BottomNav';
-import AllFlashSales from '../../components/Shop/AllFlashSales';
+import React from "react";
+import VendorDashboardLayout from "../../components/Dashboard/VendorDashboardLayout";
+import AllFlashSales from "../../components/Shop/AllFlashSales";
 
-const ShopAllFlashSales = () => {
-  const isSmallScreen = () => {
-    return window.innerWidth <= 768; // Adjust this width as per your requirement
-  };
+const ShopAllFlashSales = () => (
+  <VendorDashboardLayout active={13} bare>
+    <AllFlashSales />
+  </VendorDashboardLayout>
+);
 
-  return (
-    <div>
-      <DashboardHeader />
-      <div className="flex justify-between w-full">
-        <div className="w-[80px] 800px:w-[330px] mb-10">
-          <DashboardSideBar active={3} />
-        </div>
-        <div className="w-full justify-center flex mb-10">
-          <AllFlashSales />
-        </div>
-      </div>
-      {/* Conditionally render BottomNav only on smaller screens */}
-      {isSmallScreen() && <BottomNav />}
-    </div>
-  )
-}
-
-export default ShopAllFlashSales
+export default ShopAllFlashSales;

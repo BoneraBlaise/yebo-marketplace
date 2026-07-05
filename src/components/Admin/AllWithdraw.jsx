@@ -1,18 +1,22 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { server } from "../../server";
-import { Link } from "react-router-dom";
 import { DataGrid } from "@material-ui/data-grid";
 import { BsPencil } from "react-icons/bs";
 import { RxCross1 } from "react-icons/rx";
 import styles from "../../styles/styles";
 import { toast } from "react-toastify";
+import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
+import AdminPageToolbar from "../Dashboard/admin/AdminPageToolbar";
+import DashboardStatCard from "../Dashboard/DashboardStatCard";
+import { HiOutlineCash, HiOutlineCheck, HiOutlineX } from "react-icons/hi";
 
 const AllWithdraw = () => {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [withdrawData, setWithdrawData] = useState();
   const [withdrawStatus,setWithdrawStatus] = useState('Processing');
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     axios
@@ -118,20 +122,30 @@ const AllWithdraw = () => {
         createdAt: item.createdAt.slice(0, 10),
       });
     });
+  const pending = data?.filter((d) => d.status === "Processing").length || 0;
+  const approved = data?.filter((d) => d.status === "Succeed").length || 0;
+  const rejected = data?.filter((d) => d.status === "Rejected").length || 0;
+
   return (
-    <div className="w-full flex items-center pt-5 justify-center">
-      <div className="w-[95%] bg-white dark:bg-[#1f1f1f]">
+    <div className="yebone-fade-up space-y-6 p-1">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4">
+        <DashboardStatCard title="Pending" value={pending} icon={HiOutlineCash} />
+        <DashboardStatCard title="Approved" value={approved} icon={HiOutlineCheck} />
+        <DashboardStatCard title="Rejected" value={rejected} icon={HiOutlineX} />
+      </div>
+      <AdminPageToolbar searchValue={search} onSearchChange={setSearch} searchPlaceholder="Search withdrawals…" />
+      <VendorTableSection title="Withdrawal requests" subtitle="Review and update payout status">
         <DataGrid
-          rows={row}
+          rows={search ? row.filter((r) => r.name?.toLowerCase().includes(search.toLowerCase())) : row}
           columns={columns}
           pageSize={10}
           disableSelectionOnClick
           autoHeight
         />
-      </div>
+      </VendorTableSection>
       {open && (
         <div className="w-full fixed h-screen top-0 left-0 bg-[#00000031] z-[9999] flex items-center justify-center">
-          <div className="w-[50%] min-h-[40vh] bg-white dark:bg-[#1f1f1f] rounded shadow p-4">
+          <div className="w-[50%] min-h-[40vh] dashboard-section yebone-surface shadow-2xl p-4">
             <div className="flex justify-end w-full">
               <RxCross1 size={25} onClick={() => setOpen(false)} />
             </div>

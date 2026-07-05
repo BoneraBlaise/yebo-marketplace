@@ -2,40 +2,23 @@ import React from "react";
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { BsStarHalf } from "react-icons/bs";
 
-const Ratings = ({ rating }) => {
-  const stars = [];
+const Ratings = ({ rating, size = 20, showEmpty = false }) => {
+  if (!rating && showEmpty) {
+    return <span className="text-sm text-gray-400 italic">No reviews yet</span>;
+  }
+  if (!rating) return null;
 
+  const stars = [];
   for (let i = 1; i <= 5; i++) {
     if (i <= rating) {
-      stars.push(
-        <AiFillStar
-          key={i}
-          size={20}
-          color="#f6b100"
-          className="mr-2 cursor-pointer"
-        />
-      );
+      stars.push(<AiFillStar key={i} size={size} color="#fed592" className="mr-0.5" />);
     } else if (i === Math.ceil(rating) && !Number.isInteger(rating)) {
-      stars.push(
-        <BsStarHalf
-          key={i}
-          size={20}
-          color="#f6ba00"
-          className="mr-2 cursor-pointer"
-        />
-      );
+      stars.push(<BsStarHalf key={i} size={size} color="#fed592" className="mr-0.5" />);
     } else {
-      stars.push(
-        <AiOutlineStar
-          key={i}
-          size={20}
-          color="#f6ba00"
-          className="mr-2 cursor-pointer"
-        />
-      );
+      stars.push(<AiOutlineStar key={i} size={size} color="#d1d5db" className="mr-0.5" />);
     }
   }
-  return <div className="flex"> {stars}</div>;
+  return <div className="flex items-center">{stars}</div>;
 };
 
 export default Ratings;

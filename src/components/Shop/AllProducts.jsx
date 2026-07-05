@@ -9,6 +9,8 @@ import { getAllProductsShop } from "../../redux/actions/product";
 import { server } from "../../server";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
+import VendorInventorySummary from "../Dashboard/vendor/VendorInventorySummary";
+import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
 
 const AllProducts = () => {
   const { products, isLoading } = useSelector((state) => state.products);
@@ -20,9 +22,15 @@ const AllProducts = () => {
 
   const dispatch = useDispatch();
   useEffect(() => {
-    // Load all products for the seller
     dispatch(getAllProductsShop(seller._id));
   }, [dispatch, seller._id]);
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const el = document.querySelector(window.location.hash);
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [products]);
 
   const handleDelete = (id) => {
     setSelectedProductId(id);
@@ -151,16 +159,18 @@ const AllProducts = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="w-full mx-8 pt-1 mt-10 bg-white dark:bg-[#1f1f1f]">
-          <DataGrid
-            rows={row}
-            columns={columns}
-            pageSize={25}
-            disableSelectionOnClick
-            autoHeight
-            className="dark:bg-[#1f1f1f]"
-            
-          />
+        <div className="yebone-fade-up space-y-8 p-1">
+          <VendorInventorySummary products={products} />
+          <VendorTableSection title="Product catalog" subtitle="Manage listings, stock, and visibility">
+            <DataGrid
+              rows={row}
+              columns={columns}
+              pageSize={25}
+              disableSelectionOnClick
+              autoHeight
+              className="dark:bg-[#1f1f1f]"
+            />
+          </VendorTableSection>
         </div>
       )}
 

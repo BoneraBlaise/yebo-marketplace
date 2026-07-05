@@ -3,15 +3,24 @@ import { useSelector } from "react-redux";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import Footer from "../components/Layout/Footer";
 import Header from "../components/Layout/Header";
-import Loader from "../components/Layout/Loader";
 import ProductList from "../components/Route/ProductList/ProductList";
 import DropDownFilter from "../components/Layout/DropDownFilter";
 import { categoriesData } from "../static/data"; // Import your categories data
-import { RiEqualizerLine } from "react-icons/ri";
 import { Helmet } from "react-helmet";
 import Cookies from "js-cookie"; // Import js-cookie to handle cookies
 import { AiFillStar, AiOutlineStar } from "react-icons/ai";
-import { Link } from "react-router-dom";
+import { IoSearchOutline } from "react-icons/io5";
+import { Container, SectionTitle } from "../components/ui";
+import {
+  MarketplacePageHero,
+  MarketplaceActiveFilters,
+  MarketplaceSectionTabs,
+  MarketplaceSortSelect,
+  MarketplaceListingSkeleton,
+  MarketplaceAISection,
+  MarketplaceMobileFilterButton,
+  MarketplaceEmptyState,
+} from "../components/Marketplace";
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -308,28 +317,28 @@ const ProductsPage = () => {
       description:
         "The Google Pixel 6 is an innovative smartphone that combines cutting-edge technology, premium design, and exceptional performance. Powered by Google's custom Tensor processor, the Pixel 6 delivers smooth performance, AI-driven features, and enhanced security—making it a perfect choice for those seeking a device that's fast, smart, and secure. The 6.4-inch AMOLED display offers stunning visuals with rich colors and sharp detail, while the dual-camera system takes your photography to the next level. Whether you're capturing the perfect shot or multitasking, the Pixel 6 is designed to keep up with your busy life.",
       price: "260,000 RWF",
-      url: "https://guriraline.com/product/6737694fba5952d4be3c08c4",
+      url: "https://yebone.com/product/6737694fba5952d4be3c08c4",
     },
     {
       name: "Switzerland Nesun Women's Watches Luxury",
       description:
         "New Switzerland Nesun Women's Watches Luxury Brand Quartz Watch Women Six-leaf grass design Clock Diamond Wristwatches N9065-4",
       price: "105,000 RWF",
-      url: "https://guriraline.com/product/67493fbdac42e5077b3e6adc",
+      url: "https://yebone.com/product/67493fbdac42e5077b3e6adc",
     },
     {
       name: "Promot Rubber Wristband for adults (Multiple colors)",
       description:
         "Promot Merch Rubber Wristband. Designed for adults, this durable, flexible wristband offers a simple yet impactful way to share your message, whether for charity events, brand promotions, or team spirit. Lightweight and comfortable, it's perfect for everyday wear, making it easy to show off your cause wherever you go.",
       price: "1,000 RWF",
-      url: "https://guriraline.com/product/673e099bc4616e4cffdab559",
+      url: "https://yebone.com/product/673e099bc4616e4cffdab559",
     },
     {
       name: "Promot T-shirt (Promot Merch -All sizes) for Men, women and Children",
       description:
         "Promot T-Shirt, a high-quality and stylish garment designed for comfort and durability. Whether you're promoting your business, event, or cause, this t-shirt is the perfect choice to make your message stand out. Crafted with care and attention to detail, the Promot T-Shirt offers a perfect blend of style, comfort, and flexibility for any occasion.",
       price: "12,000 RWF",
-      url: "https://guriraline.com/product/673df8435b00468530178095",
+      url: "https://yebone.com/product/673df8435b00468530178095",
     },
     // Add more products...
   ];
@@ -337,8 +346,8 @@ const ProductsPage = () => {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Product",
-    "name": "Guriraline Products",
-    "description": "Browse a wide selection of products on Guriraline.",
+    "name": "Yebone Products",
+    "description": "Browse a wide selection of products on Yebone.",
     "offers": productList.map(product => ({
       "@type": "Offer",
       "priceCurrency": "RWF", // Assuming RWF is the currency
@@ -492,104 +501,106 @@ const ProductsPage = () => {
     }).slice(0, 5); // Limit to 5 related products
   };
 
+  const pageTitle = searchTerm
+    ? "Search Results"
+    : categoryData
+    ? categoryData
+    : "All Products";
+
+  const pageSubtitle = searchTerm
+    ? "Find exactly what you need across the Yebone marketplace."
+    : categoryData
+    ? `Browse premium ${categoryData.toLowerCase()} from verified sellers.`
+    : "Discover fashion, tech, home, and more from sellers across Africa.";
+
+  const breadcrumbs = [
+    { label: "Home", to: "/" },
+    { label: "Marketplace", to: "/products" },
+    ...(categoryData ? [{ label: categoryData }] : searchTerm ? [{ label: "Search" }] : []),
+  ];
+
+  const clearAllFilters = () => {
+    setSearchParams(new URLSearchParams());
+    setPriceRange([1, 10000000]);
+    setSelectedRating(0);
+    setInStock(true);
+    setProductType("all");
+    setIsPriceFiltered(false);
+  };
+
   return (
     <>
       {isLoading ? (
-        <Loader />
+        <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
+          <Header activeHeading={3} />
+          <Container className="py-8 lg:py-10">
+            <MarketplaceListingSkeleton />
+          </Container>
+          <Footer />
+        </div>
       ) : (
         <div>
           <Helmet>
-            <title>Products | Guriraline</title>
-            <meta name="description" content="Browse a wide range of products at Guriraline." />
+            <title>Products | Yebone</title>
+            <meta name="description" content="Browse a wide range of products at Yebone." />
             <script type="application/ld+json">{JSON.stringify(structuredDataString)}</script>
           </Helmet>
-          <div className="bg-white dark:bg-[#1f1f1f] dark:text-gray-200 min-h-screen">
+          <div className="marketplace-page dark:text-gray-200 min-h-screen">
             <Header activeHeading={3} />
 
-
+            <Container className="pt-6 lg:pt-8 pb-4">
+              <MarketplacePageHero
+                title={pageTitle}
+                subtitle={pageSubtitle}
+                breadcrumbs={breadcrumbs}
+                count={data?.length || 0}
+                searchTerm={searchTerm}
+                badge={categoryData ? "Category" : searchTerm ? "Search" : "Marketplace"}
+              />
+            </Container>
 
             {/* Related Products Section */}
             {searchTerm && getRelatedProducts().length > 0 && (
-              <div className="w-full px-4 py-2 bg-white dark:bg-[#1f1f1f]">
-                <div className="max-w-[1200px] mx-auto">
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300 mb-2">
-                      Similar Searches:
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {getRelatedProducts().map((product) => (
-                        <button
-                          key={product._id}
-                          onClick={() => {
-                            const newParams = new URLSearchParams(searchParams);
-                            newParams.set('search', product.name);
-                            setSearchParams(newParams);
-                          }}
-                          className="inline-flex items-center px-3 py-1 rounded-full bg-gray-50 dark:bg-[#2b2b2b] text-sm hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                        >
-                          <span className="truncate max-w-[200px]">{product.name}</span>
-                          {product.stock === 0 && (
-                            <span className="ml-2 text-xs text-red-500">(Sold Out)</span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
+              <Container className="pb-2">
+                <div className="yebone-surface rounded-2xl p-4">
+                  <span className="text-sm font-semibold text-yebone-primary mb-3 block">
+                    Similar searches
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {getRelatedProducts().map((product) => (
+                      <button
+                        key={product._id}
+                        onClick={() => {
+                          const newParams = new URLSearchParams(searchParams);
+                          newParams.set("search", product.name);
+                          setSearchParams(newParams);
+                        }}
+                        className="marketplace-filter-chip cursor-pointer hover:scale-[1.02]"
+                      >
+                        <span className="truncate max-w-[200px]">{product.name}</span>
+                        {product.stock === 0 && (
+                          <span className="text-xs text-red-500">(Sold Out)</span>
+                        )}
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </div>
+              </Container>
             )}
 
-            {/* Active Filters Bar */}
-            <div className="w-full px-4 my-2 py-2 border-b dark:border-gray-700">
-              <div className="max-w-[1200px] mx-auto">
-                <div className="flex flex-wrap gap-2 items-center">
-                  {getActiveFilters().length > 0 ? (
-                    <>
-                      <span className="text-sm text-gray-600 dark:text-gray-300">Active Filters:</span>
-                      {getActiveFilters().map((filter, index) => (
-                        <span
-                          key={index}
-                          className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-sm"
-                        >
-                          {filter.label}
-                          <button
-                            onClick={() => removeFilter(filter.type, filter.value)}
-                            className="ml-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      ))}
-                      <button
-                        onClick={() => {
-                          // Reset all filters
-                          setSearchParams(new URLSearchParams());
-                          setPriceRange([1, 10000000]);
-                          setSelectedRating(0);
-                          setInStock(true);
-                          setProductType('all');
-                          setIsPriceFiltered(false);
-                        }}
-                        className="text-sm text-red-500 hover:text-red-700 dark:hover:text-red-400"
-                      >
-                        Clear All
-                      </button>
-                    </>
-                  ) : (
-                    <span className="text-sm text-gray-500 dark:text-gray-400">No active filters</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-center items-start flex-wrap w-full mb-10">
+            <Container>
+              <MarketplaceActiveFilters
+                filters={getActiveFilters()}
+                onRemove={removeFilter}
+                onClearAll={clearAllFilters}
+              />
+            </Container>
+            <Container className="flex justify-center items-start flex-wrap w-full mb-10 gap-6 lg:gap-8">
               {/* Filter Sidebar for Desktop */}
-              <div className="hidden lg:block w-[20%] p-6 mx-2 lg:mx-0">
+              <div className="hidden lg:block w-full lg:w-[22%] marketplace-filter-panel yebone-surface">
                 <h2 className="font-bold text-lg mb-4 text-gray-800 dark:text-white">
-                  Filter Options
+                  Filters
                 </h2>
-
-                {/* Sort By Filter */}
                 <div className="mb-6">
                   <h3 className="font-semibold text-gray-700 dark:text-gray-200">Sort By</h3>
                   <select
@@ -753,89 +764,65 @@ const ProductsPage = () => {
                 </div>
               </div>
 
-              {/* Button to toggle Dropdown Filter for Mobile */}
-              <div className="block lg:hidden w-full p-4">
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="bg-[#29625d] text-white py-2 px-4 rounded"
-                >
-                  <RiEqualizerLine />
-                </button>
-                {dropdownOpen && (
+              <MarketplaceMobileFilterButton
+                open={dropdownOpen}
+                onToggle={() => setDropdownOpen(!dropdownOpen)}
+              />
+              {dropdownOpen && (
+                <div id="marketplace-mobile-filters" className="lg:hidden px-4 pb-4">
                   <DropDownFilter
                     categoryData={categoryData}
                     handleCategoryChange={handleCategoryChange}
                   />
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Product List Area */}
-              <div className="flex-grow w-full lg:w-[70%] p-4 mx-2 lg:mx-0">
-                {/* Sorting Dropdown */}
-                <div className="flex justify-end mb-4">
-                  {/* Add Breadcrumb Navigation */}
-                  <div className="w-full px-4 py-2">
-                    <div className="max-w-[1200px] mx-auto">
-                      <div className="flex items-center space-x-2">
-                        {sections.map((section, index) => (
-                          <React.Fragment key={section.path}>
-                            <button
-                              onClick={() => handleSectionChange(section.path)}
-                              className={`text-sm font-medium transition-colors ${location.pathname === section.path
-                                ? "text-white bg-[#29625d] rounded-xl px-2 py-1"
-                                : "text-gray-600 dark:text-gray-400 hover:text-[#29625d] dark:hover:text-[#29625d]"
-                                }`}
-                            >
-                              {section.name}
-                            </button>
-                            {index < sections.length - 1 && (
-                              <span className="text-gray-400"></span>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="relative inline-block">
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="appearance-none bg-white dark:bg-[#2b2b2b] border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-gray-500 cursor-pointer text-sm"
-                    >
-                      <option value="">Sort By</option>
-                      {sortOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-200">
-                      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                      </svg>
-                    </div>
-                  </div>
+              <div className="flex-grow w-full lg:w-[72%]">
+                <div className="marketplace-results-toolbar">
+                  <MarketplaceSectionTabs
+                    sections={sections}
+                    activePath={location.pathname}
+                    onChange={handleSectionChange}
+                  />
+                  <MarketplaceSortSelect
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    options={sortOptions}
+                  />
                 </div>
+
+                <p className="marketplace-results-count mb-4">
+                  Showing {data?.length || 0} products
+                </p>
 
                 {data && data.length > 0 ? (
                   <ProductList products={data} />
                 ) : (
-                  <h1 className="text-center w-full pb-[100px] text-[20px]">
-                    No products Found!
-                  </h1>
+                  <MarketplaceEmptyState
+                    icon={IoSearchOutline}
+                    title="No products found"
+                    message={
+                      searchTerm
+                        ? `We couldn't find matches for "${searchTerm}". Try different keywords or clear your filters.`
+                        : "No products match your current filters. Adjust filters or browse the full marketplace."
+                    }
+                    actionLabel="Browse all products"
+                    actionTo="/products"
+                  />
                 )}
                 <div className="md:block hidden">
                   <div class="bg-gradient-to-r from-[#29625d] to-[#ffd496] h-[320px] flex items-center justify-center p-6 rounded-xl mt-3 shadow-lg">
                     <div class="flex items-center gap-12 max-w-3xl w-full">           
                       <div class="flex-shrink-0 mr-8 flex flex-col items-center justify-center">
-                        <img src="https://res.cloudinary.com/djughivxs/image/upload/v1732432017/avatars/cwn1r7anqmdra57zxelr.png" alt="guriraline official shop icon" class="h-20 w-20 object-cover rounded-full mb-4" />
-                        <h3 class="text-white text-xl font-semibold mb-2">Guriraline Shop</h3>
+                        <img src="https://res.cloudinary.com/djughivxs/image/upload/v1732432017/avatars/cwn1r7anqmdra57zxelr.png" alt="yebone official shop icon" class="h-20 w-20 object-cover rounded-full mb-4" />
+                        <h3 class="text-white text-xl font-semibold mb-2">Yebone Shop</h3>
                         <p class="text-white text-sm font-medium opacity-80">Sponsored</p>
                       </div>
                       <div class="text-white flex-grow">
-                        <h2 class="text-2xl font-semibold mb-4">Discover Great Deals on Used Products at Guriraline Shop</h2>
+                        <h2 class="text-2xl font-semibold mb-4">Discover Great Deals on Used Products at Yebone Shop</h2>
                         <p class="text-md mb-6">Looking for quality used items at great prices? Search for the best deals today!</p>
-                        <a href="https://www.guriraline.com/shop/preview/6742d0af9c4de357667dc0ea" target="_blank" class="bg-[#29625d] text-white text-sm py-2 px-4 rounded-md hover:bg-[#1a4c47] transition duration-300 shadow-md transform hover:scale-105">
+                        <a href="https://www.yebone.com/shop/preview/6742d0af9c4de357667dc0ea" target="_blank" class="bg-[#29625d] text-white text-sm py-2 px-4 rounded-md hover:bg-[#1a4c47] transition duration-300 shadow-md transform hover:scale-105">
                           Visit Store
                         </a>
                       </div>
@@ -844,13 +831,15 @@ const ProductsPage = () => {
                   </div>
 
                 </div>
+                <MarketplaceAISection searchTerm={searchTerm} />
+
                 {/* Recommended Products Section */}
                 <div className="recommended-products mt-10">
-                  <h2 className="font-semibold text-xl mb-4">Recommended Products</h2>
+                  <SectionTitle title="Recommended for you" subtitle="Based on your recent browsing" align="left" />
                   <ProductList products={recommendations} />
                 </div>
               </div>
-            </div>
+            </Container>
             <Footer />
           </div>
         </div>
