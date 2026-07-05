@@ -1,0 +1,134 @@
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useParams } from "react-router-dom";
+import { getAllProductsShop } from "../../redux/actions/product";
+import styles from "../../styles/styles";
+import ProductCard from "../Route/ProductCard/ProductCard";
+import Ratings from "../Products/Ratings";
+import { getAllEventsShop } from "../../redux/actions/event";
+
+const ShopProfileData = ({ isOwner }) => {
+  const { products } = useSelector((state) => state.products);
+  const { events } = useSelector((state) => state.events);
+  const { id } = useParams();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllProductsShop(id));
+    dispatch(getAllEventsShop(id));
+  }, [dispatch, id]);
+
+  const [active, setActive] = useState(1);
+
+  const allReviews =
+    products && products.map((product) => product.reviews).flat();
+
+  return (
+    <div className="w-full dark:bg-[#1f1f1f]">
+      <div className="flex w-full items-center justify-between">
+        <div className="w-full flex ">
+          <div className="flex items-center" onClick={() => setActive(1)}>
+            <h5
+              className={`font-semibold text-base md:text-md ${active === 1 ? "text-green-700" : "text-gray-700 dark:text-gray-300"
+                } cursor-pointer pr-5`}
+            >
+              Shop Products
+            </h5>
+          </div>
+          <div className="flex items-center" onClick={() => setActive(2)}>
+            <h5
+              className={`font-semibold text-base md:text-md ${active === 2 ? "text-green-700" : "text-gray-700 dark:text-gray-300"
+                } cursor-pointer pr-5`}
+            >
+              Running Events
+            </h5>
+          </div>
+
+          <div className="flex items-center" onClick={() => setActive(3)}>
+            <h5
+              className={`font-semibold text-base md:text-md ${active === 3 ? "text-green-700" : "text-gray-700 dark:text-gray-300"
+                } cursor-pointer pr-5`}
+            >
+              Shop Reviews
+            </h5>
+          </div>
+          <div>
+            {isOwner && (
+              <div>
+                <Link to="/dashboard">
+                  <h5
+                    className={`font-semibold text-base md:text-md ${active === 3 ? "text-green-700" : "text-gray-700 dark:text-gray-300"
+                      } cursor-pointer pr-5`}
+                  >
+                    Dashboard
+                  </h5>
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      <br />
+      {active === 1 && (
+        <div className="flex flex-wrap justify-center md:justify-start gap-5 sm:gap-8 md:gap-5 lg:gap-5 mb-12">
+          {products &&
+            // Create a shallow copy and sort it by createdAt (new to old)
+            [...products]
+              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+              .map((product, index) => (
+                <ProductCard data={product} key={index} isShop={true} />
+              ))}
+        </div>
+      )}
+
+      {active === 2 && (
+        <div className="w-full">
+          <div className="flex flex-wrap justify-center md:justify-start gap-5 sm:gap-8 md:gap-5 lg:gap-5 mb-12">
+            {events &&
+              // Create a shallow copy and sort it by createdAt (new to old)
+              [...events]
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                .map((event, index) => (
+                  <ProductCard data={event} key={index} isShop={true} isEvent={true} />
+                ))}
+          </div>
+          {events && events.length === 0 && (
+            <h5 className="w-full text-center py-5 text-lg dark:text-gray-200">
+              No Events have for this shop!
+            </h5>
+          )}
+        </div>
+      )}
+
+
+      {active === 3 && (
+        <div className="w-full">
+          {allReviews && allReviews.map((item, index) => (
+            <div className="w-full flex mx-2 my-4" key={index}>
+              <img
+                src={item.user.avatar?.url}
+                className="w-12 h-12 rounded-full shadow-md hover:scale-105 transform transition-all duration-300"
+                alt="reviewer_image"
+              />
+
+              <div className="pl-2">
+                <div className="flex w-full items-center">
+                  <h1 className="font-semibold pr-2 dark:text-green-500">{item.user.name}</h1>
+                  <Ratings rating={item.rating} />
+                </div>
+                <p className="font-normal mt-1 text-gray-700 dark:text-gray-400">{item?.comment}</p>
+              </div>
+            </div>
+          ))}
+          {allReviews && allReviews.length === 0 && (
+            <h5 className="w-full text-center py-5 text-lg">
+              No Reviews have for this shop!
+            </h5>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ShopProfileData;

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <!-- Homepage -->
+    <url>
+        <loc>https://www.guriraline.com/</loc>
+        <lastmod>2024-12-01T13:57:12+00:00</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+
+    <!-- Products Page -->
+    <url>
+        <loc>https://www.guriraline.com/products/</loc>
+        <lastmod>2024-12-01T13:57:12+00:00</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <!-- Shop Create Page -->
+    <url>
+        <loc>https://www.guriraline.com/shop-create/</loc>
+        <lastmod>2024-12-01T13:57:12+00:00</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Sign-up Page -->
+    <url>
+        <loc>https://www.guriraline.com/sign-up/</loc>
+        <lastmod>2024-12-01T13:57:12+00:00</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+
+    <!-- Product Category Page -->
+    <url>
+        <loc>https://guriraline.com/products?category=Mobiles</loc>
+        <lastmod>2024-12-01T13:57:12+00:00</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- Specific Product Page Example -->
+    <url>
+        <loc>https://guriraline.com/product/673df8435b00468530178095</loc>
+        <lastmod>2024-12-01T13:57:12+00:00</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
+    <!-- About Us Page -->
+    <url>
+        <loc>https://www.guriraline.com/about-us/</loc>
+        <lastmod>2024-12-01T13:57:12+00:00</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.5</priority>
+    </url>
+
+    <!-- Contact Page -->
+    <url>
+        <loc>https://www.guriraline.com/contact/</loc>
+        <lastmod>2024-12-01T13:57:12+00:00</lastmod>
+        <changefreq>yearly</changefreq>
+        <priority>0.5</priority>
+    </url>
+
+</urlset>

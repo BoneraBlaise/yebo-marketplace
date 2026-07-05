@@ -1,0 +1,15 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /login/
+Disallow: /shop-login/
+Disallow: /admin-dashboard/
+Disallow: /dashboard/
+Disallow: /shop-create/
+
+Allow: /products/
+Allow: /best-selling/
+
+# Sitemap location
+Sitemap: https://www.guriraline.com/sitemap.xml
