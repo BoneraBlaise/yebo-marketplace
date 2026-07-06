@@ -11,4 +11,6 @@ export * from "./utils";
 export * from "./intelligence";
 export * from "./decision";
 export * from "./orchestration";
+export * from "./knowledge";
+export * from "./agents";
 export * from "./components";

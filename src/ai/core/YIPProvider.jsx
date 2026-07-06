@@ -18,6 +18,9 @@ import { YIPShoppingIntelligence } from "../intelligence/YIPShoppingIntelligence
 import { createDecisionEngine } from "../decision/DecisionEngine";
 import { createYEBOIntelligenceEngine } from "../intelligence/YEBOIntelligenceEngine";
 import { createAIOrchestrator } from "../orchestration/AIOrchestrator";
+import { createKnowledgeEngine } from "../knowledge/KnowledgeEngine";
+import { createKnowledgeSnapshot } from "../knowledge/KnowledgeSnapshot";
+import { createAgentPlatform } from "../agents/AgentPlatform";
 
 const YIPContext = createContext(null);
 
@@ -62,6 +65,25 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const [currentProviderId, setCurrentProviderId] = useState(
     () => orchestratorRef.current?.providerManager?.currentProviderId || "mock"
   );
+  const knowledgeEngineRef = useRef(null);
+  if (!knowledgeEngineRef.current) {
+    knowledgeEngineRef.current = createKnowledgeEngine({
+      memoryEngine: memoryRef.current,
+      decisionEngine: decisionEngineRef.current,
+      intelligenceEngine: intelligenceEngineRef.current,
+      orchestrator: orchestratorRef.current,
+    });
+  }
+  const agentPlatformRef = useRef(null);
+  if (!agentPlatformRef.current) {
+    agentPlatformRef.current = createAgentPlatform({
+      memoryEngine: memoryRef.current,
+      decisionEngine: decisionEngineRef.current,
+      intelligenceEngine: intelligenceEngineRef.current,
+      knowledgeEngine: knowledgeEngineRef.current,
+      orchestrator: orchestratorRef.current,
+    });
+  }
   const conversationRef = useRef(
     new YIPConversation([
       { id: "welcome", role: "assistant", content: WELCOME_MESSAGE, isWelcome: true },
@@ -242,6 +264,51 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     [currentProviderId]
   );
 
+  const searchKnowledge = useCallback(
+    (query, options) => knowledgeEngineRef.current.searchKnowledge(query, options),
+    []
+  );
+
+  const getKnowledge = useCallback(
+    (id) => knowledgeEngineRef.current.getKnowledge(id),
+    []
+  );
+
+  const getKnowledgeDomains = useCallback(
+    () => knowledgeEngineRef.current.getKnowledgeDomains(),
+    []
+  );
+
+  const knowledgeSnapshot = useCallback(
+    () => createKnowledgeSnapshot(knowledgeEngineRef.current),
+    []
+  );
+
+  const routeTask = useCallback(
+    (input, options) => agentPlatformRef.current.routeTask(input, options),
+    []
+  );
+
+  const getAgent = useCallback(
+    (id) => agentPlatformRef.current.getAgent(id),
+    []
+  );
+
+  const getAgents = useCallback(
+    () => agentPlatformRef.current.getAgents(),
+    []
+  );
+
+  const getAgentCapabilities = useCallback(
+    (agentId) => agentPlatformRef.current.getAgentCapabilities(agentId),
+    []
+  );
+
+  const executeAgent = useCallback(
+    (input, options) => agentPlatformRef.current.executeAgent(input, options),
+    []
+  );
+
   const runSmartSearch = useCallback(async (query, products = []) => {
     setIsTyping(true);
     setLastError(null);
@@ -396,6 +463,23 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       switchProvider,
       getAvailableProviders,
       getProviderHealth,
+      // Knowledge platform (Phase 7H)
+      knowledgeEngine: knowledgeEngineRef.current,
+      knowledgeRegistry: knowledgeEngineRef.current.registry,
+      knowledgeSearch: knowledgeEngineRef.current.search,
+      knowledgeSnapshot,
+      searchKnowledge,
+      getKnowledge,
+      getKnowledgeDomains,
+      // Agent platform (Phase 7I)
+      agentPlatform: agentPlatformRef.current,
+      agentRegistry: agentPlatformRef.current.registry,
+      agentManager: agentPlatformRef.current.manager,
+      routeTask,
+      getAgent,
+      getAgents,
+      getAgentCapabilities,
+      executeAgent,
       // Back-compat aliases for Phase 7A hooks
       isConnectedLegacy: adapterRef.current.isAvailable?.() || false,
     }),
@@ -440,6 +524,15 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       switchProvider,
       getAvailableProviders,
       getProviderHealth,
+      searchKnowledge,
+      getKnowledge,
+      getKnowledgeDomains,
+      knowledgeSnapshot,
+      routeTask,
+      getAgent,
+      getAgents,
+      getAgentCapabilities,
+      executeAgent,
     ]
   );
 

@@ -20,3 +20,9 @@ export {
   useAvailableProviders,
   useProviderHealth,
 } from "./useOrchestration";
+export {
+  useKnowledgeSearch,
+  useKnowledgeDomains,
+  useKnowledgeSnapshot,
+} from "./useKnowledge";
+export { useAgents, useAgentCapabilities, useAgentExecution } from "./useAgents";

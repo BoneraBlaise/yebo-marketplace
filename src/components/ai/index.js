@@ -82,3 +82,9 @@ export { YEBODecisionHint } from "./decision";
 
 /* YEBO AI Orchestration (Phase 7G) */
 export { YEBOProviderStatus } from "./orchestration";
+
+/* YEBO Enterprise Knowledge Platform (Phase 7H) */
+export { YEBOKnowledgeHint } from "./knowledge";
+
+/* YEBO Autonomous Agent Platform (Phase 7I) */
+export { YEBOAgentHint } from "./agents";

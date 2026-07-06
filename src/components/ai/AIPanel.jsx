@@ -7,6 +7,8 @@ import { YEBOErrorState } from "../../ai";
 import YEBOPanelIntelligence from "./intelligence/YEBOPanelIntelligence";
 import YEBOWelcomeBack from "./memory/YEBOWelcomeBack";
 import { YEBOProviderStatus } from "./orchestration";
+import { YEBOKnowledgeHint } from "./knowledge";
+import { YEBOAgentHint } from "./agents";
 import { Badge } from "../ui";
 import "./core/ai.css";
 
@@ -79,6 +81,8 @@ const AIPanel = () => {
           )}
           <YEBOWelcomeBack className="mb-3" />
           <YEBOProviderStatus compact className="mb-3" />
+          <YEBOKnowledgeHint query="shipping" compact className="mb-3" />
+          <YEBOAgentHint task="find product" compact className="mb-3" />
           <YEBOPanelIntelligence />
         </div>
 
