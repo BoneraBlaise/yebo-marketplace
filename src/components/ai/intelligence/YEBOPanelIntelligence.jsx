@@ -10,8 +10,8 @@ import YEBOBudgetAssistant from "./YEBOBudgetAssistant";
 import YEBOGiftFinder from "./YEBOGiftFinder";
 import AIConversation from "../primitives/AIConversation";
 import AILoading from "../primitives/AILoading";
-import { YEBODecisionHint } from "../decision";
-import { YEBOIntelligenceHint } from "../intelligence";
+import YEBODecisionHint from "../decision/YEBODecisionHint";
+import YEBOIntelligenceHint from "./YEBOIntelligenceHint";
 
 /** Mode-specific YEBO intelligence inside the assistant panel */
 const YEBOPanelIntelligence = () => {

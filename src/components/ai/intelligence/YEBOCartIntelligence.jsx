@@ -1,7 +1,7 @@
 import React from "react";
 import { CART_INTELLIGENCE_EXTRAS } from "../../../ai/intelligence/yipMockData";
-import { YEBODecisionHint } from "../decision";
-import { YEBOIntelligenceHint } from "../intelligence";
+import YEBODecisionHint from "../decision/YEBODecisionHint";
+import YEBOIntelligenceHint from "./YEBOIntelligenceHint";
 import AICard from "../primitives/AICard";
 import { HiOutlineSparkles } from "react-icons/hi";
 

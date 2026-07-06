@@ -3,12 +3,12 @@ import { RxCross1 } from "react-icons/rx";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { AiOutlineSend } from "react-icons/ai";
 import { useAI } from "./core/AIContext";
-import { YEBOErrorState } from "../../ai";
+import YEBOErrorState from "../../ai/components/YEBOErrorState";
 import YEBOPanelIntelligence from "./intelligence/YEBOPanelIntelligence";
 import YEBOWelcomeBack from "./memory/YEBOWelcomeBack";
-import { YEBOProviderStatus } from "./orchestration";
-import { YEBOKnowledgeHint } from "./knowledge";
-import { YEBOAgentHint } from "./agents";
+import YEBOProviderStatus from "./orchestration/YEBOProviderStatus";
+import YEBOKnowledgeHint from "./knowledge/YEBOKnowledgeHint";
+import YEBOAgentHint from "./agents/YEBOAgentHint";
 import { Badge } from "../ui";
 import "./core/ai.css";
 

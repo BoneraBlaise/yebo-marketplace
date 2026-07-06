@@ -4,6 +4,17 @@ import { useKnowledgeDomains } from "../../../ai/hooks/useKnowledge";
 import { useAI } from "../core/AIContext";
 import AICard from "../primitives/AICard";
 
+/** Normalize knowledge search payloads — array or nested results/documents/items */
+const normalizeKnowledgeList = (value) => {
+  if (Array.isArray(value)) return value;
+  if (value instanceof Promise) return [];
+  if (Array.isArray(value?.results)) return value.results;
+  if (Array.isArray(value?.documents)) return value.documents;
+  if (Array.isArray(value?.items)) return value.items;
+  if (Array.isArray(value?.data)) return value.data;
+  return [];
+};
+
 /** Mock knowledge cards for YEBO Assistant — presentation only */
 const YEBOKnowledgeHint = ({ query = "shipping", className, compact = false }) => {
   const domains = useKnowledgeDomains();
@@ -12,8 +23,7 @@ const YEBOKnowledgeHint = ({ query = "shipping", className, compact = false }) =
   const results = useMemo(() => {
     if (!searchKnowledge) return [];
     const res = searchKnowledge(query);
-    if (res instanceof Promise) return [];
-    return (res?.results || res || []).slice(0, compact ? 1 : 3);
+    return normalizeKnowledgeList(res).slice(0, compact ? 1 : 3);
   }, [searchKnowledge, query, compact]);
 
   if (!results.length && !domains.length) return null;
