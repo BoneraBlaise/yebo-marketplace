@@ -6,6 +6,7 @@ import { useAI } from "./core/AIContext";
 import { YEBOErrorState } from "../../ai";
 import YEBOPanelIntelligence from "./intelligence/YEBOPanelIntelligence";
 import YEBOWelcomeBack from "./memory/YEBOWelcomeBack";
+import { YEBOProviderStatus } from "./orchestration";
 import { Badge } from "../ui";
 import "./core/ai.css";
 
@@ -77,6 +78,7 @@ const AIPanel = () => {
             <YEBOErrorState error={lastError} onRetry={() => sendMessage(inputValue)} className="mb-3" />
           )}
           <YEBOWelcomeBack className="mb-3" />
+          <YEBOProviderStatus compact className="mb-3" />
           <YEBOPanelIntelligence />
         </div>
 

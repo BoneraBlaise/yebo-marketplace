@@ -79,3 +79,6 @@ export {
 
 /* YEBO Decision Engine (Phase 7E) */
 export { YEBODecisionHint } from "./decision";
+
+/* YEBO AI Orchestration (Phase 7G) */
+export { YEBOProviderStatus } from "./orchestration";

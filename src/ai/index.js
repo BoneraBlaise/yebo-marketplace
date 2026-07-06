@@ -10,4 +10,5 @@ export * from "./hooks";
 export * from "./utils";
 export * from "./intelligence";
 export * from "./decision";
+export * from "./orchestration";
 export * from "./components";

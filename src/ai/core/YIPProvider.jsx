@@ -17,6 +17,7 @@ import { normalizeError, YIP_ERROR } from "../utils/errors";
 import { YIPShoppingIntelligence } from "../intelligence/YIPShoppingIntelligence";
 import { createDecisionEngine } from "../decision/DecisionEngine";
 import { createYEBOIntelligenceEngine } from "../intelligence/YEBOIntelligenceEngine";
+import { createAIOrchestrator } from "../orchestration/AIOrchestrator";
 
 const YIPContext = createContext(null);
 
@@ -49,6 +50,18 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       decisionEngine: decisionEngineRef.current,
     });
   }
+  const orchestratorRef = useRef(null);
+  if (!orchestratorRef.current) {
+    orchestratorRef.current = createAIOrchestrator({
+      memoryEngine: memoryRef.current,
+      decisionEngine: decisionEngineRef.current,
+      intelligenceEngine: intelligenceEngineRef.current,
+      config: { preferredProvider: "mock", streamingEnabled: false },
+    });
+  }
+  const [currentProviderId, setCurrentProviderId] = useState(
+    () => orchestratorRef.current?.providerManager?.currentProviderId || "mock"
+  );
   const conversationRef = useRef(
     new YIPConversation([
       { id: "welcome", role: "assistant", content: WELCOME_MESSAGE, isWelcome: true },
@@ -204,6 +217,31 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     []
   );
 
+  const switchProvider = useCallback((id) => {
+    const provider = orchestratorRef.current.switchProvider(id);
+    setCurrentProviderId(id);
+    const next = YIPConfig.set({ provider: id });
+    setConfigState(next);
+    adapterRef.current = createProviderAdapter(id);
+    YIPEvents.emit(YIP_EVENT.PROVIDER_CHANGE, { provider: id });
+    return provider;
+  }, []);
+
+  const getAvailableProviders = useCallback(
+    () => orchestratorRef.current.getAvailableProviders(),
+    [currentProviderId]
+  );
+
+  const getProviderHealth = useCallback(
+    (providerId) => orchestratorRef.current.getProviderHealth(providerId),
+    [currentProviderId]
+  );
+
+  const currentProvider = useMemo(
+    () => orchestratorRef.current?.currentProvider ?? null,
+    [currentProviderId]
+  );
+
   const runSmartSearch = useCallback(async (query, products = []) => {
     setIsTyping(true);
     setLastError(null);
@@ -349,6 +387,15 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       getRecommendationReason,
       getPersonalization,
       getIntelligenceSnapshot,
+      // AI orchestration (Phase 7G)
+      orchestrator: orchestratorRef.current,
+      providerManager: orchestratorRef.current.providerManager,
+      providerRegistry: orchestratorRef.current.providerRegistry,
+      currentProvider,
+      currentProviderId,
+      switchProvider,
+      getAvailableProviders,
+      getProviderHealth,
       // Back-compat aliases for Phase 7A hooks
       isConnectedLegacy: adapterRef.current.isAvailable?.() || false,
     }),
@@ -388,6 +435,11 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       getRecommendationReason,
       getPersonalization,
       getIntelligenceSnapshot,
+      currentProvider,
+      currentProviderId,
+      switchProvider,
+      getAvailableProviders,
+      getProviderHealth,
     ]
   );
 

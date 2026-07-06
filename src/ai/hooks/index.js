@@ -15,3 +15,8 @@ export {
   useIntelligenceRecommendationReason,
   usePersonalization,
 } from "./useIntelligence";
+export {
+  useCurrentProvider,
+  useAvailableProviders,
+  useProviderHealth,
+} from "./useOrchestration";
