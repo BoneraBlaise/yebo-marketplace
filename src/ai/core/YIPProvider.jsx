@@ -15,6 +15,8 @@ import { consumeStream } from "../utils/streaming";
 import { YIPAnalytics } from "../utils/analytics";
 import { normalizeError, YIP_ERROR } from "../utils/errors";
 import { YIPShoppingIntelligence } from "../intelligence/YIPShoppingIntelligence";
+import { createDecisionEngine } from "../decision/DecisionEngine";
+import { createYEBOIntelligenceEngine } from "../intelligence/YEBOIntelligenceEngine";
 
 const YIPContext = createContext(null);
 
@@ -33,6 +35,20 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const memoryRef = useRef(createYEBOMemoryEngine());
   const shoppingContextRef = useRef(createYEBOShoppingContext(memoryRef.current));
   const contextEngineRef = useRef(createContextEngine());
+  const decisionEngineRef = useRef(null);
+  if (!decisionEngineRef.current) {
+    decisionEngineRef.current = createDecisionEngine({
+      memoryEngine: memoryRef.current,
+      contextEngine: contextEngineRef.current,
+    });
+  }
+  const intelligenceEngineRef = useRef(null);
+  if (!intelligenceEngineRef.current) {
+    intelligenceEngineRef.current = createYEBOIntelligenceEngine({
+      memoryEngine: memoryRef.current,
+      decisionEngine: decisionEngineRef.current,
+    });
+  }
   const conversationRef = useRef(
     new YIPConversation([
       { id: "welcome", role: "assistant", content: WELCOME_MESSAGE, isWelcome: true },
@@ -152,6 +168,41 @@ export const YIPProvider = ({ children, config: configOverride }) => {
 
   const getMemorySnapshot = useCallback(() => memoryRef.current.getSnapshot(), []);
   const getWelcomeMessage = useCallback(() => memoryRef.current.getWelcomeMessage(), []);
+
+  const getRecommendations = useCallback(
+    (scope) => decisionEngineRef.current.getRecommendations(scope),
+    []
+  );
+  const getDecisionReason = useCallback(
+    (id) => decisionEngineRef.current.getDecisionReason(id),
+    []
+  );
+  const getDecisionSnapshot = useCallback(() => decisionEngineRef.current.getSnapshot(), []);
+
+  const getRankedRecommendations = useCallback(
+    (scope) => intelligenceEngineRef.current.getRankedRecommendations(scope),
+    []
+  );
+  const getShoppingScore = useCallback(
+    (type, scope) => intelligenceEngineRef.current.getShoppingScore(type, scope),
+    []
+  );
+  const getConfidence = useCallback(
+    (id, scope) => intelligenceEngineRef.current.getConfidence(id, scope),
+    []
+  );
+  const getRecommendationReason = useCallback(
+    (id) => intelligenceEngineRef.current.getRecommendationReason(id),
+    []
+  );
+  const getPersonalization = useCallback(
+    () => intelligenceEngineRef.current.getPersonalization(),
+    []
+  );
+  const getIntelligenceSnapshot = useCallback(
+    () => intelligenceEngineRef.current.getSnapshot(),
+    []
+  );
 
   const runSmartSearch = useCallback(async (query, products = []) => {
     setIsTyping(true);
@@ -284,6 +335,20 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       runComparison,
       runBudgetAdvice,
       runGiftFinder,
+      // Decision engine (Phase 7E)
+      decisionEngine: decisionEngineRef.current,
+      decisionContext: decisionEngineRef.current.decisionContext,
+      getRecommendations,
+      getDecisionReason,
+      getDecisionSnapshot,
+      // Intelligence layer (Phase 7F)
+      intelligenceEngine: intelligenceEngineRef.current,
+      getRankedRecommendations,
+      getShoppingScore,
+      getConfidence,
+      getRecommendationReason,
+      getPersonalization,
+      getIntelligenceSnapshot,
       // Back-compat aliases for Phase 7A hooks
       isConnectedLegacy: adapterRef.current.isAvailable?.() || false,
     }),
@@ -314,6 +379,15 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       runGiftFinder,
       getMemorySnapshot,
       getWelcomeMessage,
+      getRecommendations,
+      getDecisionReason,
+      getDecisionSnapshot,
+      getRankedRecommendations,
+      getShoppingScore,
+      getConfidence,
+      getRecommendationReason,
+      getPersonalization,
+      getIntelligenceSnapshot,
     ]
   );
 

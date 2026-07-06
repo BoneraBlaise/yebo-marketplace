@@ -7,6 +7,8 @@ import AIVirtualTryOn from "../ai/sections/AIVirtualTryOn";
 import YEBOProductIntelligenceExtras from "../ai/intelligence/YEBOProductIntelligenceExtras";
 import YEBOProactiveBanner from "../ai/intelligence/YEBOProactiveBanner";
 import { YEBOCrossPageContinuity, YEBOSmartReminders } from "../ai/memory";
+import { YEBODecisionHint } from "../ai/decision";
+import { YEBOIntelligenceHint } from "../ai/intelligence";
 import { PROACTIVE_SUGGESTIONS } from "../../ai/intelligence/yipMockData";
 import HomeProductCard from "../Home/HomeProductCard";
 import { PRODUCT_AI_SECTIONS } from "../ai/data/aiPlaceholders";
@@ -68,6 +70,8 @@ const ProductAISections = ({ category }) => {
 
           <YEBOProactiveBanner suggestions={PROACTIVE_SUGGESTIONS} className="mb-5" />
           <YEBOCrossPageContinuity className="mb-4" limit={2} />
+          <YEBODecisionHint scope="product" className="mb-4" />
+          <YEBOIntelligenceHint scope="product" compact className="mb-4" />
           <YEBOSmartReminders compact className="mb-5" />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-5">

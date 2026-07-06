@@ -7,6 +7,8 @@ import YEBOMemoryTimeline from "./YEBOMemoryTimeline";
 import YEBOPreferenceCards from "./YEBOPreferenceCards";
 import YEBOShoppingHistory from "./YEBOShoppingHistory";
 import YEBOSmartReminders from "./YEBOSmartReminders";
+import { YEBODecisionHint } from "../decision";
+import { YEBOIntelligenceHint } from "../intelligence";
 import AIInsightCard from "../primitives/AIInsightCard";
 import { HiOutlineHeart, HiOutlineSparkles } from "react-icons/hi";
 
@@ -29,6 +31,8 @@ const YEBOCustomerMemoryDashboard = () => {
       className="py-0"
       badge="Memory"
     >
+      <YEBODecisionHint scope="dashboard" className="mb-4" />
+      <YEBOIntelligenceHint scope="dashboard" compact className="mb-4" />
       <div className="grid lg:grid-cols-2 gap-4 mb-4">
         <YEBOMemoryJourney />
         <YEBOMemoryTimeline />

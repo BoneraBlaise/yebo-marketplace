@@ -10,6 +10,8 @@ import YEBOBudgetAssistant from "./YEBOBudgetAssistant";
 import YEBOGiftFinder from "./YEBOGiftFinder";
 import AIConversation from "../primitives/AIConversation";
 import AILoading from "../primitives/AILoading";
+import { YEBODecisionHint } from "../decision";
+import { YEBOIntelligenceHint } from "../intelligence";
 
 /** Mode-specific YEBO intelligence inside the assistant panel */
 const YEBOPanelIntelligence = () => {
@@ -65,6 +67,8 @@ const YEBOPanelIntelligence = () => {
         suggestions={proactiveSuggestions}
         onAction={() => sendMessage("Help me choose")}
       />
+      <YEBODecisionHint scope="homepage" compact />
+      <YEBOIntelligenceHint scope="homepage" compact />
 
       <div className="flex-1 overflow-y-auto min-h-0 space-y-3">
         {shoppingMode === "chat" && (

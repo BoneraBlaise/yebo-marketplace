@@ -4,6 +4,8 @@ import { SHOPPING_SCOPES } from "../../../ai/memory/YEBOShoppingContext";
 import AISection from "../primitives/AISection";
 import AIInsightCard from "../primitives/AIInsightCard";
 import AICard from "../primitives/AICard";
+import { YEBODecisionHint } from "../decision";
+import { YEBOIntelligenceHint } from "../intelligence";
 import {
   HiOutlineSearch,
   HiOutlineSwitchHorizontal,
@@ -30,6 +32,8 @@ const YEBOVendorMemoryDashboard = () => {
       className="py-0"
       badge="Vendor YEBO"
     >
+      <YEBODecisionHint scope="vendor" className="mb-4" />
+      <YEBOIntelligenceHint scope="vendor" compact className="mb-4" />
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <AIInsightCard
           title="Customer interests"

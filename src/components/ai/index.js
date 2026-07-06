@@ -58,6 +58,7 @@ export {
   YEBOCustomerShoppingInsights,
   YEBOVendorShoppingInsights,
   YEBOAdminShoppingIntelligence,
+  YEBOIntelligenceHint,
 } from "./intelligence";
 
 /* YEBO Memory Engine (Phase 7D) */
@@ -75,3 +76,6 @@ export {
   YEBOVendorMemoryDashboard,
   YEBOAdminMemoryDashboard,
 } from "./memory";
+
+/* YEBO Decision Engine (Phase 7E) */
+export { YEBODecisionHint } from "./decision";

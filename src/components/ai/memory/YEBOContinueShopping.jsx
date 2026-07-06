@@ -1,6 +1,8 @@
 import React from "react";
 import { HiOutlineArrowRight, HiOutlineShoppingBag } from "react-icons/hi";
 import { useYEBOMemoryOptional } from "../../../ai/hooks/useYEBOMemory";
+import { YEBODecisionHint } from "../decision";
+import { YEBOIntelligenceHint } from "../intelligence";
 import AICard from "../primitives/AICard";
 
 /** Continue shopping card from session memory */
@@ -37,6 +39,8 @@ const YEBOContinueShopping = ({ className }) => {
           <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-yebone-primary mt-2">
             Continue <HiOutlineArrowRight size={12} />
           </span>
+          <YEBODecisionHint scope="homepage" compact className="mt-2" />
+          <YEBOIntelligenceHint scope="homepage" compact className="mt-2" />
         </div>
       </div>
     </AICard>

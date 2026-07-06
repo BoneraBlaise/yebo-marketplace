@@ -12,3 +12,4 @@ export { default as YEBOCheckoutIntelligence } from "./YEBOCheckoutIntelligence"
 export { default as YEBOCustomerShoppingInsights } from "./YEBOCustomerShoppingInsights";
 export { default as YEBOVendorShoppingInsights } from "./YEBOVendorShoppingInsights";
 export { default as YEBOAdminShoppingIntelligence } from "./YEBOAdminShoppingIntelligence";
+export { default as YEBOIntelligenceHint } from "./YEBOIntelligenceHint";

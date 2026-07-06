@@ -1,5 +1,7 @@
 import React from "react";
 import { CART_INTELLIGENCE_EXTRAS } from "../../../ai/intelligence/yipMockData";
+import { YEBODecisionHint } from "../decision";
+import { YEBOIntelligenceHint } from "../intelligence";
 import AICard from "../primitives/AICard";
 import { HiOutlineSparkles } from "react-icons/hi";
 
@@ -10,6 +12,8 @@ const YEBOCartIntelligence = ({ compact = true }) => (
       <p className="text-xs font-semibold text-yebone-primary">YEBO cart intelligence</p>
       <span className="text-[10px] text-gray-400 ml-auto">Preview</span>
     </div>
+    <YEBODecisionHint scope="cart" compact className="mb-2 px-1" />
+    <YEBOIntelligenceHint scope="cart" compact className="mb-2 px-1" />
     <div className="space-y-2">
       {CART_INTELLIGENCE_EXTRAS.map(({ id, title, description, savings }) => (
         <AICard key={id} padding="sm" className="!p-3 cursor-default" hover>

@@ -6,6 +6,8 @@ import { useAIOptional } from "../core/AIContext";
 import AICard from "../primitives/AICard";
 import AILoading from "../primitives/AILoading";
 import YEBOSmartSearchResults from "../intelligence/YEBOSmartSearchResults";
+import { YEBODecisionHint } from "../decision";
+import { YEBOIntelligenceHint } from "../intelligence";
 import { Badge } from "../../ui";
 import { SMART_SEARCH_EXAMPLES } from "../../../ai/intelligence/yipMockData";
 
@@ -76,6 +78,9 @@ const AISearchNatural = ({ className }) => {
           <AiOutlineSearch size={16} /> Ask YEBO
         </button>
       </form>
+
+      <YEBODecisionHint scope="search" compact className="mb-3" />
+      <YEBOIntelligenceHint scope="search" compact className="mb-3" />
 
       <div className="flex flex-wrap gap-2 mb-4">
         {SMART_SEARCH_EXAMPLES.map((ex) => (

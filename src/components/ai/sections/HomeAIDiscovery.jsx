@@ -14,6 +14,8 @@ import {
 import YEBOShoppingInsightCards from "../intelligence/YEBOShoppingInsightCards";
 import YEBOProactiveBanner from "../intelligence/YEBOProactiveBanner";
 import { YEBOWelcomeBack, YEBOCrossPageContinuity, YEBOContinueShopping, YEBOSmartReminders } from "../memory";
+import { YEBODecisionHint } from "../decision";
+import { YEBOIntelligenceHint } from "../intelligence";
 import { PROACTIVE_SUGGESTIONS } from "../../../ai/intelligence/yipMockData";
 
 const HomeAIDiscovery = () => {
@@ -37,6 +39,8 @@ const HomeAIDiscovery = () => {
       compact
     >
       <YEBOWelcomeBack className="mb-4" />
+      <YEBODecisionHint scope="homepage" className="mb-4" />
+      <YEBOIntelligenceHint scope="homepage" compact className="mb-4" />
       <YEBOProactiveBanner suggestions={PROACTIVE_SUGGESTIONS} className="mb-4" />
       <YEBOCrossPageContinuity className="mb-4" />
 
