@@ -21,6 +21,7 @@ import {
   MarketplaceMobileFilterButton,
   MarketplaceEmptyState,
 } from "../components/Marketplace";
+import { AISearchNatural } from "../components/ai";
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -557,6 +558,9 @@ const ProductsPage = () => {
                 searchTerm={searchTerm}
                 badge={categoryData ? "Category" : searchTerm ? "Search" : "Marketplace"}
               />
+              <div className="mt-6">
+                <AISearchNatural />
+              </div>
             </Container>
 
             {/* Related Products Section */}

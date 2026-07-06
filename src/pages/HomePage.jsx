@@ -13,6 +13,8 @@ import "../components/Home/home.css";
 const HomeCategories = lazy(() => import("../components/Home/HomeCategories"));
 const HomeProductRails = lazy(() => import("../components/Home/HomeProductRails"));
 const HomeAIExperience = lazy(() => import("../components/Home/HomeAIExperience"));
+const HomeAIDiscovery = lazy(() => import("../components/ai/sections/HomeAIDiscovery"));
+const AIShoppingAssistants = lazy(() => import("../components/ai/sections/AIShoppingAssistants"));
 const HomeAIPicks = lazy(() => import("../components/Home/HomeAIPicks"));
 const HomeEventsBanner = lazy(() => import("../components/Home/HomeEventsBanner"));
 const HomeEventsSection = lazy(() => import("../components/Home/HomeEventsSection"));
@@ -80,6 +82,16 @@ const HomePage = () => {
           {/* 5. AI Shopping Experience */}
           <Suspense fallback={<SectionFallback />}>
             <HomeAIExperience />
+          </Suspense>
+
+          {/* 5b. AI Discovery */}
+          <Suspense fallback={<SectionFallback />}>
+            <HomeAIDiscovery />
+          </Suspense>
+
+          {/* 5c. Shopping Assistants */}
+          <Suspense fallback={<SectionFallback />}>
+            <AIShoppingAssistants compact />
           </Suspense>
 
           {/* 6. AI Picks */}

@@ -26,6 +26,7 @@ import VendorQuickActions from "../Dashboard/vendor/VendorQuickActions";
 import VendorAnalytics from "../Dashboard/vendor/VendorAnalytics";
 import VendorReviewsPanel from "../Dashboard/vendor/VendorReviewsPanel";
 import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
+import { YEBOVendorShoppingInsights, YEBOVendorMemoryDashboard } from "../ai";
 
 const DashboardHero = () => {
   const dispatch = useDispatch();
@@ -289,6 +290,9 @@ const DashboardHero = () => {
       </div>
 
       <VendorQuickActions />
+
+      <YEBOVendorShoppingInsights />
+      <YEBOVendorMemoryDashboard />
 
       <VendorTableSection title="Recent orders" subtitle="Latest activity from your store">
         <div style={{ height: 400, width: "100%" }}>

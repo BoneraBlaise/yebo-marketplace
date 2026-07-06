@@ -36,7 +36,7 @@ const MarketplaceAISection = ({ searchTerm }) => {
           <HiOutlineSparkles className="text-yebone-gold shrink-0 mt-0.5" size={22} />
           <div>
             <p className="font-semibold text-yebone-primary dark:text-yebone-gold text-sm">
-              Yebone AI — presentation preview
+              YEBO — presentation preview
             </p>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Smart recommendations powered by your browsing. Full AI backend coming soon.

@@ -10,6 +10,7 @@ import { FaCreativeCommonsSamplingPlus } from "react-icons/fa";
 import { getAllOrdersOfUser } from "../../redux/actions/order";
 import { SectionTitle, Button } from "../ui";
 import DashboardStatCard from "./DashboardStatCard";
+import { YEBOCustomerShoppingInsights, YEBOCustomerMemoryDashboard } from "../ai";
 
 const DashboardHome = ({ setActive }) => {
   const dispatch = useDispatch();
@@ -66,6 +67,9 @@ const DashboardHome = ({ setActive }) => {
           onClick={() => setActive(9)}
         />
       </div>
+
+      <YEBOCustomerShoppingInsights />
+      <YEBOCustomerMemoryDashboard />
 
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="dashboard-section yebone-surface">

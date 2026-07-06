@@ -1,0 +1,230 @@
+﻿node.exe : npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm 
+help npmrc` for supported config options.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm warn Unknow...config options.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+> yebone@0.1.0 build
+> set NODE_OPTIONS=--max-old-space-size=8192 && react-scripts build
+
+(node:12364) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+Creating an optimized production build...
+Browserslist: browsers data (caniuse-lite) is 17 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+Browserslist: browsers data (caniuse-lite) is 17 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+
+Treating warnings as errors because process.env.CI = true.
+Most CI servers set it automatically.
+
+Failed to compile.
+
+[eslint] 
+src\ai\core\YIPProvider.jsx
+  Line 69:6:   React Hook useEffect has a missing dependency: 'config'. Either include it or remove the dependency array                          react-hooks/exhaustive-deps
+  Line 207:5:  React Hook useMemo has unnecessary dependencies: 'isPanelOpen' and 'messages'. Either exclude them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 267:7:  Duplicate key 'getMemorySnapshot'                                                                                                  no-dupe-keys
+  Line 268:7:  Duplicate key 'getWelcomeMessage'                                                                                                  no-dupe-keys
+
+src\ai\memory\MemoryHelpers.js
+  Line 39:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\ai\memory\RecommendationMemory.js
+  Line 1:10:  'pushUnique' is defined but never used  no-unused-vars
+
+src\ai\memory\YEBOMemoryEngine.js
+  Line 5:10:  'MemoryStorage' is defined but never used  no-unused-vars
+
+src\ai\memory\yebMemoryMockData.js
+  Line 134:1:  Assign object to a variable before exporting as module default  import/no-anonymous-default-export
+
+src\components\Bid\BidDetails.js
+  Line 1:38:   'useCallback' is defined but never used                no-unused-vars
+  Line 30:7:   'ThumbnailImage' is assigned a value but never used    no-unused-vars
+  Line 46:16:  'setTags' is assigned a value but never used           no-unused-vars
+  Line 56:23:  'setRelatedBids' is assigned a value but never used    no-unused-vars
+  Line 106:9:  'imagePlaceholder' is assigned a value but never used  no-unused-vars
+
+src\components\Checkout\Checkout.jsx
+  Line 30:26:  'setCouponCodeData' is assigned a value but never used  no-unused-vars
+  Line 31:25:  'setDiscountPrice' is assigned a value but never used   no-unused-vars
+
+src\components\Checkout\CheckoutOrderSummary.jsx
+  Line 36:9:  'tierPrice' is assigned a value but never used  no-unused-vars
+
+src\components\Events\CountDown.jsx
+  Line 19:6:  React Hook useEffect has a missing dependency: 'calculateTimeLeft'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\LanguageSwitcher.jsx
+  Line 6:17:  't' is assigned a value but never used  no-unused-vars
+
+src\components\Layout\DropDown.jsx
+  Line 3:8:   'styles' is defined but never used                 no-unused-vars
+  Line 10:9:  'submitHandle' is assigned a value but never used  no-unused-vars
+
+src\components\Layout\Navbar.jsx
+  Line 13:12:  'baseUrl' is assigned a value but never used      no-unused-vars
+  Line 13:21:  'queryParams' is assigned a value but never used  no-unused-vars
+
+src\components\Payment\Payment.jsx
+  Line 8:3:    'CardNumberElement' is defined but never used           no-unused-vars
+  Line 9:3:    'CardCvcElement' is defined but never used              no-unused-vars
+  Line 10:3:   'CardExpiryElement' is defined but never used           no-unused-vars
+  Line 11:3:   'useStripe' is defined but never used                   no-unused-vars
+  Line 12:3:   'useElements' is defined but never used                 no-unused-vars
+  Line 15:10:  'PayPalScriptProvider' is defined but never used        no-unused-vars
+  Line 15:32:  'PayPalButtons' is defined but never used               no-unused-vars
+  Line 17:10:  'PaystackButton' is defined but never used              no-unused-vars
+  Line 34:11:  'referralProducts' is assigned a value but never used   no-unused-vars
+  Line 34:29:  'clearAllReferrals' is assigned a value but never used  no-unused-vars
+
+src\components\Products\ProductDetails.jsx
+  Line 63:10:   'loading' is assigned a value but never used    no-unused-vars
+  Line 64:10:   'error' is assigned a value but never used      no-unused-vars
+  Line 318:13:  'shareLink' is assigned a value but never used  no-unused-vars
+
+src\components\Products\ProductDetailsTabs.jsx
+  Line 5:28:  'HiOutlineSparkles' is defined but never used                                                                                                                                                  no-unused-vars
+  Line 51:9:  The 'reviews' logical expression could make the dependencies of useMemo Hook (at line 62) change on every render. To fix this, wrap the initialization of 'reviews' in its own useMemo() Hook  react-hooks/exhaustive-deps
+  Line 51:9:  The 'reviews' logical expression could make the dependencies of useMemo Hook (at line 69) change on every render. To fix this, wrap the initialization of 'reviews' in its own useMemo() Hook  react-hooks/exhaustive-deps
+
+src\components\Profile\ProfileContent.jsx
+  Line 17:3:    'joinCommissionProgram' is defined but never used                                                                             no-unused-vars
+  Line 43:10:   'avatar' is assigned a value but never used                                                                                   no-unused-vars
+  Line 43:18:   'setAvatar' is assigned a value but never used                                                                                no-unused-vars
+  Line 55:6:    React Hook useEffect has a missing dependency: 'dispatch'. Either include it or remove the dependency array                   react-hooks/exhaustive-deps
+  Line 157:13:  The attribute aria-required is not supported by the role form. This role is implicit on the element form                      jsx-a11y/role-supports-aria-props
+  Line 283:6:   React Hook useEffect has missing dependencies: 'dispatch' and 'user._id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 304:6:   React Hook useEffect has missing dependencies: 'dispatch' and 'user._id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  Line 366:7:   The attribute aria-required is not supported by the role form. This role is implicit on the element form                      jsx-a11y/role-supports-aria-props
+
+src\components\Route\Bids\BidList.js
+  Line 22:10:  'filteredBids' is assigned a value but never used  no-unused-vars
+
+src\components\Route\FlashSales\FlashSaleDetails.js
+  Line 20:18:  'setTags' is assigned a value but never used  no-unused-vars
+
+src\components\Route\ProductCard\MobileProductCard.jsx
+  Line 9:8:   'styles' is defined but never used                                                                           no-unused-vars
+  Line 25:6:  React Hook useEffect has a missing dependency: 'data._id'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Route\ProductCard\ProductCard.jsx
+  Line 28:6:  React Hook useEffect has a missing dependency: 'data._id'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Route\ProductList\ProductList.jsx
+  Line 3:10:   'Link' is defined but never used                                                                                no-unused-vars
+  Line 5:10:   'AiFillHeart' is defined but never used                                                                         no-unused-vars
+  Line 5:23:   'AiOutlineHeart' is defined but never used                                                                      no-unused-vars
+  Line 6:8:    'Ratings' is defined but never used                                                                             no-unused-vars
+  Line 11:10:  'addTocart' is defined but never used                                                                           no-unused-vars
+  Line 18:10:  'MdVerifiedUser' is defined but never used                                                                      no-unused-vars
+  Line 24:11:  't' is assigned a value but never used                                                                          no-unused-vars
+  Line 25:11:  'wishlist' is assigned a value but never used                                                                   no-unused-vars
+  Line 26:11:  'cart' is assigned a value but never used                                                                       no-unused-vars
+  Line 29:10:  'recommendedProducts' is assigned a value but never used                                                        no-unused-vars
+  Line 35:9:   'formatPrice' is assigned a value but never used                                                                no-unused-vars
+  Line 76:9:   'handleWishlistToggle' is assigned a value but never used                                                       no-unused-vars
+  Line 257:6:  React Hook useEffect has a missing dependency: 'prepareData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Route\Recent\RecentlyViewed.js
+  Line 5:10:  'AiOutlineShoppingCart' is defined but never used  no-unused-vars
+  Line 6:10:  'toast' is defined but never used                  no-unused-vars
+
+src\components\Shop\AllBids.js
+  Line 46:13:  'updatedBids' is assigned a value but never used  no-unused-vars
+
+src\components\Shop\AllCoupons.jsx
+  Line 28:9:    'dispatch' is assigned a value but never used                                                                    no-unused-vars
+  Line 102:6:   React Hook useEffect has a missing dependency: 'fetchCoupons'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  Line 198:17:  The attribute aria-required is not supported by the role form. This role is implicit on the element form         jsx-a11y/role-supports-aria-props
+
+src\components\Shop\AllEvents.jsx
+  Line 9:10:   'deleteEvent' is defined but never used          no-unused-vars
+  Line 82:15:  'event_name' is assigned a value but never used  no-unused-vars
+
+src\components\Shop\AllFlashSales.js
+  Line 45:13:  'updatedFlashSales' is assigned a value but never used  no-unused-vars
+
+src\components\Shop\AllProducts.jsx
+  Line 53:13:  'updatedProducts' is assigned a value but never used  no-unused-vars
+
+src\components\Shop\AllRefundOrders.jsx
+  Line 18:6:  React Hook useEffect has a missing dependency: 'seller._id'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Shop\CreateBid.js
+  Line 35:6:  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Shop\CreateEvent.jsx
+  Line 58:6:  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Shop\CreateProduct.jsx
+  Line 39:6:  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Shop\DashboardMessages.jsx
+  Line 5:10:    'useDispatch' is defined but never used      no-unused-vars
+  Line 8:8:     'styles' is defined but never used           no-unused-vars
+  Line 29:10:   'images' is assigned a value but never used  no-unused-vars
+  Line 314:53:  Expected '!==' and instead saw '!='          eqeqeq
+
+src\components\Shop\OrderDetails.jsx
+  Line 12:19:  'isLoading' is assigned a value but never used                                                                 no-unused-vars
+  Line 22:6:   React Hook useEffect has a missing dependency: 'seller._id'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Shop\ShopInfo.jsx
+  Line 32:6:  React Hook useEffect has missing dependencies: 'dispatch' and 'id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\components\Shop\ShopLogin.jsx
+  Line 1:17:  'useEffect' is defined but never used  no-unused-vars
+
+src\components\Wishlist\Wishlist.jsx
+  Line 77:17:  'setValue' is assigned a value but never used  no-unused-vars
+
+src\components\ai\AIRecommendations.jsx
+  Line 2:8:  'classNames' is defined but never used  no-unused-vars
+
+src\components\cart\Cart.jsx
+  Line 1:17:  'useState' is defined but never used  no-unused-vars
+
+src\pages\BidsPage.js
+  Line 28:11:  'user' is assigned a value but never used  no-unused-vars
+
+src\pages\FlashSalePage.js
+  Line 26:36:  'error' is assigned a value but never used  no-unused-vars
+
+src\pages\Login.jsx
+  Line 14:6:  React Hook useEffect has missing dependencies: 'isAuthenticated' and 'navigate'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\ProductsPage.jsx
+  Line 233:6:   React Hook useEffect has a missing dependency: 'getRecommendations'. Either include it or remove the dependency array                                                                  react-hooks/exhaustive-deps
+  Line 278:9:   'handleWholesaleChange' is assigned a value but never used                                                                                                                             no-unused-vars
+  Line 287:9:   'handleFlashSaleChange' is assigned a value but never used                                                                                                                             no-unused-vars
+  Line 296:9:   'handleDailyDealChange' is assigned a value but never used                                                                                                                             no-unused-vars
+  Line 829:25:  Using target="_blank" without rel="noreferrer" (which implies rel="noopener") is a security risk in older browsers: see https://mathiasbynens.github.io/rel-noopener/#recommendations  react/jsx-no-target-blank
+
+src\pages\SellerActivationPage.jsx
+  Line 16:17:  'response' is assigned a value but never used  no-unused-vars
+
+src\pages\ShopCreate.jsx
+  Line 14:6:  React Hook useEffect has missing dependencies: 'isSeller', 'navigate', and 'seller._id'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\ShopLoginPage.jsx
+  Line 14:6:  React Hook useEffect has a missing dependency: 'navigate'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\SignupPage.jsx
+  Line 15:6:  React Hook useEffect has missing dependencies: 'isAuthenticated' and 'navigate'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+src\pages\UserInbox.jsx
+  Line 11:8:   'styles' is defined but never used                                                                                                                                                                                                                            no-unused-vars
+  Line 24:10:  'images' is assigned a value but never used                                                                                                                                                                                                                   no-unused-vars
+  Line 290:6:  React Hook useEffect has missing dependencies: 'online' and 'setActiveStatus'. Either include them or remove the dependency array. If 'setActiveStatus' changes too often, find the parent component that defines it and wrap that definition in useCallback  react-hooks/exhaustive-deps
+
+src\redux\actions\cart.js
+  Line 1:10:  'toast' is defined but never used  no-unused-vars
+
+

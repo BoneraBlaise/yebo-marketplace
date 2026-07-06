@@ -92,6 +92,8 @@ import { getActiveBids } from "./redux/actions/bids.js";
 import LoginSuccessHandler from "./components/Login/LoginSuccessHandler";
 import CommissionDashboard from "./components/Commission/CommissionDashboard";
 import { ReferralProvider } from './context/ReferralContext';
+import { AIProvider, GlobalAIFab } from "./components/ai";
+import "./components/ai/core/ai.css";
 
 // Google Analytics tracking code inside App component
 const GoogleAnalytics = () => {
@@ -123,6 +125,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <ReferralProvider>
+        <AIProvider>
         <ErrorBoundary>
         <GoogleAnalytics />
         <Suspense fallback={<LoadingFallback />}>
@@ -445,8 +448,10 @@ const App = () => {
           theme="light" // can be set dynamically if needed
           className="custom-toast-container" // Add custom class name for easier targeting
         />
+        <GlobalAIFab />
         </Suspense>
         </ErrorBoundary>
+        </AIProvider>
       </ReferralProvider>
     </BrowserRouter>
   );

@@ -9,6 +9,7 @@ import { useReferral } from "../../context/ReferralContext";
 import { Button } from "../ui";
 import { typography } from "../../design-system/typography";
 import CheckoutCartItem from "../Checkout/CheckoutCartItem";
+import { YEBOCartIntelligence } from "../ai";
 import "../Checkout/checkout.css";
 
 const formatPrice = (price) =>
@@ -94,6 +95,7 @@ const Cart = ({ setOpenCart }) => {
                   hasReferral={referralProducts.has(item._id) || item.referralCode}
                 />
               ))}
+              <YEBOCartIntelligence />
             </div>
 
             <div className="p-5 border-t border-gray-100 dark:border-gray-800 bg-yebone-light-gray/30 dark:bg-gray-900/50 space-y-3">

@@ -12,6 +12,7 @@ import { typography } from "../../design-system/typography";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutCartItem from "./CheckoutCartItem";
 import CheckoutEmptyCart from "./CheckoutEmptyCart";
+import { YEBOCheckoutIntelligence } from "../ai";
 import "./checkout.css";
 
 const Checkout = () => {
@@ -198,7 +199,9 @@ const Checkout = () => {
             />
           </div>
 
-          <CheckoutOrderSummary
+          <div className="space-y-6">
+            <YEBOCheckoutIntelligence />
+            <CheckoutOrderSummary
             subTotalPrice={subTotalPrice}
             shipping={shipping}
             totalPrice={totalPrice}
@@ -209,6 +212,7 @@ const Checkout = () => {
             isWonBid={!!wonBid}
             wonBid={wonBid}
           />
+          </div>
         </div>
       </Container>
 
