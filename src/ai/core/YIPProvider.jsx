@@ -50,7 +50,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const providerFactoryRef = useRef(null);
   if (!providerFactoryRef.current) {
     providerFactoryRef.current = createProviderFactory({
-      preferredProvider: "gemini",
+      preferredProvider: "openrouter",
       streamingEnabled: true,
       offlineMode: false,
       mockMode: false,
@@ -67,7 +67,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     providerFactoryRef.current.initialize();
   }
   const [currentProviderId, setCurrentProviderId] = useState(
-    () => orchestratorRef.current?.providerManager?.currentProviderId || "gemini"
+    () => orchestratorRef.current?.providerManager?.currentProviderId || "openrouter"
   );
   const knowledgeEngineRef = useRef(null);
   if (!knowledgeEngineRef.current) {
@@ -173,7 +173,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
 
       try {
         if (
-          config.provider === "gemini" &&
+          (config.provider === "gemini" || config.provider === "openrouter") &&
           !(adapterRef.current instanceof SDKAssistantAdapter)
         ) {
           adapterRef.current = createAssistantAdapter(

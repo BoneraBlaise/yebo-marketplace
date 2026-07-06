@@ -2,6 +2,7 @@
 
 export const PROVIDER_ID = {
   GEMINI: "gemini",
+  OPENROUTER: "openrouter",
   OPENAI: "openai",
   CLAUDE: "claude",
   FASHION: "fashion",

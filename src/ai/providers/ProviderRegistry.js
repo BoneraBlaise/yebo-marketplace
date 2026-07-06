@@ -1,6 +1,7 @@
 import { BaseProvider } from "./BaseProvider";
 import { UnknownProviderError } from "./ProviderErrors";
 import { GeminiProvider } from "./GeminiProvider";
+import { OpenRouterProvider } from "./OpenRouterProvider";
 import { OpenAIProvider } from "./OpenAIProvider";
 import { ClaudeProvider } from "./ClaudeProvider";
 import { FashionProvider } from "./FashionProvider";
@@ -13,6 +14,7 @@ import { PROVIDER_STATUS } from "./ProviderTypes";
 
 const PROVIDER_CLASSES = {
   gemini: GeminiProvider,
+  openrouter: OpenRouterProvider,
   openai: OpenAIProvider,
   claude: ClaudeProvider,
   fashion: FashionProvider,

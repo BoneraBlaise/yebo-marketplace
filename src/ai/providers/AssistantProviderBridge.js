@@ -5,7 +5,10 @@ import { GeminiAdapter } from "./GeminiAdapter";
 import { ClaudeAdapter } from "./ClaudeAdapter";
 import { LocalAdapter } from "./LocalAdapter";
 import { isGeminiConfigured } from "./GeminiConfig";
+import { isOpenRouterConfigured } from "./openrouter/OpenRouterConfig";
 import { PROVIDER_STATUS } from "./ProviderTypes";
+
+const SDK_PROVIDER_IDS = new Set(["gemini", "openrouter"]);
 
 const LEGACY_ADAPTERS = {
   mock: MockAdapter,
@@ -20,19 +23,33 @@ const createLegacyAdapter = (providerId = "mock") => {
   return new Adapter();
 };
 
+const isSdkProviderConfigured = (providerId) => {
+  if (providerId === "gemini") return isGeminiConfigured();
+  if (providerId === "openrouter") return isOpenRouterConfigured();
+  return false;
+};
+
+const getLiveIndicator = (providerId) => {
+  if (providerId === "openrouter") {
+    return { label: "OpenRouter Live", emoji: "🟢", key: "openrouter_live" };
+  }
+  return { label: "Gemini Live", emoji: "🟢", key: "gemini_live" };
+};
+
 /** Assistant panel provider indicator — presentation only */
 export const ASSISTANT_PROVIDER_INDICATOR = {
   GEMINI_LIVE: { label: "Gemini Live", emoji: "🟢", key: "gemini_live" },
+  OPENROUTER_LIVE: { label: "OpenRouter Live", emoji: "🟢", key: "openrouter_live" },
   MOCK_FALLBACK: { label: "Mock Fallback", emoji: "🟡", key: "mock_fallback" },
   OFFLINE: { label: "Offline", emoji: "🔴", key: "offline" },
 };
 
 /**
  * Bridges the legacy assistant adapter interface to the Provider SDK.
- * Resolves Gemini through ProviderFactory; MockAdapter is fallback only.
+ * Resolves providers through ProviderFactory; MockAdapter is fallback only.
  */
 export class SDKAssistantAdapter extends BaseAdapter {
-  constructor(factory, preferredId = "gemini") {
+  constructor(factory, preferredId = "openrouter") {
     super(preferredId, "YEBO Assistant SDK");
     this.factory = factory;
     this.preferredId = preferredId;
@@ -48,11 +65,14 @@ export class SDKAssistantAdapter extends BaseAdapter {
   }
 
   _prepareProviderForMessage(provider) {
-    if (!isGeminiConfigured()) return;
+    if (!isSdkProviderConfigured(this.preferredId)) return;
     provider._forceMock = false;
     provider._useMock = false;
     if (provider.geminiClient) {
       provider.geminiClient._ready = true;
+    }
+    if (provider.openRouterClient) {
+      provider.openRouterClient._ready = true;
     }
   }
 
@@ -69,11 +89,11 @@ export class SDKAssistantAdapter extends BaseAdapter {
       return;
     }
     if (health?.live || (health?.status === PROVIDER_STATUS.HEALTHY && !health?.mock)) {
-      this.providerState = ASSISTANT_PROVIDER_INDICATOR.GEMINI_LIVE;
+      this.providerState = getLiveIndicator(this.preferredId);
       return;
     }
-    if (isGeminiConfigured()) {
-      this.providerState = ASSISTANT_PROVIDER_INDICATOR.GEMINI_LIVE;
+    if (isSdkProviderConfigured(this.preferredId)) {
+      this.providerState = getLiveIndicator(this.preferredId);
       return;
     }
     this.providerState = ASSISTANT_PROVIDER_INDICATOR.MOCK_FALLBACK;
@@ -89,8 +109,8 @@ export class SDKAssistantAdapter extends BaseAdapter {
 
     const provider = this._resolveSdkProvider();
     this._lastHealth = await provider.health();
-    if (isGeminiConfigured()) {
-      this.providerState = ASSISTANT_PROVIDER_INDICATOR.GEMINI_LIVE;
+    if (isSdkProviderConfigured(this.preferredId)) {
+      this.providerState = getLiveIndicator(this.preferredId);
     } else {
       this._setProviderState(this._lastHealth);
     }
@@ -99,7 +119,7 @@ export class SDKAssistantAdapter extends BaseAdapter {
     // eslint-disable-next-line no-console
     console.info("[YEBO Assistant] connect()", {
       provider: this.preferredId,
-      geminiConfigured: isGeminiConfigured(),
+      configured: isSdkProviderConfigured(this.preferredId),
       indicator: this.providerState.key,
     });
     return this.connected;
@@ -112,20 +132,21 @@ export class SDKAssistantAdapter extends BaseAdapter {
   async complete(input, options = {}) {
     // eslint-disable-next-line no-console
     console.info("[YEBO Assistant] sendMessage → complete()", {
+      provider: this.preferredId,
       preview: String(input || "").slice(0, 40),
     });
     try {
       const provider = this._resolveSdkProvider();
       this._prepareProviderForMessage(provider);
       // eslint-disable-next-line no-console
-      console.info("[YEBO GeminiProvider] chat() (generate)", {
-        configured: isGeminiConfigured(),
+      console.info(`[YEBO ${this.preferredId}Provider] chat()`, {
+        configured: isSdkProviderConfigured(this.preferredId),
         useMock: provider._useMock,
         forceMock: provider._forceMock,
       });
       const res = await provider.chat(input, options);
       // eslint-disable-next-line no-console
-      console.info("[YEBO GeminiProvider] chat() result", {
+      console.info(`[YEBO ${this.preferredId}Provider] chat() result`, {
         mock: res.mock,
         fallback: res.fallback,
         providerId: res.providerId,
@@ -142,7 +163,7 @@ export class SDKAssistantAdapter extends BaseAdapter {
       };
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.warn("[YEBO GeminiProvider] chat() failed → MockAdapter fallback", err.message);
+      console.warn(`[YEBO ${this.preferredId}Provider] chat() failed → MockAdapter fallback`, err.message);
       this.providerState = ASSISTANT_PROVIDER_INDICATOR.MOCK_FALLBACK;
       return this.mockAdapter.complete(input, options);
     }
@@ -151,14 +172,15 @@ export class SDKAssistantAdapter extends BaseAdapter {
   async *stream(input, options = {}) {
     // eslint-disable-next-line no-console
     console.info("[YEBO Assistant] sendMessage → stream()", {
+      provider: this.preferredId,
       preview: String(input || "").slice(0, 40),
     });
     try {
       const provider = this._resolveSdkProvider();
       this._prepareProviderForMessage(provider);
       // eslint-disable-next-line no-console
-      console.info("[YEBO GeminiProvider] stream()", {
-        configured: isGeminiConfigured(),
+      console.info(`[YEBO ${this.preferredId}Provider] stream()`, {
+        configured: isSdkProviderConfigured(this.preferredId),
         useMock: provider._useMock,
         forceMock: provider._forceMock,
       });
@@ -170,14 +192,14 @@ export class SDKAssistantAdapter extends BaseAdapter {
       }
       const result = streamController.complete();
       // eslint-disable-next-line no-console
-      console.info("[YEBO GeminiProvider] stream() complete", { live: result.live });
+      console.info(`[YEBO ${this.preferredId}Provider] stream() complete`, { live: result.live });
       this._setProviderState(this._lastHealth, {
         mock: !result.live,
         fallback: !result.live,
       });
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.warn("[YEBO GeminiProvider] stream() failed → MockAdapter fallback", err.message);
+      console.warn(`[YEBO ${this.preferredId}Provider] stream() failed → MockAdapter fallback`, err.message);
       this.providerState = ASSISTANT_PROVIDER_INDICATOR.MOCK_FALLBACK;
       yield* this.mockAdapter.stream(input, options);
     }
@@ -204,8 +226,8 @@ export class SDKAssistantAdapter extends BaseAdapter {
   }
 }
 
-export const createAssistantAdapter = (providerId = "gemini", factory) => {
-  if (providerId === "gemini" && factory) {
+export const createAssistantAdapter = (providerId = "openrouter", factory) => {
+  if (SDK_PROVIDER_IDS.has(providerId) && factory) {
     return new SDKAssistantAdapter(factory, providerId);
   }
   return createLegacyAdapter(providerId);

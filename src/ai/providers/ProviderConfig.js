@@ -5,7 +5,7 @@ export const defaultProviderConfig = {
   streamingEnabled: false,
   offlineMode: true,
   debugMode: false,
-  textProvider: "gemini",
+  textProvider: "openrouter",
   imageProvider: "fashion",
   embeddingProvider: "openai",
   mockMode: true,

@@ -21,6 +21,14 @@ export { BaseProvider } from "./BaseProvider";
 export { GeminiProvider } from "./GeminiProvider";
 export { GeminiClient } from "./GeminiClient";
 export { getGeminiApiKey, isGeminiConfigured, logGeminiDebug } from "./GeminiConfig";
+export { OpenRouterProvider } from "./OpenRouterProvider";
+export { OpenRouterClient } from "./openrouter/OpenRouterClient";
+export {
+  getOpenRouterApiKey,
+  isOpenRouterConfigured,
+  logOpenRouterDebug,
+} from "./openrouter/OpenRouterConfig";
+export { OpenRouterLiveStream, createOpenRouterLiveStream } from "./OpenRouterLiveStream";
 export { OpenAIProvider } from "./OpenAIProvider";
 export { ClaudeProvider } from "./ClaudeProvider";
 export { FashionProvider } from "./FashionProvider";

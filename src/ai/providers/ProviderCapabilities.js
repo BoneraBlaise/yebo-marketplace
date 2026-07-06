@@ -16,6 +16,20 @@ export const SDK_CAPABILITY_PROFILES = {
     supportsEmbeddings: true,
     supportsImageGeneration: false,
   },
+  openrouter: {
+    label: "OpenRouter",
+    models: {
+      [MODEL_CATEGORY.TEXT]: "google/gemma-4-31b-it:free",
+      [MODEL_CATEGORY.VISION]: null,
+      [MODEL_CATEGORY.EMBEDDING]: null,
+      [MODEL_CATEGORY.IMAGE]: null,
+      [MODEL_CATEGORY.AUDIO]: null,
+    },
+    supportsStreaming: true,
+    supportsVision: false,
+    supportsEmbeddings: false,
+    supportsImageGeneration: false,
+  },
   openai: {
     label: "OpenAI",
     models: {
