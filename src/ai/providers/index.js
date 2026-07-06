@@ -18,6 +18,8 @@ export {
 /* Provider SDK — Phase 8A.1 (aliased to avoid orchestration barrel collisions) */
 export { BaseProvider } from "./BaseProvider";
 export { GeminiProvider } from "./GeminiProvider";
+export { GeminiClient } from "./GeminiClient";
+export { getGeminiApiKey, isGeminiConfigured, logGeminiDebug } from "./GeminiConfig";
 export { OpenAIProvider } from "./OpenAIProvider";
 export { ClaudeProvider } from "./ClaudeProvider";
 export { FashionProvider } from "./FashionProvider";

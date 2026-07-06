@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo, useRef, useEffect } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { YIPConfig, YIP_PUBLIC_NAME } from "../config/yipConfig";
 import { createProviderAdapter } from "../providers/ProviderFactory";
 import { createSession } from "./YIPSession";
@@ -23,18 +23,9 @@ import { createKnowledgeSnapshot } from "../knowledge/KnowledgeSnapshot";
 import { createAgentPlatform } from "../agents/AgentPlatform";
 import { createProviderFactory } from "../providers/ProviderFactory";
 import { connectOrchestrationToSDK } from "../orchestration/OrchestrationSDKBridge";
-
-const YIPContext = createContext(null);
+import { YIPContext } from "./YIPContext";
 
 const WELCOME_MESSAGE = `Hi! I'm ${YIP_PUBLIC_NAME} — your Yebone shopping companion. Ask me anything about products, styles, or deals across Africa. Powered by YIP.`;
-
-export const useYIP = () => {
-  const ctx = useContext(YIPContext);
-  if (!ctx) throw new Error("useYIP must be used within YIPProvider");
-  return ctx;
-};
-
-export const useYIPOptional = () => useContext(YIPContext);
 
 export const YIPProvider = ({ children, config: configOverride }) => {
   const sessionRef = useRef(createSession());
@@ -573,5 +564,3 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     </YEBOMemoryContext.Provider>
   );
 };
-
-export default YIPContext;

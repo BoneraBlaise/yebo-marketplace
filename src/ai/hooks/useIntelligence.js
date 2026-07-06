@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useYIPOptional } from "../hooks/useYIP";
+import { useYIPOptional } from "./useYIP";
 import { SHOPPING_SCOPES } from "../memory/YEBOShoppingContext";
 import { SCORE_TYPE } from "../intelligence/IntelligenceTypes";
 

@@ -1,1 +1,1 @@
-export { useYIP, useYIPOptional } from "../core/YIPProvider";
+export { useYIP, useYIPOptional } from "../core/YIPContext";
