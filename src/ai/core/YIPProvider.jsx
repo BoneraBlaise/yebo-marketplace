@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { YIPConfig, YIP_PUBLIC_NAME } from "../config/yipConfig";
-import { createProviderAdapter } from "../providers/providerFactory";
+import { createProviderAdapter } from "../providers/ProviderFactory";
 import { createSession } from "./YIPSession";
 import { YIPConversation } from "./YIPConversation";
 import { createYEBOMemoryEngine } from "../memory/YEBOMemoryEngine";
@@ -21,6 +21,8 @@ import { createAIOrchestrator } from "../orchestration/AIOrchestrator";
 import { createKnowledgeEngine } from "../knowledge/KnowledgeEngine";
 import { createKnowledgeSnapshot } from "../knowledge/KnowledgeSnapshot";
 import { createAgentPlatform } from "../agents/AgentPlatform";
+import { createProviderFactory } from "../providers/ProviderFactory";
+import { connectOrchestrationToSDK } from "../orchestration/OrchestrationSDKBridge";
 
 const YIPContext = createContext(null);
 
@@ -54,6 +56,15 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     });
   }
   const orchestratorRef = useRef(null);
+  const providerFactoryRef = useRef(null);
+  if (!providerFactoryRef.current) {
+    providerFactoryRef.current = createProviderFactory({
+      preferredProvider: "mock",
+      streamingEnabled: false,
+      offlineMode: true,
+      mockMode: true,
+    });
+  }
   if (!orchestratorRef.current) {
     orchestratorRef.current = createAIOrchestrator({
       memoryEngine: memoryRef.current,
@@ -61,6 +72,8 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       intelligenceEngine: intelligenceEngineRef.current,
       config: { preferredProvider: "mock", streamingEnabled: false },
     });
+    connectOrchestrationToSDK(orchestratorRef.current);
+    providerFactoryRef.current.initialize();
   }
   const [currentProviderId, setCurrentProviderId] = useState(
     () => orchestratorRef.current?.providerManager?.currentProviderId || "mock"
@@ -241,6 +254,11 @@ export const YIPProvider = ({ children, config: configOverride }) => {
 
   const switchProvider = useCallback((id) => {
     const provider = orchestratorRef.current.switchProvider(id);
+    try {
+      providerFactoryRef.current.switchProvider(id);
+    } catch {
+      /* orchestration-only provider ids */
+    }
     setCurrentProviderId(id);
     const next = YIPConfig.set({ provider: id });
     setConfigState(next);
@@ -248,6 +266,11 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     YIPEvents.emit(YIP_EVENT.PROVIDER_CHANGE, { provider: id });
     return provider;
   }, []);
+
+  const getProvider = useCallback(
+    (id) => providerFactoryRef.current.getProvider(id || currentProviderId),
+    [currentProviderId]
+  );
 
   const getAvailableProviders = useCallback(
     () => orchestratorRef.current.getAvailableProviders(),
@@ -458,6 +481,13 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       orchestrator: orchestratorRef.current,
       providerManager: orchestratorRef.current.providerManager,
       providerRegistry: orchestratorRef.current.providerRegistry,
+      // Provider SDK (Phase 8A.1)
+      providerFactory: providerFactoryRef.current,
+      providerHealth: providerFactoryRef.current.getHealthMonitor(),
+      providerUsage: providerFactoryRef.current.getUsageTracker(),
+      providerConfiguration: providerFactoryRef.current.getConfiguration(),
+      getProvider,
+      sdkProviderRegistry: providerFactoryRef.current.registry,
       currentProvider,
       currentProviderId,
       switchProvider,
@@ -524,6 +554,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       switchProvider,
       getAvailableProviders,
       getProviderHealth,
+      getProvider,
       searchKnowledge,
       getKnowledge,
       getKnowledgeDomains,

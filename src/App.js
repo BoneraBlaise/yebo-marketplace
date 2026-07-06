@@ -92,7 +92,8 @@ import { getActiveBids } from "./redux/actions/bids.js";
 import LoginSuccessHandler from "./components/Login/LoginSuccessHandler";
 import CommissionDashboard from "./components/Commission/CommissionDashboard";
 import { ReferralProvider } from './context/ReferralContext';
-import { AIProvider, GlobalAIFab } from "./components/ai";
+import { AIProvider } from "./components/ai/core/AIContext";
+import GlobalAIFab from "./components/ai/GlobalAIFab";
 import "./components/ai/core/ai.css";
 
 // Google Analytics tracking code inside App component

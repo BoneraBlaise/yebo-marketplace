@@ -18,5 +18,6 @@ export { defaultOrchestrationConfig, mergeOrchestrationConfig } from "./Provider
 export { PROVIDER_CAPABILITY_PROFILES, getCapabilityProfile } from "./ProviderCapabilities";
 export { DEFAULT_PROVIDER_PRIORITY, FALLBACK_CHAIN } from "./ProviderPriority";
 export { MOCK_PROVIDER_ADAPTERS, MockOrchestrationAdapter } from "./MockProviders";
+export { connectOrchestrationToSDK } from "./OrchestrationSDKBridge";
 export * from "./ProviderTypes";
 export { delay, normalizeHealth, isProviderUsable, pickMockResponse } from "./ProviderHelpers";

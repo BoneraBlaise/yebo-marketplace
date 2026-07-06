@@ -1,12 +1,10 @@
-/** Re-export YIP platform from src/ai */
+/** Re-export YIP platform — direct paths only (avoid src/ai barrel circular init) */
 export {
-  YIPProvider,
-  useYIP,
-  useYIPOptional,
-  YIPConfig,
-  YIP_PUBLIC_NAME,
-  YIP_PLATFORM_NAME,
-} from "../../ai";
+  AIProvider as YIPProvider,
+  useAI as useYIP,
+  useAIOptional as useYIPOptional,
+} from "./core/AIContext";
+export { YIPConfig, YIP_PUBLIC_NAME, YIP_PLATFORM_NAME } from "../../ai/config";
 
 /** Backward-compatible UI bridge (AIProvider = YIPProvider) */
 export { AIProvider, useAI, useAIOptional } from "./core/AIContext";
