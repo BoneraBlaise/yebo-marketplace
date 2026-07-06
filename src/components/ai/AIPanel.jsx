@@ -21,7 +21,9 @@ const AIPanel = () => {
     setInputValue,
     sendMessage,
     isTyping,
+    isStreaming,
     lastError,
+    assistantProviderIndicator,
   } = useAI();
 
   useEffect(() => {
@@ -43,6 +45,10 @@ const AIPanel = () => {
     e.preventDefault();
     if (shoppingMode === "chat") sendMessage(inputValue);
   };
+
+  const activeProviderLabel = assistantProviderIndicator
+    ? `${assistantProviderIndicator.emoji} ${assistantProviderIndicator.label}`
+    : "🔴 Offline";
 
   return (
     <>
@@ -93,7 +99,10 @@ const AIPanel = () => {
           >
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="gold" className="text-[10px]">YEBO</Badge>
-              <span className="text-[10px] text-gray-400">Powered by YIP · Mock intelligence</span>
+              <span className="text-[10px] text-gray-400">
+                Active Provider · {activeProviderLabel}
+                {isStreaming ? " · streaming" : ""}
+              </span>
             </div>
             <div className="flex gap-2">
               <input

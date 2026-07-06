@@ -19,13 +19,13 @@ export const defaultFeatureFlags = {
 export const defaultYIPConfig = {
   publicName: YIP_PUBLIC_NAME,
   platformName: YIP_PLATFORM_NAME,
-  provider: "mock",
-  model: "mock-v1",
+  provider: "gemini",
+  model: "gemini-2.0-flash",
   temperature: 0.7,
-  streaming: false,
+  streaming: true,
   language: "en",
   region: "RW",
-  mockMode: true,
+  mockMode: false,
   environment: typeof process !== "undefined" ? process.env.NODE_ENV : "development",
   featureFlags: { ...defaultFeatureFlags },
 };

@@ -14,7 +14,7 @@ const STATUS_COLORS = {
 const YEBOProviderStatus = ({ className, compact = false }) => {
   const current = useCurrentProvider();
   const providers = useAvailableProviders();
-  const { switchProvider, providerHealth, providerUsage, providerConfiguration, isStreaming } =
+  const { switchProvider, providerHealth, providerUsage, providerConfiguration, isStreaming, assistantProviderIndicator } =
     useAI();
 
   const sdkHealth = useMemo(() => {
@@ -35,10 +35,13 @@ const YEBOProviderStatus = ({ className, compact = false }) => {
   const statusClass = STATUS_COLORS[healthLabel] || STATUS_COLORS.offline;
 
   if (compact) {
+    const indicator = assistantProviderIndicator
+      ? `${assistantProviderIndicator.emoji} ${assistantProviderIndicator.label}`
+      : `🔴 Offline`;
     return (
       <p className={`text-[10px] text-gray-500 ${className || ""}`}>
-        <span className="font-semibold text-yebone-primary">{current.name}</span>
-        <span className={`ml-1 capitalize ${statusClass}`}>· {healthLabel}</span>
+        <span className="font-semibold text-yebone-primary">Active Provider</span>
+        <span className="ml-1">{indicator}</span>
         {isStreaming && <span className="ml-1 text-yebone-gold">· streaming</span>}
       </p>
     );

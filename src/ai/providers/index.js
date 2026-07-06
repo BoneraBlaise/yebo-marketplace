@@ -5,6 +5,7 @@ export { OpenAIAdapter } from "./OpenAIAdapter";
 export { GeminiAdapter } from "./GeminiAdapter";
 export { ClaudeAdapter } from "./ClaudeAdapter";
 export { LocalAdapter } from "./LocalAdapter";
+export { SDKAssistantAdapter, createAssistantAdapter, ASSISTANT_PROVIDER_INDICATOR } from "./AssistantProviderBridge";
 export {
   createProviderAdapter,
   listProviders,
@@ -29,6 +30,7 @@ export { ProviderRegistry as SDKProviderRegistry, createProviderRegistry as crea
 export { ProviderHealthMonitor as SDKProviderHealthMonitor, createHealthMonitor as createSDKHealthMonitor } from "./ProviderHealth";
 export { ProviderUsageTracker as SDKProviderUsageTracker, createUsageTracker as createSDKUsageTracker } from "./ProviderUsage";
 export { ProviderStream, createStream } from "./ProviderStreaming";
+export { GeminiLiveStream, createGeminiLiveStream } from "./GeminiLiveStream";
 export { defaultProviderConfig, mergeProviderConfig as mergeSDKProviderConfig } from "./ProviderConfig";
 export { SDK_CAPABILITY_PROFILES, getSDKCapabilities } from "./ProviderCapabilities";
 export { sdkProviderEvents, SDK_PROVIDER_EVENT } from "./ProviderEvents";

@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { YIPConfig, YIP_PUBLIC_NAME } from "../config/yipConfig";
-import { createProviderAdapter } from "../providers/ProviderFactory";
+import { createAssistantAdapter, ASSISTANT_PROVIDER_INDICATOR, SDKAssistantAdapter } from "../providers/AssistantProviderBridge";
 import { createSession } from "./YIPSession";
 import { YIPConversation } from "./YIPConversation";
 import { createYEBOMemoryEngine } from "../memory/YEBOMemoryEngine";
@@ -50,10 +50,10 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const providerFactoryRef = useRef(null);
   if (!providerFactoryRef.current) {
     providerFactoryRef.current = createProviderFactory({
-      preferredProvider: "mock",
-      streamingEnabled: false,
-      offlineMode: true,
-      mockMode: true,
+      preferredProvider: "gemini",
+      streamingEnabled: true,
+      offlineMode: false,
+      mockMode: false,
     });
   }
   if (!orchestratorRef.current) {
@@ -67,7 +67,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     providerFactoryRef.current.initialize();
   }
   const [currentProviderId, setCurrentProviderId] = useState(
-    () => orchestratorRef.current?.providerManager?.currentProviderId || "mock"
+    () => orchestratorRef.current?.providerManager?.currentProviderId || "gemini"
   );
   const knowledgeEngineRef = useRef(null);
   if (!knowledgeEngineRef.current) {
@@ -99,7 +99,16 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     return YIPConfig.get();
   });
 
-  const adapterRef = useRef(createProviderAdapter(config.provider));
+  const adapterRef = useRef(null);
+  if (!adapterRef.current) {
+    adapterRef.current = createAssistantAdapter(
+      config.provider,
+      providerFactoryRef.current
+    );
+  }
+  const [assistantProviderIndicator, setAssistantProviderIndicator] = useState(
+    ASSISTANT_PROVIDER_INDICATOR.OFFLINE
+  );
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [messages, setMessages] = useState(conversationRef.current.getAll());
   const [isTyping, setIsTyping] = useState(false);
@@ -117,8 +126,17 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     const session = sessionRef.current;
     session.start({ provider: config.provider });
     memoryRef.current.seedMockSession();
-    adapterRef.current.connect(config).catch(() => {
+    adapterRef.current = createAssistantAdapter(
+      config.provider,
+      providerFactoryRef.current
+    );
+    adapterRef.current.connect(config).then(() => {
+      setAssistantProviderIndicator(
+        adapterRef.current.getProviderIndicator?.() || ASSISTANT_PROVIDER_INDICATOR.OFFLINE
+      );
+    }).catch(() => {
       setLastError(normalizeError({ code: YIP_ERROR.PROVIDER_UNAVAILABLE }));
+      setAssistantProviderIndicator(ASSISTANT_PROVIDER_INDICATOR.MOCK_FALLBACK);
     });
     return () => session.end();
   }, [config.provider]);
@@ -154,7 +172,24 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       YIPAnalytics.trackAssistant("message_sent");
 
       try {
+        if (
+          config.provider === "gemini" &&
+          !(adapterRef.current instanceof SDKAssistantAdapter)
+        ) {
+          adapterRef.current = createAssistantAdapter(
+            config.provider,
+            providerFactoryRef.current
+          );
+        }
+
         const adapter = adapterRef.current;
+        // eslint-disable-next-line no-console
+        console.info("[YEBO Assistant] sendMessage", {
+          provider: config.provider,
+          streaming: config.streaming,
+          adapter: adapter?.constructor?.name,
+        });
+
         if (!adapter.isAvailable()) {
           throw normalizeError({ code: YIP_ERROR.PROVIDER_UNAVAILABLE });
         }
@@ -185,6 +220,9 @@ export const YIPProvider = ({ children, config: configOverride }) => {
           title: trimmed.slice(0, 40),
           role: "assistant",
         });
+        setAssistantProviderIndicator(
+          adapterRef.current.getProviderIndicator?.() || ASSISTANT_PROVIDER_INDICATOR.MOCK_FALLBACK
+        );
         syncMessages();
       } catch (err) {
         const yipError = normalizeError(err);
@@ -253,7 +291,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     setCurrentProviderId(id);
     const next = YIPConfig.set({ provider: id });
     setConfigState(next);
-    adapterRef.current = createProviderAdapter(id);
+    adapterRef.current = createAssistantAdapter(id, providerFactoryRef.current);
     YIPEvents.emit(YIP_EVENT.PROVIDER_CHANGE, { provider: id });
     return provider;
   }, []);
@@ -402,7 +440,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       setConfig: (partial) => {
         const next = YIPConfig.set(partial);
         setConfigState(next);
-        adapterRef.current = createProviderAdapter(next.provider);
+        adapterRef.current = createAssistantAdapter(next.provider, providerFactoryRef.current);
         YIPEvents.emit(YIP_EVENT.PROVIDER_CHANGE, { provider: next.provider });
         return next;
       },
@@ -420,6 +458,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       setInputValue,
       sendMessage,
       lastError,
+      assistantProviderIndicator,
       // Adapter data
       suggestedPrompts: adapterRef.current.getSuggestedPrompts?.() || [],
       quickActions: adapterRef.current.getQuickActions?.() || [],
@@ -540,6 +579,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       getRecommendationReason,
       getPersonalization,
       getIntelligenceSnapshot,
+      assistantProviderIndicator,
       currentProvider,
       currentProviderId,
       switchProvider,
