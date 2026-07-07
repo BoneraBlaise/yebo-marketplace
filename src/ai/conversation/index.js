@@ -1,4 +1,4 @@
-/** Conversation Core — Phase 8B.1 + 8B.2 */
+/** Conversation Core — Phase 8B.1 + 8B.2 + 8B.3 */
 
 export { ConversationManager, createConversationManager } from "./ConversationManager";
 export { SessionManager, createSessionManager } from "./SessionManager";
@@ -6,8 +6,12 @@ export { ConversationPipeline, createConversationPipeline } from "./Conversation
 export { ContextBuilder, createContextBuilder } from "./ContextBuilder";
 export { MemoryInjector, createMemoryInjector } from "./MemoryInjector";
 export { KnowledgeInjector, createKnowledgeInjector } from "./KnowledgeInjector";
+export { PromptComposer, createPromptComposer } from "./PromptComposer";
+export { SystemPromptManager, createSystemPromptManager } from "./SystemPromptManager";
+export { createPromptContext } from "./PromptContext";
 export { createConversationContext } from "./ConversationContext";
 export { logConversationDiagnostics } from "./ConversationDiagnostics";
+export { logPromptDiagnostics } from "./PromptDiagnostics";
 export {
   MESSAGE_ROLE,
   CONVERSATION_STATUS,

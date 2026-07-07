@@ -4,12 +4,14 @@ import { createPipelineState } from "./ConversationState";
 import { createContextBuilder } from "./ContextBuilder";
 import { createMemoryInjector } from "./MemoryInjector";
 import { createKnowledgeInjector } from "./KnowledgeInjector";
+import { createPromptComposer } from "./PromptComposer";
+import { createSystemPromptManager } from "./SystemPromptManager";
 import { logConversationDiagnostics } from "./ConversationDiagnostics";
 
 /**
  * Conversation pipeline — orchestrates existing systems without changing them.
  * Stages: User Input → ConversationManager → ContextBuilder → MemoryInjector →
- * KnowledgeInjector → Prompt → ProviderFactory → Streaming/Response → Update
+ * KnowledgeInjector → PromptComposer → ProviderFactory → Streaming/Response → Update
  */
 export class ConversationPipeline {
   constructor({
@@ -44,6 +46,12 @@ export class ConversationPipeline {
     });
     this.memoryInjector = createMemoryInjector(memoryEngine);
     this.knowledgeInjector = createKnowledgeInjector(knowledgeEngine);
+    this.promptComposer = createPromptComposer({
+      systemPromptManager: createSystemPromptManager({
+        promptLibrary: this.promptLibrary || undefined,
+      }),
+    });
+    this.lastPrompt = null;
   }
 
   _emitStage(stage, payload = {}) {
@@ -76,13 +84,11 @@ export class ConversationPipeline {
     return context;
   }
 
-  _runPromptStage(input, _context) {
+  _runPromptStage(input, context) {
     this._emitStage(PIPELINE_STAGE.PROMPT);
-    /** Backwards-compatible: pass user input through unchanged */
-    if (this.promptLibrary?.render) {
-      return { input, enriched: false, libraryAvailable: true };
-    }
-    return { input, enriched: false };
+    const composed = this.promptComposer.compose({ input, context });
+    this.lastPrompt = composed;
+    return composed;
   }
 
   async _invokeProvider(input, options, streaming = false) {
