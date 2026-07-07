@@ -15,4 +15,6 @@ export * from "./knowledge";
 export * from "./agents";
 export * from "./reasoning";
 export * from "./commerce";
+export * from "./infrastructure";
+export * from "./experience";
 export * from "./components";
