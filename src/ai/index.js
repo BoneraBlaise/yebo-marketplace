@@ -13,4 +13,6 @@ export * from "./decision";
 export * from "./orchestration";
 export * from "./knowledge";
 export * from "./agents";
+export * from "./reasoning";
+export * from "./commerce";
 export * from "./components";

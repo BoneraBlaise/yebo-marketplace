@@ -11,6 +11,8 @@ import {
   createConversationManager,
   createSessionManager,
   createConversationPipeline,
+  createMemoryInjector,
+  createKnowledgeInjector,
 } from "../conversation";
 
 const SDK_PROVIDER_IDS = new Set(["gemini", "openrouter"]);
@@ -54,7 +56,7 @@ export const ASSISTANT_PROVIDER_INDICATOR = {
  * Resolves providers through ProviderFactory; MockAdapter is fallback only.
  */
 export class SDKAssistantAdapter extends BaseAdapter {
-  constructor(factory, preferredId = "openrouter") {
+  constructor(factory, preferredId = "openrouter", engineOptions = {}) {
     super(preferredId, "YEBO Assistant SDK");
     this.factory = factory;
     this.preferredId = preferredId;
@@ -67,10 +69,24 @@ export class SDKAssistantAdapter extends BaseAdapter {
     this.conversationPipeline = createConversationPipeline({
       sessionManager: this.sessionManager,
       conversationManager: this.conversationManager,
+      memoryEngine: engineOptions.memoryEngine || null,
+      knowledgeEngine: engineOptions.knowledgeEngine || null,
       factory,
       resolveProvider: () => this._resolveSdkProvider(),
       prepareProvider: (provider) => this._prepareProviderForMessage(provider),
     });
+  }
+
+  /** Optional engine wiring — backward compatible */
+  setIntelligenceEngines({ memoryEngine = null, knowledgeEngine = null } = {}) {
+    if (memoryEngine) {
+      this.conversationPipeline.memoryEngine = memoryEngine;
+      this.conversationPipeline.memoryInjector = createMemoryInjector(memoryEngine);
+    }
+    if (knowledgeEngine) {
+      this.conversationPipeline.knowledgeEngine = knowledgeEngine;
+      this.conversationPipeline.knowledgeInjector = createKnowledgeInjector(knowledgeEngine);
+    }
   }
 
   _resolveSdkProvider() {

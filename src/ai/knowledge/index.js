@@ -1,6 +1,11 @@
 /* YEBO Enterprise Knowledge Platform — Phase 7H (RAG-ready) */
 
 export { KnowledgeEngine, KnowledgeContext, createKnowledgeEngine } from "./KnowledgeEngine";
+export { ProductKnowledge, createProductKnowledge } from "./ProductKnowledge";
+export { OrganizationKnowledge, createOrganizationKnowledge } from "./OrganizationKnowledge";
+export { FAQKnowledge, createFAQKnowledge } from "./FAQKnowledge";
+export { KnowledgeRetrieval, createKnowledgeRetrieval } from "./KnowledgeRetrieval";
+export { logKnowledgeDiagnostics } from "./KnowledgeDiagnostics";
 export { KnowledgeRegistry, createKnowledgeRegistry } from "./KnowledgeRegistry";
 export { KnowledgeManager, createKnowledgeManager } from "./KnowledgeManager";
 export { KnowledgeIndex, createKnowledgeIndex } from "./KnowledgeIndex";

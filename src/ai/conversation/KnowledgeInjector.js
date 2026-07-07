@@ -13,7 +13,9 @@ export class KnowledgeInjector {
       let knowledge = null;
       const query = String(input || "");
 
-      if (typeof this.knowledgeEngine.searchKnowledge === "function") {
+      if (typeof this.knowledgeEngine.retrieve === "function") {
+        knowledge = await this.knowledgeEngine.retrieve(query, { limit: 5 });
+      } else if (typeof this.knowledgeEngine.searchKnowledge === "function") {
         knowledge = this.knowledgeEngine.searchKnowledge(query, { limit: 3 });
       } else if (typeof this.knowledgeEngine.search === "function") {
         knowledge = await this.knowledgeEngine.search(query, { limit: 3 });

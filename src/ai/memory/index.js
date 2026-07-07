@@ -15,6 +15,13 @@ export { RecentlyViewedMemory, createRecentlyViewedMemory } from "./RecentlyView
 export { RecommendationMemory, createRecommendationMemory } from "./RecommendationMemory";
 export { ShoppingMemory, createShoppingMemory } from "./ShoppingMemory";
 export { YEBOMemoryEngine, createYEBOMemoryEngine } from "./YEBOMemoryEngine";
+export { MemoryProvider, MemoryProviderRegistry, createMemoryProvider, createMemoryProviderRegistry } from "./MemoryProvider";
+export { ShortTermMemory, createShortTermMemory } from "./ShortTermMemory";
+export { LongTermMemory, createLongTermMemory } from "./LongTermMemory";
+export { MemoryRetrieval, createMemoryRetrieval } from "./MemoryRetrieval";
+export { scoreMemoryItem, rankMemoryItems } from "./MemoryScoring";
+export { isExpired, applyExpiration, withExpiration } from "./MemoryExpiration";
+export { logMemoryDiagnostics } from "./MemoryDiagnostics";
 export { YEBOShoppingContext, SHOPPING_SCOPES, createYEBOShoppingContext } from "./YEBOShoppingContext";
 export { YEBOMemoryContext, useYEBOMemory, useYEBOMemoryOptional } from "./YEBOMemoryContext";
 export { YEBOMemoryProvider } from "./YEBOMemoryProvider";

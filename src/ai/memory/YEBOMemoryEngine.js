@@ -15,6 +15,7 @@ import { createRecentlyViewedMemory } from "./RecentlyViewedMemory";
 import { createRecommendationMemory } from "./RecommendationMemory";
 import { createShoppingMemory } from "./ShoppingMemory";
 import { YIPMemory } from "./YIPMemory";
+import { createMemoryRetrieval } from "./MemoryRetrieval";
 import {
   MOCK_VISITED_PRODUCTS,
   MOCK_VIEWED_CATEGORIES,
@@ -57,6 +58,8 @@ export class YEBOMemoryEngine {
       products: this.products,
       search: this.search,
     });
+
+    this.retrieval = createMemoryRetrieval({ engine: this });
 
     this._mockMeta = {
       timeline: MOCK_SHOPPING_TIMELINE,
@@ -150,6 +153,10 @@ export class YEBOMemoryEngine {
       return `Welcome back — continue exploring "${lastSearch}".`;
     }
     return "Welcome back — YEBO remembers your shopping session.";
+  }
+
+  retrieve(query = "", options = {}) {
+    return this.retrieval.retrieve(query, options);
   }
 
   getSnapshot() {

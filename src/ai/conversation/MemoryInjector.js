@@ -11,7 +11,11 @@ export class MemoryInjector {
 
     try {
       let memory = null;
-      if (typeof this.memoryEngine.getSnapshot === "function") {
+      const query = String(context.metadata?.query || context.user || "");
+
+      if (typeof this.memoryEngine.retrieve === "function") {
+        memory = this.memoryEngine.retrieve(query, { limit: 10 });
+      } else if (typeof this.memoryEngine.getSnapshot === "function") {
         memory = this.memoryEngine.getSnapshot();
       } else if (typeof this.memoryEngine.export === "function") {
         memory = this.memoryEngine.export();

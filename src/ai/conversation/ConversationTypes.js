@@ -24,10 +24,14 @@ export const PIPELINE_STAGE = {
   CONTEXT_BUILD: "context_build",
   MEMORY: "memory",
   KNOWLEDGE: "knowledge",
+  REASONING: "reasoning",
+  CONTEXT_OPTIMIZATION: "context_optimization",
   PROMPT: "prompt",
+  ACTION_DECISION: "action_decision",
   PROVIDER: "provider",
   STREAMING: "streaming",
   RESPONSE: "response",
+  RECOVERY: "recovery",
   CONVERSATION_UPDATE: "conversation_update",
 };
 

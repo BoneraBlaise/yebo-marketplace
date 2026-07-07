@@ -10,6 +10,8 @@ export const CONVERSATION_EVENT = {
   PIPELINE_STAGE: "conversation:pipeline_stage",
   PIPELINE_COMPLETE: "conversation:pipeline_complete",
   PIPELINE_ERROR: "conversation:pipeline_error",
+  PIPELINE_CANCELLED: "conversation:pipeline_cancelled",
+  PIPELINE_TIMEOUT: "conversation:pipeline_timeout",
 };
 
 class ConversationEventsBus {

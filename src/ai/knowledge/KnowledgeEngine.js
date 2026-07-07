@@ -1,6 +1,7 @@
 import { createKnowledgeManager } from "./KnowledgeManager";
 import { mergeKnowledgeConfig } from "./KnowledgeConfig";
 import { knowledgeEvents, KNOWLEDGE_EVENT } from "./KnowledgeEvents";
+import { createKnowledgeRetrieval } from "./KnowledgeRetrieval";
 
 /** Read-only bind to upstream YIP layers */
 export class KnowledgeContext {
@@ -41,6 +42,11 @@ export class KnowledgeEngine {
     this.router = this.manager.router;
     this.pipeline = this.manager.pipeline;
     this.cache = this.manager.cache;
+    this.retrieval = createKnowledgeRetrieval({ engine: this });
+  }
+
+  retrieve(query = "", options = {}) {
+    return this.retrieval.retrieve(query, options);
   }
 
   searchKnowledge(query, options = {}) {
