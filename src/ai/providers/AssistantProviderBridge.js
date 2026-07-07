@@ -7,6 +7,11 @@ import { LocalAdapter } from "./LocalAdapter";
 import { isGeminiConfigured } from "./GeminiConfig";
 import { isOpenRouterConfigured } from "./openrouter/OpenRouterConfig";
 import { PROVIDER_STATUS } from "./ProviderTypes";
+import {
+  createConversationManager,
+  createSessionManager,
+  createConversationPipeline,
+} from "../conversation";
 
 const SDK_PROVIDER_IDS = new Set(["gemini", "openrouter"]);
 
@@ -56,6 +61,16 @@ export class SDKAssistantAdapter extends BaseAdapter {
     this.mockAdapter = new MockAdapter();
     this.providerState = ASSISTANT_PROVIDER_INDICATOR.OFFLINE;
     this._lastHealth = null;
+    this.conversationManager = createConversationManager();
+    this.sessionManager = createSessionManager(this.conversationManager);
+    this.sessionManager.createSession();
+    this.conversationPipeline = createConversationPipeline({
+      sessionManager: this.sessionManager,
+      conversationManager: this.conversationManager,
+      factory,
+      resolveProvider: () => this._resolveSdkProvider(),
+      prepareProvider: (provider) => this._prepareProviderForMessage(provider),
+    });
   }
 
   _resolveSdkProvider() {
@@ -136,15 +151,11 @@ export class SDKAssistantAdapter extends BaseAdapter {
       preview: String(input || "").slice(0, 40),
     });
     try {
-      const provider = this._resolveSdkProvider();
-      this._prepareProviderForMessage(provider);
       // eslint-disable-next-line no-console
       console.info(`[YEBO ${this.preferredId}Provider] chat()`, {
         configured: isSdkProviderConfigured(this.preferredId),
-        useMock: provider._useMock,
-        forceMock: provider._forceMock,
       });
-      const res = await provider.chat(input, options);
+      const res = await this.conversationPipeline.executeComplete(input, options);
       // eslint-disable-next-line no-console
       console.info(`[YEBO ${this.preferredId}Provider] chat() result`, {
         mock: res.mock,
@@ -176,21 +187,14 @@ export class SDKAssistantAdapter extends BaseAdapter {
       preview: String(input || "").slice(0, 40),
     });
     try {
-      const provider = this._resolveSdkProvider();
-      this._prepareProviderForMessage(provider);
       // eslint-disable-next-line no-console
       console.info(`[YEBO ${this.preferredId}Provider] stream()`, {
         configured: isSdkProviderConfigured(this.preferredId),
-        useMock: provider._useMock,
-        forceMock: provider._forceMock,
       });
-      const streamController = await provider.stream(input, options);
-      streamController.start();
-      for await (const { chunk, done } of streamController.next()) {
-        if (done) break;
+      for await (const chunk of this.conversationPipeline.executeStream(input, options)) {
         if (chunk) yield chunk;
       }
-      const result = streamController.complete();
+      const result = this.conversationPipeline.lastStreamResult || {};
       // eslint-disable-next-line no-console
       console.info(`[YEBO ${this.preferredId}Provider] stream() complete`, { live: result.live });
       this._setProviderState(this._lastHealth, {
