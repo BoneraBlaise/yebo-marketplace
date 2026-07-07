@@ -1,10 +1,15 @@
 import { PIPELINE_STAGE } from "./ConversationTypes";
 import { conversationEvents, CONVERSATION_EVENT } from "./ConversationEvents";
 import { createPipelineState } from "./ConversationState";
+import { createContextBuilder } from "./ContextBuilder";
+import { createMemoryInjector } from "./MemoryInjector";
+import { createKnowledgeInjector } from "./KnowledgeInjector";
+import { logConversationDiagnostics } from "./ConversationDiagnostics";
 
 /**
  * Conversation pipeline — orchestrates existing systems without changing them.
- * Stages: User Input → History → Memory → Knowledge → Prompt → Provider → Response → Update
+ * Stages: User Input → ConversationManager → ContextBuilder → MemoryInjector →
+ * KnowledgeInjector → Prompt → ProviderFactory → Streaming/Response → Update
  */
 export class ConversationPipeline {
   constructor({
@@ -16,6 +21,7 @@ export class ConversationPipeline {
     factory = null,
     resolveProvider = null,
     prepareProvider = null,
+    preferredProviderId = null,
   } = {}) {
     this.sessionManager = sessionManager;
     this.conversationManager = conversationManager;
@@ -25,7 +31,19 @@ export class ConversationPipeline {
     this.factory = factory;
     this.resolveProvider = resolveProvider;
     this.prepareProvider = prepareProvider;
+    this.preferredProviderId = preferredProviderId;
     this.lastStreamResult = null;
+    this.lastContext = null;
+
+    this.contextBuilder = createContextBuilder({
+      conversationManager,
+      sessionManager,
+      factory,
+      resolveProvider,
+      preferredProviderId,
+    });
+    this.memoryInjector = createMemoryInjector(memoryEngine);
+    this.knowledgeInjector = createKnowledgeInjector(knowledgeEngine);
   }
 
   _emitStage(stage, payload = {}) {
@@ -36,36 +54,29 @@ export class ConversationPipeline {
     return this.sessionManager.getCurrentSession() || this.sessionManager.createSession();
   }
 
-  _runMemoryStage(input) {
+  async _assembleContext(input, session) {
+    const startedAt = Date.now();
+    this._emitStage(PIPELINE_STAGE.CONTEXT_BUILD);
+
+    let context = this.contextBuilder.buildContext({
+      input,
+      session,
+      conversationId: session.conversationId,
+    });
+
     this._emitStage(PIPELINE_STAGE.MEMORY);
-    if (!this.memoryEngine) return null;
-    try {
-      if (typeof this.memoryEngine.getSnapshot === "function") {
-        return this.memoryEngine.getSnapshot();
-      }
-      if (typeof this.memoryEngine.export === "function") {
-        return this.memoryEngine.export();
-      }
-    } catch {
-      /* optional stage — do not alter flow */
-    }
-    return null;
-  }
+    context = this.memoryInjector.inject(context);
 
-  async _runKnowledgeStage(input) {
     this._emitStage(PIPELINE_STAGE.KNOWLEDGE);
-    if (!this.knowledgeEngine) return null;
-    try {
-      if (typeof this.knowledgeEngine.search === "function") {
-        return await this.knowledgeEngine.search(String(input || ""), { limit: 3 });
-      }
-    } catch {
-      /* optional stage — do not alter flow */
-    }
-    return null;
+    context = await this.knowledgeInjector.inject(context, input);
+
+    const elapsedMs = Date.now() - startedAt;
+    logConversationDiagnostics(context, elapsedMs);
+    this.lastContext = context;
+    return context;
   }
 
-  _runPromptStage(input, _history, _memoryContext, _knowledgeContext) {
+  _runPromptStage(input, _context) {
     this._emitStage(PIPELINE_STAGE.PROMPT);
     /** Backwards-compatible: pass user input through unchanged */
     if (this.promptLibrary?.render) {
@@ -101,16 +112,16 @@ export class ConversationPipeline {
       this.conversationManager.appendUserMessage(session.conversationId, input);
 
       this._emitStage(PIPELINE_STAGE.CONVERSATION_HISTORY);
-      const history = this.conversationManager.getHistory(session.conversationId);
       pipelineState.stagesCompleted.push(PIPELINE_STAGE.CONVERSATION_HISTORY);
 
-      const memoryContext = this._runMemoryStage(input);
-      pipelineState.stagesCompleted.push(PIPELINE_STAGE.MEMORY);
+      const context = await this._assembleContext(input, session);
+      pipelineState.stagesCompleted.push(
+        PIPELINE_STAGE.CONTEXT_BUILD,
+        PIPELINE_STAGE.MEMORY,
+        PIPELINE_STAGE.KNOWLEDGE
+      );
 
-      const knowledgeContext = await this._runKnowledgeStage(input);
-      pipelineState.stagesCompleted.push(PIPELINE_STAGE.KNOWLEDGE);
-
-      const prompt = this._runPromptStage(input, history, memoryContext, knowledgeContext);
+      const prompt = this._runPromptStage(input, context);
       pipelineState.stagesCompleted.push(PIPELINE_STAGE.PROMPT);
 
       const providerInput = prompt.input;
@@ -157,16 +168,16 @@ export class ConversationPipeline {
       this.conversationManager.appendUserMessage(session.conversationId, input);
 
       this._emitStage(PIPELINE_STAGE.CONVERSATION_HISTORY);
-      const history = this.conversationManager.getHistory(session.conversationId);
       pipelineState.stagesCompleted.push(PIPELINE_STAGE.CONVERSATION_HISTORY);
 
-      const memoryContext = this._runMemoryStage(input);
-      pipelineState.stagesCompleted.push(PIPELINE_STAGE.MEMORY);
+      const context = await this._assembleContext(input, session);
+      pipelineState.stagesCompleted.push(
+        PIPELINE_STAGE.CONTEXT_BUILD,
+        PIPELINE_STAGE.MEMORY,
+        PIPELINE_STAGE.KNOWLEDGE
+      );
 
-      const knowledgeContext = await this._runKnowledgeStage(input);
-      pipelineState.stagesCompleted.push(PIPELINE_STAGE.KNOWLEDGE);
-
-      const prompt = this._runPromptStage(input, history, memoryContext, knowledgeContext);
+      const prompt = this._runPromptStage(input, context);
       pipelineState.stagesCompleted.push(PIPELINE_STAGE.PROMPT);
 
       const providerInput = prompt.input;

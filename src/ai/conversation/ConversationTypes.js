@@ -21,6 +21,7 @@ export const SESSION_STATUS = {
 export const PIPELINE_STAGE = {
   USER_INPUT: "user_input",
   CONVERSATION_HISTORY: "conversation_history",
+  CONTEXT_BUILD: "context_build",
   MEMORY: "memory",
   KNOWLEDGE: "knowledge",
   PROMPT: "prompt",
