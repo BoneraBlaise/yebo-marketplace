@@ -1,7 +1,5 @@
 import React from 'react'
-import Header from '../../components/Layout/Header'
 import BlogDetails from '../../components/legal/BlogDetails'
-import Footer from '../../components/Layout/Footer'
 import post1 from '../../components/images/1.jpg'
 import post6 from '../../components/images/6.jpg'
 import post2 from '../../components/images/2.jpg'
@@ -88,9 +86,7 @@ const posts = [
 const BlogDetailsPage = () => {
     return (
         <div>
-            <Header />
             <BlogDetails posts={posts} />
-            <Footer />
         </div>
     )
 }

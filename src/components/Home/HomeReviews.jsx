@@ -26,7 +26,7 @@ const REVIEWS = [
 ];
 
 const HomeReviews = () => (
-  <section className="home-section">
+  <section className="home-section home-surface-1">
     <Container>
       <SectionTitle
         title="Loved by shoppers across Africa"
@@ -37,28 +37,30 @@ const HomeReviews = () => (
         {REVIEWS.map((review) => (
           <Card
             key={review.name}
-            className="hover:shadow-lg transition-shadow"
+            className="home-surface-card home-review-card"
             padding="lg"
           >
-            <div className="flex gap-1 mb-4">
+            <div className="flex gap-0.5 mb-4" aria-label={`${review.rating} out of 5 stars`}>
               {[...Array(review.rating)].map((_, i) => (
-                <span key={i} className="text-yebone-gold text-lg">
+                <span key={i} className="text-yebone-gold text-base leading-none">
                   ★
                 </span>
               ))}
             </div>
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+            <p className="home-review-card__quote">
               &ldquo;{review.text}&rdquo;
             </p>
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-yebone-primary text-white flex items-center justify-center font-semibold text-sm">
+            <div className="home-review-card__author">
+              <div className="home-review-card__avatar bg-yebone-primary text-white flex items-center justify-center font-semibold text-sm">
                 {review.avatar}
               </div>
               <div>
-                <p className="font-semibold text-sm dark:text-white">
+                <p className="font-semibold text-sm text-[var(--home-text)] leading-snug">
                   {review.name}
                 </p>
-                <p className="text-xs text-gray-500">{review.location}</p>
+                <p className="text-xs text-[var(--home-text-muted)] mt-0.5">
+                  {review.location}
+                </p>
               </div>
             </div>
           </Card>

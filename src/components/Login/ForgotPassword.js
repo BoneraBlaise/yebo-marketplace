@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import { HiOutlineMail } from "react-icons/hi";
 import { server } from "../../server";
 import { Button } from "../ui";
-import { AuthLayout, AuthFloatingInput } from "../Auth";
+import { AuthLayout, AuthPageChrome, AuthFloatingInput } from "../Auth";
+import { brandCopy, MARKETPLACE_NAME } from "../../ui-polish/brandConstants";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -47,11 +48,12 @@ const ForgotPassword = () => {
   };
 
   return (
-    <AuthLayout
-      title="Forgot password?"
-      subtitle="Enter your email address and we'll send you a link to reset your password."
-    >
-      <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+    <AuthPageChrome>
+      <AuthLayout
+        title="Forgot password?"
+        subtitle={`Enter your email and we'll send a secure reset link to your ${MARKETPLACE_NAME} account.`}
+      >
+        <form className="space-y-5" onSubmit={handleSubmit} noValidate>
         <AuthFloatingInput
           id="email"
           name="email"
@@ -85,6 +87,7 @@ const ForgotPassword = () => {
         </p>
       </form>
     </AuthLayout>
+    </AuthPageChrome>
   );
 };
 

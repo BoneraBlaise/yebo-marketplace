@@ -6,6 +6,7 @@ import AISection from "../primitives/AISection";
 import AICard from "../primitives/AICard";
 import AIActionButton from "../primitives/AIActionButton";
 import HomeProductCard from "../../Home/HomeProductCard";
+import { MarketplaceCardGrid, MarketplaceCardSlot } from "../../Marketplace/cards";
 import {
   TRENDING_SEARCHES,
   SMART_SUGGESTIONS,
@@ -35,7 +36,7 @@ const HomeAIDiscovery = () => {
       id="ai-discovery"
       title="Ask YEBO"
       subtitle="Smart shopping intelligence — trending searches, insights, and mock recommendations via YIP."
-      className="bg-white dark:bg-gray-950/50 pt-0 pb-12"
+      className="home-section home-section--compact home-surface-1 !pt-0"
       compact
     >
       <YEBOWelcomeBack className="mb-4" />
@@ -51,7 +52,7 @@ const HomeAIDiscovery = () => {
 
       <div className="grid lg:grid-cols-3 gap-6 mb-8">
         {/* Ask AI card */}
-        <AICard className="lg:col-span-1" glass>
+        <AICard className="lg:col-span-1 home-surface-card" glass>
           <p className="font-Poppins font-semibold dark:text-white mb-2">Ask YEBO</p>
           <p className="text-sm text-gray-500 mb-4">
             Describe what you need in plain language. Full AI search connects later.
@@ -73,7 +74,7 @@ const HomeAIDiscovery = () => {
 
         {/* Trending + Smart */}
         <div className="lg:col-span-2 grid sm:grid-cols-2 gap-4">
-          <AICard padding="sm">
+          <AICard padding="sm" className="home-surface-card">
             <div className="flex items-center gap-2 mb-3">
               <HiOutlineTrendingUp className="text-yebone-primary" size={18} />
               <p className="font-semibold text-sm dark:text-white">Trending searches</p>
@@ -87,7 +88,7 @@ const HomeAIDiscovery = () => {
             </div>
           </AICard>
 
-          <AICard padding="sm">
+          <AICard padding="sm" className="home-surface-card">
             <div className="flex items-center gap-2 mb-3">
               <HiOutlineLightBulb className="text-yebone-gold" size={18} />
               <p className="font-semibold text-sm dark:text-white">Smart suggestions</p>
@@ -101,7 +102,7 @@ const HomeAIDiscovery = () => {
             </div>
           </AICard>
 
-          <AICard padding="sm" className="sm:col-span-2">
+          <AICard padding="sm" className="sm:col-span-2 home-surface-card">
             <div className="flex items-center gap-2 mb-3">
               <HiOutlineClock className="text-gray-400" size={18} />
               <p className="font-semibold text-sm dark:text-white">Recently searched</p>
@@ -134,13 +135,13 @@ const HomeAIDiscovery = () => {
             AI recommendation cards
             <span className="text-xs font-normal text-gray-500">· Based on marketplace trends</span>
           </p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <MarketplaceCardGrid>
             {recommendations.map((product) => (
-              <div key={product._id} className="flex justify-center">
-                <HomeProductCard data={product} compact />
-              </div>
+              <MarketplaceCardSlot key={product._id}>
+                <HomeProductCard data={product} compact fluid />
+              </MarketplaceCardSlot>
             ))}
-          </div>
+          </MarketplaceCardGrid>
         </div>
       )}
     </AISection>

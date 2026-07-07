@@ -42,8 +42,8 @@ const HomeFlashSaleCard = ({ data }) => {
     data.originalPrice > 0 && data.flashSalePrice < data.originalPrice;
 
   return (
-    <article className="home-card-lift group w-[260px] sm:w-[280px] flex flex-col bg-white dark:bg-gray-900 rounded-2xl border border-gray-100/90 dark:border-gray-800 overflow-hidden shadow-sm">
-      <div className="relative aspect-[4/5] overflow-hidden bg-yebone-light-gray">
+    <article className="yebone-product-card home-card-lift group w-[260px] sm:w-[280px] flex flex-col overflow-hidden shrink-0">
+      <div className="relative aspect-[4/5] overflow-hidden bg-[var(--home-surface-muted)]">
         <Link to={`/product/${data._id}`}>
           <img
             src={data.images?.[0]?.url}
@@ -52,17 +52,17 @@ const HomeFlashSaleCard = ({ data }) => {
             loading="lazy"
           />
         </Link>
-        <span className="absolute top-3 left-3 px-2 py-0.5 rounded-lg bg-red-500 text-white text-[10px] font-bold uppercase">
+        <span className="home-chip home-chip--discount absolute top-3 left-3 z-10">
           Flash Sale
         </span>
-        <span className="absolute top-3 right-3 px-2 py-0.5 rounded-lg bg-black/70 text-white text-[10px] font-semibold">
+        <span className="home-chip home-chip--neutral absolute top-3 right-3 z-10 normal-case font-semibold">
           {timeLeft}
         </span>
       </div>
 
-      <div className="p-4 flex flex-col gap-2 flex-1">
+      <div className="home-product-card__body">
         <Link to={`/product/${data._id}`}>
-          <h3 className="font-Poppins font-medium text-sm line-clamp-2 dark:text-white group-hover:text-yebone-primary transition">
+          <h3 className="yebone-card-title line-clamp-2 text-[var(--home-text)] group-hover:text-yebone-primary transition-colors">
             {data.name}
           </h3>
         </Link>

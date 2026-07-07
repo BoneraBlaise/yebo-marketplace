@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { SectionTitle } from "../ui";
 import HomeProductCard from "../Home/HomeProductCard";
+import { MarketplaceCardGrid, MarketplaceCardSlot } from "./cards";
 
 const MarketplaceAISection = ({ searchTerm }) => {
   const { allProducts } = useSelector((state) => state.products);
@@ -58,16 +59,16 @@ const MarketplaceAISection = ({ searchTerm }) => {
       {recentlyViewed.length > 0 && (
         <div>
           <SectionTitle title="Recently viewed" subtitle="Pick up where you left off" />
-          <div className="marketplace-product-grid mt-4">
+          <MarketplaceCardGrid className="mt-4">
             {recentlyViewed.slice(0, 4).map((item) => {
               const product = (allProducts || []).find((p) => p._id === item._id) || item;
               return (
-                <div key={item._id} className="flex justify-center">
-                  <HomeProductCard data={product} compact />
-                </div>
+                <MarketplaceCardSlot key={item._id}>
+                  <HomeProductCard data={product} compact fluid />
+                </MarketplaceCardSlot>
               );
             })}
-          </div>
+          </MarketplaceCardGrid>
         </div>
       )}
 
@@ -77,13 +78,13 @@ const MarketplaceAISection = ({ searchTerm }) => {
             <HiOutlineTrendingUp className="text-yebone-primary" size={22} />
             <SectionTitle title="Trending products" subtitle="Popular across Yebone right now" align="left" className="mb-0" />
           </div>
-          <div className="marketplace-product-grid mt-4">
+          <MarketplaceCardGrid className="mt-4">
             {trending.map((product) => (
-              <div key={product._id} className="flex justify-center">
-                <HomeProductCard data={product} compact />
-              </div>
+              <MarketplaceCardSlot key={product._id}>
+                <HomeProductCard data={product} compact fluid />
+              </MarketplaceCardSlot>
             ))}
-          </div>
+          </MarketplaceCardGrid>
         </div>
       )}
 
@@ -93,13 +94,13 @@ const MarketplaceAISection = ({ searchTerm }) => {
             <HiOutlineLocationMarker className="text-yebone-primary" size={22} />
             <SectionTitle title="Popular nearby" subtitle="Discover sellers in your region" align="left" className="mb-0" />
           </div>
-          <div className="marketplace-product-grid mt-4">
+          <MarketplaceCardGrid className="mt-4">
             {nearby.map((product) => (
-              <div key={product._id} className="flex justify-center">
-                <HomeProductCard data={product} compact />
-              </div>
+              <MarketplaceCardSlot key={product._id}>
+                <HomeProductCard data={product} compact fluid />
+              </MarketplaceCardSlot>
             ))}
-          </div>
+          </MarketplaceCardGrid>
         </div>
       )}
 

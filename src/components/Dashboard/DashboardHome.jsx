@@ -73,7 +73,7 @@ const DashboardHome = ({ setActive }) => {
 
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="dashboard-section yebone-surface">
-          <h3 className="font-Poppins font-semibold mb-4 dark:text-white">Order summary</h3>
+          <h3 className="yebone-section-title mb-4 dark:text-white">Order summary</h3>
           <div className="space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Pending</span>

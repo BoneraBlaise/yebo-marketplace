@@ -3,31 +3,31 @@ import classNames from "classnames";
 import { typography } from "../../design-system/typography";
 
 const Input = React.forwardRef(
-  ({ label, error, className, inputClassName, id, ...props }, ref) => {
+  ({ label, error, helper, className, inputClassName, id, ...props }, ref) => {
     const inputId = id || props.name;
 
     return (
-      <div className={classNames("w-full", className)}>
+      <div className={classNames("w-full yebone-form-field !mb-0", className)}>
         {label && (
-          <label
-            htmlFor={inputId}
-            className={classNames(typography.caption, "block mb-1.5 font-medium")}
-          >
+          <label htmlFor={inputId} className={classNames(typography.label, "yebone-form-label !mb-0")}>
             {label}
           </label>
         )}
         <input
           ref={ref}
           id={inputId}
+          aria-invalid={!!error}
           className={classNames(
             typography.body,
-            "w-full h-10 px-3 rounded-md border-2 border-yebone-primary bg-white dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-yebone-primary focus:ring-opacity-30 outline-none transition",
-            error && "border-red-500",
+            "w-full min-h-[2.75rem] px-4 rounded-xl border bg-white dark:bg-gray-900 dark:text-white transition-all duration-200",
+            error ? "border-red-500 focus:ring-red-500/20" : "border-gray-300 dark:border-gray-600 focus:border-yebone-primary focus:ring-2 focus:ring-yebone-primary/20",
+            "outline-none",
             inputClassName
           )}
           {...props}
         />
-        {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
+        {helper && !error && <p className="yebone-form-helper">{helper}</p>}
+        {error && <p className="yebone-form-error" role="alert">{error}</p>}
       </div>
     );
   }

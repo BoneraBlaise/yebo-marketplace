@@ -14,12 +14,12 @@ const LoginPage = () => {
   }, [])
   
   return (
-    <div>
+    <div className="yebone-premium-screen">
     <Helmet>
-        <title>Login | Yebone</title>
-        <meta name="description" content="Login to your Yebone account to access your orders and profile." />
-        <meta property="og:title" content="Login | Yebone" />
-        <meta property="og:description" content="Login to Yebone for a personalized shopping experience." />
+        <title>Login | YEBONE</title>
+        <meta name="description" content="Login to your YEBONE account to access orders, wishlist, and AI previews." />
+        <meta property="og:title" content="Login | YEBONE" />
+        <meta property="og:description" content="Sign in to YEBONE — Africa's AI-powered marketplace." />
       </Helmet>
 
         <Login />

@@ -33,9 +33,19 @@ export class ThemeEngine {
     });
 
     if (this.resolvedMode === THEME_MODE.DARK) {
-      root.style.setProperty("--yebone-bg", "#1f1f1f");
-      root.style.setProperty("--yebone-fg", "#f3f4f6");
+      root.style.setProperty("--yebone-bg", "#141414");
+      root.style.setProperty("--yebone-fg", "#f5f5f5");
+      root.style.setProperty("--yebone-shadow", "0 4px 16px rgba(0,0,0,0.45)");
+      root.style.setProperty("--yebone-accent", "#fed592");
+      root.style.setProperty("--yebone-muted", "#a3a3a3");
+    } else {
+      root.style.setProperty("--yebone-bg", "#F6F6F5");
+      root.style.setProperty("--yebone-fg", "#313131");
+      root.style.setProperty("--yebone-shadow", "0 4px 6px rgba(0,0,0,0.08)");
+      root.style.setProperty("--yebone-muted", "#6b7280");
     }
+
+    root.classList.add("yebo-theme-transition");
 
     logDesignSystemDiagnostics("theme", { mode, resolved: this.resolvedMode });
     this.listeners.forEach((fn) => fn({ mode, resolvedMode: this.resolvedMode }));

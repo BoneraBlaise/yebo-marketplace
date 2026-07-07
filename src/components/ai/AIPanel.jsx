@@ -59,7 +59,7 @@ const AIPanel = () => {
         aria-modal="true"
         aria-label="Chat with YEBO"
       >
-        <div className="shrink-0 flex items-center justify-between gap-3 p-4 border-b border-gray-100 dark:border-gray-800 yebone-glass">
+        <div className="shrink-0 flex items-center justify-between gap-3 px-4 py-3.5 border-b border-gray-100/80 dark:border-gray-800/80 yebone-glass bg-white/90 dark:bg-gray-950/90">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yebone-primary to-yebone-primary-dark flex items-center justify-center shrink-0">
               <HiOutlineSparkles className="text-yebone-gold" size={22} />
@@ -81,7 +81,7 @@ const AIPanel = () => {
           </button>
         </div>
 
-        <div className="flex-1 flex flex-col min-h-0 p-4">
+        <div className="flex-1 flex flex-col min-h-0 px-4 py-3 gap-3">
           {lastError && (
             <YEBOErrorState error={lastError} onRetry={() => sendMessage(inputValue)} className="mb-3" />
           )}
@@ -95,7 +95,7 @@ const AIPanel = () => {
         {shoppingMode === "chat" && (
           <form
             onSubmit={handleSubmit}
-            className="shrink-0 p-4 border-t border-gray-100 dark:border-gray-800 yebone-glass"
+            className="shrink-0 px-4 py-3.5 border-t border-gray-100/80 dark:border-gray-800/80 yebone-glass bg-white/90 dark:bg-gray-950/90"
           >
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="gold" className="text-[10px]">YEBO</Badge>

@@ -41,7 +41,7 @@ const AI_FEATURES = [
 ];
 
 const HomeAIExperience = () => (
-  <section id="ai-experience" className="home-section bg-yebone-light-gray dark:bg-gray-900/50">
+  <section id="ai-experience" className="home-section home-section--emphasis home-surface-2">
     <Container>
       <div className="text-center mb-12">
         <Badge variant="gold" className="mb-4">
@@ -60,19 +60,19 @@ const HomeAIExperience = () => (
           {AI_FEATURES.map(({ icon: Icon, title, description, tag }) => (
             <Card
               key={title}
-              className="hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-yebone-primary/5"
+              className="home-surface-card border-yebone-primary/5"
               padding="md"
             >
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yebone-primary to-yebone-primary-dark flex items-center justify-center mb-4">
                 <Icon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-yebone-primary">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-yebone-primary px-2 py-0.5 rounded-md bg-yebone-primary/8 border border-yebone-primary/12">
                 {tag}
               </span>
-              <h3 className="font-Poppins font-semibold text-lg mt-1 mb-2 dark:text-white">
+              <h3 className="yebone-section-title mt-1.5 mb-2 text-[var(--home-text)]">
                 {title}
               </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              <p className="text-sm text-[var(--home-text-muted)] leading-relaxed">
                 {description}
               </p>
             </Card>

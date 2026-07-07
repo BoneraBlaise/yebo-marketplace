@@ -1,7 +1,5 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Footer from "../components/Layout/Footer";
-import Header from "../components/Layout/Header";
 import CheckoutSteps from "../components/Checkout/CheckoutSteps";
 import Lottie from "react-lottie";
 import animationData from "../Assests/animations/107043-success.json";
@@ -9,13 +7,11 @@ import { Container, Button } from "../components/ui";
 import { typography } from "../design-system/typography";
 
 const OrderSuccessPage = () => (
-  <div className="min-h-screen flex flex-col bg-yebone-light-gray dark:bg-gray-950">
-    <Header />
+  <div className="yebone-premium-screen min-h-screen flex flex-col bg-yebone-light-gray dark:bg-gray-950">
     <CheckoutSteps active={3} />
     <main className="flex-1">
       <Success />
     </main>
-    <Footer />
   </div>
 );
 

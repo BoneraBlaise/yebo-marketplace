@@ -1,5 +1,6 @@
 /**
- * Global header — premium Yebone navigation used on every public page.
- * Implementation lives in Home/HomeHeader.jsx (single source of truth).
+ * Global header — single production component.
+ * Rendered by AppLayout on all public routes.
+ * Implementation: Home/HomeHeader.jsx
  */
 export { default } from "../Home/HomeHeader";

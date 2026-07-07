@@ -1,27 +1,44 @@
 import React from "react";
-import { Input, Select } from "../components";
+import { Input, Select, Textarea } from "../components";
+import { typography } from "../typography";
 
-export const FormField = ({ label, error, children, required }) => (
-  <div className="space-y-1">
-    {label && <label className="block text-sm font-medium">{label}{required && " *"}</label>}
+export const FormField = ({ label, error, helper, children, required, htmlFor }) => (
+  <div className="yebone-form-field">
+    {label && (
+      <label htmlFor={htmlFor} className={`${typography.label} yebone-form-label`}>
+        {label}{required && <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>}
+      </label>
+    )}
     {children}
-    {error && <p className="text-xs text-red-600" role="alert">{error}</p>}
+    {helper && !error && <p className="yebone-form-helper">{helper}</p>}
+    {error && <p className="yebone-form-error" role="alert">{error}</p>}
   </div>
 );
 
-export const FormGroup = ({ legend, children }) => (
-  <fieldset className="space-y-4 border rounded-lg p-4">
-    {legend && <legend className="text-sm font-semibold px-1">{legend}</legend>}
+export const FormGroup = ({ legend, description, children }) => (
+  <fieldset className="rounded-2xl border border-gray-200/80 dark:border-gray-700/80 p-5 md:p-6 space-y-4 bg-white/50 dark:bg-gray-900/30">
+    {legend && <legend className={`${typography.sectionTitle} px-1 mb-1`}>{legend}</legend>}
+    {description && <p className={`${typography.caption} -mt-2 mb-2`}>{description}</p>}
     {children}
   </fieldset>
 );
 
-export const FormInput = ({ label, error, ...props }) => (
-  <FormField label={label} error={error} required={props.required}><Input error={error} {...props} /></FormField>
+export const FormInput = ({ label, error, helper, id, ...props }) => (
+  <FormField label={label} error={error} helper={helper} required={props.required} htmlFor={id || props.name}>
+    <Input id={id || props.name} error={error} aria-invalid={!!error} {...props} />
+  </FormField>
 );
 
-export const FormSelect = ({ label, error, children, ...props }) => (
-  <FormField label={label} error={error}><Select {...props}>{children}</Select></FormField>
+export const FormSelect = ({ label, error, helper, children, id, ...props }) => (
+  <FormField label={label} error={error} helper={helper} htmlFor={id || props.name}>
+    <Select id={id || props.name} {...props}>{children}</Select>
+  </FormField>
+);
+
+export const FormTextarea = ({ label, error, helper, id, ...props }) => (
+  <FormField label={label} error={error} helper={helper} htmlFor={id || props.name}>
+    <Textarea id={id || props.name} {...props} />
+  </FormField>
 );
 
 export const useFormValidation = (rules = {}) => {
@@ -35,4 +52,4 @@ export const useFormValidation = (rules = {}) => {
   return { validate };
 };
 
-export default { FormField, FormGroup, FormInput, FormSelect, useFormValidation };
+export default { FormField, FormGroup, FormInput, FormSelect, FormTextarea, useFormValidation };

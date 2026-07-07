@@ -1,0 +1,564 @@
+/**
+ * YEBONE Platform Polish — Phase 8B / 8B.1
+ * Global presentation utilities for legacy + new surfaces
+ */
+
+/* ── Premium screen shell ── */
+.yebone-premium-screen,
+.marketplace-page.yebone-premium-screen,
+.dashboard-page,
+.home-page {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.yebone-premium-screen main,
+.yebone-premium-screen > main {
+  outline: none;
+}
+
+.yebone-premium-screen .yebone-stack-flow > * + * {
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .yebone-premium-screen .yebone-stack-flow > * + * {
+    margin-top: 2rem;
+  }
+}
+
+/* Typography hierarchy */
+.yebone-h1 { font-family: Poppins, sans-serif; font-size: clamp(1.875rem, 4vw, 3rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+.yebone-h2 { font-family: Poppins, sans-serif; font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 600; letter-spacing: -0.015em; line-height: 1.2; }
+.yebone-h3 { font-family: Poppins, sans-serif; font-size: clamp(1.125rem, 2vw, 1.5rem); font-weight: 600; line-height: 1.3; }
+.yebone-section-title { font-family: Poppins, sans-serif; font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
+.yebone-card-title { font-family: Poppins, sans-serif; font-size: 1rem; font-weight: 600; }
+.yebone-body { font-family: Roboto, sans-serif; font-size: 0.9375rem; line-height: 1.6; }
+.yebone-caption { font-size: 0.8125rem; line-height: 1.5; color: #6b7280; }
+.dark .yebone-caption { color: #9ca3af; }
+.yebone-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #6b7280; }
+
+/* 8px spacing stacks */
+.yebone-stack-8 > * + * { margin-top: 0.5rem; }
+.yebone-stack-16 > * + * { margin-top: 1rem; }
+.yebone-stack-24 > * + * { margin-top: 1.5rem; }
+.yebone-stack-32 > * + * { margin-top: 2rem; }
+
+/* Status chips */
+.yebone-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.yebone-status-chip--success { background: rgba(16, 185, 129, 0.12); color: #047857; }
+.yebone-status-chip--warning { background: rgba(245, 158, 11, 0.14); color: #b45309; }
+.yebone-status-chip--danger { background: rgba(239, 68, 68, 0.12); color: #b91c1c; }
+.yebone-status-chip--neutral { background: rgba(107, 114, 128, 0.12); color: #4b5563; }
+.yebone-status-chip--primary { background: rgba(41, 98, 93, 0.12); color: #29625d; }
+
+.dark .yebone-status-chip--success { color: #6ee7b7; }
+.dark .yebone-status-chip--warning { color: #fcd34d; }
+.dark .yebone-status-chip--danger { color: #fca5a5; }
+.dark .yebone-status-chip--neutral { color: #d1d5db; }
+.dark .yebone-status-chip--primary { color: #a8d4cf; }
+
+/* Premium pagination */
+.yebone-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}
+
+.yebone-pagination-btn {
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding: 0 0.625rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border: 1px solid rgba(41, 98, 93, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: #374151;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.dark .yebone-pagination-btn {
+  background: rgba(26, 26, 26, 0.9);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
+}
+
+.yebone-pagination-btn:hover:not(:disabled) {
+  background: rgba(41, 98, 93, 0.08);
+  border-color: rgba(41, 98, 93, 0.25);
+}
+
+.yebone-pagination-btn.is-active {
+  background: #29625d;
+  border-color: #29625d;
+  color: #fff;
+}
+
+.yebone-pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Premium product card shell */
+.yebone-product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(41, 98, 93, 0.08);
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 12px -4px rgba(41, 98, 93, 0.08);
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.dark .yebone-product-card {
+  background: #171717;
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 16px -6px rgba(0, 0, 0, 0.45);
+}
+
+.yebone-product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px -20px rgba(41, 98, 93, 0.28);
+  border-color: rgba(41, 98, 93, 0.18);
+}
+
+.yebone-product-card__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #f6f6f5;
+}
+
+.dark .yebone-product-card__media { background: #262626; }
+
+.yebone-product-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.yebone-product-card:hover .yebone-product-card__media img {
+  transform: scale(1.04);
+}
+
+.yebone-product-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.125rem 1.125rem;
+  flex: 1;
+}
+
+/* Premium tables */
+.yebone-table-wrap {
+  overflow-x: auto;
+  border-radius: 1rem;
+  border: 1px solid rgba(41, 98, 93, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.dark .yebone-table-wrap { background: rgba(17, 24, 23, 0.6); border-color: rgba(255, 255, 255, 0.06); }
+
+.yebone-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+}
+
+.yebone-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  text-align: left;
+  padding: 0.875rem 1rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #6b7280;
+  background: rgba(246, 246, 245, 0.95);
+  border-bottom: 1px solid rgba(41, 98, 93, 0.1);
+  backdrop-filter: blur(8px);
+}
+.dark .yebone-table thead th { background: rgba(26, 26, 26, 0.95); color: #9ca3af; }
+
+.yebone-table tbody td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(41, 98, 93, 0.06);
+  vertical-align: middle;
+}
+.dark .yebone-table tbody td { border-color: rgba(255, 255, 255, 0.05); }
+
+.yebone-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.yebone-table tbody tr:nth-child(even) {
+  background: rgba(41, 98, 93, 0.02);
+}
+.dark .yebone-table tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.yebone-table tbody tr:hover { background: rgba(41, 98, 93, 0.06); }
+.dark .yebone-table tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
+
+/* MUI DataGrid — premium data grid */
+.yebone-datagrid,
+.vendor-datagrid-wrap .MuiDataGrid-root {
+  border: none !important;
+  font-family: Poppins, Roboto, sans-serif !important;
+  font-size: 0.875rem !important;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.yebone-datagrid .MuiDataGrid-columnHeaders,
+.vendor-datagrid-wrap .MuiDataGrid-columnHeaders {
+  background: rgba(246, 246, 245, 0.98) !important;
+  border-bottom: 1px solid rgba(41, 98, 93, 0.1) !important;
+  min-height: 48px !important;
+  max-height: 48px !important;
+  line-height: 48px !important;
+}
+
+.dark .yebone-datagrid .MuiDataGrid-columnHeaders,
+.dark .vendor-datagrid-wrap .MuiDataGrid-columnHeaders {
+  background: rgba(26, 26, 26, 0.98) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.yebone-datagrid .MuiDataGrid-columnHeaderTitle,
+.vendor-datagrid-wrap .MuiDataGrid-columnHeaderTitle {
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: #6b7280 !important;
+}
+
+.dark .yebone-datagrid .MuiDataGrid-columnHeaderTitle,
+.dark .vendor-datagrid-wrap .MuiDataGrid-columnHeaderTitle {
+  color: #9ca3af !important;
+}
+
+.yebone-datagrid .MuiDataGrid-row,
+.vendor-datagrid-wrap .MuiDataGrid-row {
+  transition: background-color 0.15s ease !important;
+}
+
+.yebone-datagrid .MuiDataGrid-row:nth-of-type(even),
+.vendor-datagrid-wrap .MuiDataGrid-row:nth-of-type(even) {
+  background: rgba(41, 98, 93, 0.02) !important;
+}
+
+.dark .yebone-datagrid .MuiDataGrid-row:nth-of-type(even),
+.dark .vendor-datagrid-wrap .MuiDataGrid-row:nth-of-type(even) {
+  background: rgba(255, 255, 255, 0.015) !important;
+}
+
+.yebone-datagrid .MuiDataGrid-row:hover,
+.vendor-datagrid-wrap .MuiDataGrid-row:hover {
+  background: rgba(41, 98, 93, 0.06) !important;
+}
+
+.dark .yebone-datagrid .MuiDataGrid-row:hover,
+.dark .vendor-datagrid-wrap .MuiDataGrid-row:hover {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.yebone-datagrid .MuiDataGrid-cell,
+.vendor-datagrid-wrap .MuiDataGrid-cell {
+  border-bottom: 1px solid rgba(41, 98, 93, 0.06) !important;
+  padding: 0 1rem !important;
+}
+
+.dark .yebone-datagrid .MuiDataGrid-cell,
+.dark .vendor-datagrid-wrap .MuiDataGrid-cell {
+  border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+  color: #e5e7eb !important;
+}
+
+.yebone-datagrid .MuiDataGrid-footerContainer,
+.vendor-datagrid-wrap .MuiDataGrid-footerContainer {
+  border-top: 1px solid rgba(41, 98, 93, 0.08) !important;
+  min-height: 52px !important;
+}
+
+/* Premium toolbar */
+.yebone-premium-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .yebone-premium-toolbar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.yebone-premium-search {
+  position: relative;
+  flex: 1;
+  max-width: 28rem;
+}
+
+.yebone-premium-search input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(41, 98, 93, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dark .yebone-premium-search input {
+  background: rgba(26, 26, 26, 0.95);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #f3f4f6;
+}
+
+.yebone-premium-search input:focus {
+  outline: none;
+  border-color: rgba(41, 98, 93, 0.4);
+  box-shadow: 0 0 0 3px rgba(41, 98, 93, 0.12);
+}
+
+.yebone-premium-search svg {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+/* Vendor shop premium */
+.marketplace-shop-sidebar {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  box-shadow: 0 4px 24px -8px rgba(41, 98, 93, 0.15);
+}
+
+.marketplace-shop-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.marketplace-shop-stat {
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 0.875rem;
+  background: rgba(41, 98, 93, 0.04);
+}
+
+.dark .marketplace-shop-stat {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Premium forms */
+.yebone-form-field { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+.yebone-form-label { font-size: 0.8125rem; font-weight: 600; color: #374151; }
+.dark .yebone-form-label { color: #d1d5db; }
+.yebone-form-helper { font-size: 0.75rem; color: #6b7280; }
+.yebone-form-error { font-size: 0.75rem; color: #dc2626; }
+
+.yebone-form-section {
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px solid rgba(41, 98, 93, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.dark .yebone-form-section {
+  background: rgba(26, 26, 26, 0.6);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 768px) {
+  .yebone-form-section { padding: 1.5rem 1.75rem; }
+}
+
+/* Messaging */
+.yebone-inbox-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: calc(100vh - 5rem);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  border: 1px solid rgba(41, 98, 93, 0.1);
+}
+@media (min-width: 768px) {
+  .yebone-inbox-layout { grid-template-columns: 320px 1fr; }
+}
+
+.yebone-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(41, 98, 93, 0.08);
+  background: rgba(246, 246, 245, 0.9);
+  backdrop-filter: blur(12px);
+}
+.dark .yebone-chat-header { background: rgba(26, 26, 26, 0.9); border-color: rgba(255, 255, 255, 0.06); }
+
+.yebone-chat-messages {
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.yebone-chat-bubble {
+  border-radius: 1rem;
+  padding: 0.625rem 1rem;
+  max-width: min(80%, 24rem);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  word-break: break-word;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.yebone-chat-bubble-sent {
+  background: linear-gradient(135deg, #29625d, #1a4c47);
+  color: #fff;
+  border-bottom-right-radius: 0.25rem;
+}
+
+.yebone-chat-bubble-received {
+  background: #fff;
+  color: #313131;
+  border: 1px solid rgba(41, 98, 93, 0.1);
+  border-bottom-left-radius: 0.25rem;
+}
+.dark .yebone-chat-bubble-received {
+  background: #262626;
+  color: #f3f4f6;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.yebone-chat-time { font-size: 0.6875rem; color: #9ca3af; margin-top: 0.25rem; }
+
+.yebone-chat-compose {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid rgba(41, 98, 93, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+}
+.dark .yebone-chat-compose { background: rgba(26, 26, 26, 0.95); border-color: rgba(255, 255, 255, 0.06); }
+
+.yebone-chat-input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(41, 98, 93, 0.15);
+  background: #fff;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.dark .yebone-chat-input { background: #1a1a1a; border-color: rgba(255, 255, 255, 0.1); color: #fff; }
+.yebone-chat-input:focus {
+  outline: none;
+  border-color: #29625d;
+  box-shadow: 0 0 0 3px rgba(41, 98, 93, 0.12);
+}
+
+.yebone-conversation-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-bottom: 1px solid rgba(41, 98, 93, 0.06);
+}
+.yebone-conversation-item:hover,
+.yebone-conversation-item.is-active {
+  background: rgba(41, 98, 93, 0.06);
+}
+
+/* Skeleton grid for dashboards */
+.yebone-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+@media (min-width: 1024px) {
+  .yebone-skeleton-grid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.yebone-skeleton-card {
+  height: 6rem;
+  border-radius: 1rem;
+}
+
+/* Marketplace filter panel polish */
+.marketplace-filter-panel {
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.marketplace-filter-panel select,
+.marketplace-filter-panel input[type="text"],
+.marketplace-filter-panel input[type="number"] {
+  border-radius: 0.75rem;
+  border: 1px solid rgba(41, 98, 93, 0.12);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.marketplace-filter-panel select:focus,
+.marketplace-filter-panel input:focus {
+  outline: none;
+  border-color: rgba(41, 98, 93, 0.35);
+  box-shadow: 0 0 0 3px rgba(41, 98, 93, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yebone-table tbody tr,
+  .yebone-conversation-item,
+  .yebone-chat-input,
+  .yebone-product-card,
+  .yebone-product-card__media img,
+  .yebone-pagination-btn {
+    transition: none;
+  }
+
+  .yebone-product-card:hover {
+    transform: none;
+  }
+}

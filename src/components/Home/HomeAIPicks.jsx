@@ -6,6 +6,7 @@ import { Container, SectionTitle, Badge } from "../ui";
 import HomeProductCard from "./HomeProductCard";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import { getAIPicksProducts } from "./homeAIPicksFilters";
+import { MarketplaceCardGrid, MarketplaceCardSlot } from "../Marketplace/cards";
 
 const HomeAIPicks = () => {
   const { allProducts } = useSelector((state) => state.products);
@@ -18,7 +19,7 @@ const HomeAIPicks = () => {
   const hasData = picks.length >= 2;
 
   return (
-    <section id="ai-picks" className="home-section bg-gradient-to-b from-transparent to-yebone-light-gray/40 dark:to-gray-900/20">
+    <section id="ai-picks" className="home-section home-section--compact home-surface-0">
       <Container>
         <div className="flex items-center gap-2 mb-2">
           <Badge variant="gold">AI Powered</Badge>
@@ -39,15 +40,15 @@ const HomeAIPicks = () => {
         />
 
         {hasData ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 justify-items-center lg:justify-items-stretch home-fade-up">
+          <MarketplaceCardGrid>
             {picks.map((product) => (
-              <div key={product._id} className="w-full flex justify-center">
-                <HomeProductCard data={product} compact />
-              </div>
+              <MarketplaceCardSlot key={product._id}>
+                <HomeProductCard data={product} compact fluid />
+              </MarketplaceCardSlot>
             ))}
-          </div>
+          </MarketplaceCardGrid>
         ) : (
-          <ProductCardSkeleton count={4} compact />
+          <ProductCardSkeleton count={4} compact layout="grid" />
         )}
 
         <div className="text-center mt-10">

@@ -7,9 +7,11 @@ import { server } from "../../server";
 import { Button } from "../ui";
 import {
   AuthLayout,
+  AuthPageChrome,
   AuthFloatingInput,
   AuthPasswordStrength,
 } from "../Auth";
+import { MARKETPLACE_NAME } from "../../ui-polish/brandConstants";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -74,12 +76,13 @@ const ResetPassword = () => {
     confirmPassword.length > 0 && newPassword === confirmPassword;
 
   return (
-    <AuthLayout
-      title="Reset password"
-      subtitle="Choose a strong new password for your Yebone account."
-      showLogo={false}
-    >
-      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+    <AuthPageChrome>
+      <AuthLayout
+        title="Reset password"
+        subtitle={`Choose a strong new password for your ${MARKETPLACE_NAME} account.`}
+        showLogo={false}
+      >
+        <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <div>
           <AuthFloatingInput
             id="new-password"
@@ -127,6 +130,7 @@ const ResetPassword = () => {
         </Button>
       </form>
     </AuthLayout>
+    </AuthPageChrome>
   );
 };
 

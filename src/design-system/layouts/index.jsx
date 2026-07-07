@@ -1,7 +1,7 @@
 import React from "react";
 import { logDesignSystemDiagnostics } from "../diagnostics/DesignSystemDiagnostics";
 
-const shellClass = "min-h-screen bg-[var(--yebone-bg,#F6F6F5)] text-[var(--yebone-fg,#313131)] dark:bg-[#1f1f1f] dark:text-gray-100";
+const shellClass = "min-h-screen bg-[var(--yebone-bg,#F6F6F5)] text-[var(--yebone-fg,#313131)] transition-colors duration-300";
 
 const makeLayout = (name) =>
   function Layout({ header, sidebar, footer, children, className = "" }) {
@@ -9,9 +9,9 @@ const makeLayout = (name) =>
     return (
       <div className={`${shellClass} ${className}`} data-layout={name}>
         {header}
-        <div className="flex flex-col lg:flex-row">
+        <div className="flex flex-col lg:flex-row max-w-[1600px] mx-auto w-full">
           {sidebar}
-          <main className="flex-1 p-4 md:p-6 lg:p-8" role="main">
+          <main className="flex-1 p-4 md:p-6 lg:p-8 xl:p-10 max-w-full overflow-x-hidden" role="main">
             {children}
           </main>
         </div>

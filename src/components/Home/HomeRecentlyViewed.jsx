@@ -3,7 +3,7 @@ import RecentlyViewed from "../Route/Recent/RecentlyViewed";
 import { Container, SectionTitle } from "../ui";
 
 const HomeRecentlyViewed = () => (
-  <section className="home-section bg-yebone-light-gray/50 dark:bg-gray-900/30">
+  <section id="recently-viewed" className="home-section home-section--compact home-surface-3">
     <Container>
       <SectionTitle
         title="Continue browsing"

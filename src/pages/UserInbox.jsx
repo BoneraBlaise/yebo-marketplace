@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import Header from "../components/Layout/Header";
 import { useSelector } from "react-redux";
 import socketIO from "socket.io-client";
 import { format } from "timeago.js";
@@ -210,30 +209,32 @@ const UserInbox = () => {
   }, [messages]);
 
   return (
-    <div className="w-full">
+    <div className="yebone-premium-screen w-full min-h-screen bg-yebone-light-gray dark:bg-gray-950">
       {!open && (
         <>
-          <Header />
-          <h1 className="text-center text-xl py-3 font-Poppins dark:text-white">
-           Inbox
-          </h1>
-          {/* All messages list */}
-          {conversations &&
-            conversations.map((item, index) => (
-              <MessageList
-                data={item}
-                key={index}
-                index={index}
-                setOpen={setOpen}
-                setCurrentChat={setCurrentChat}
-                me={user?._id}
-                setUserData={setUserData}
-                userData={userData}
-                online={onlineCheck(item)}
-                setActiveStatus={setActiveStatus}
-                loading={loading}
-              />
-            ))}
+          <div className="max-w-3xl mx-auto px-4 py-6 lg:py-8">
+            <h1 className="yebone-h3 text-center dark:text-white mb-6">Messages</h1>
+            <div className="yebone-inbox-layout yebone-surface">
+              <div className="overflow-y-auto max-h-[70vh] lg:max-h-[calc(100vh-12rem)]">
+                {conversations &&
+                  conversations.map((item, index) => (
+                    <MessageList
+                      data={item}
+                      key={index}
+                      index={index}
+                      setOpen={setOpen}
+                      setCurrentChat={setCurrentChat}
+                      me={user?._id}
+                      setUserData={setUserData}
+                      userData={userData}
+                      online={onlineCheck(item)}
+                      setActiveStatus={setActiveStatus}
+                      loading={loading}
+                    />
+                  ))}
+              </div>
+            </div>
+          </div>
         </>
       )}
 
@@ -291,9 +292,7 @@ const MessageList = ({
 
   return (
     <div
-      className={`w-full flex p-3 px-3 ${
-        active === index ? "bg-[#00000010]" : "bg-transparent"
-      }  cursor-pointer`}
+      className={`yebone-conversation-item ${active === index ? "is-active" : ""}`}
       onClick={(e) =>
         setActive(index) ||
         handleClick(data._id) ||
@@ -342,9 +341,8 @@ const SellerInbox = ({
   handleImageUpload,
 }) => {
   return (
-    <div className="w-full min-h-full flex flex-col justify-center">
-      {/* message header */}
-      <div className="w-full flex p-2 items-center justify-between bg-slate-200 dark:bg-[#1f1f1f] border-b">
+    <div className="yebone-premium-screen w-full min-h-screen flex flex-col bg-yebone-light-gray dark:bg-gray-950">
+      <div className="yebone-chat-header">
         <div className="flex">
           <img
             src={`${userData?.avatar?.url}`}
@@ -363,8 +361,7 @@ const SellerInbox = ({
         />
       </div>
 
-      {/* messages */}
-      <div className="px-3 h-[75vh] py-3 overflow-y-scroll hide-scrollbar">
+      <div className="yebone-chat-messages flex-1 px-3 h-[75vh] lg:h-[calc(100vh-8rem)] hide-scrollbar">
         {messages &&
           messages.map((item, index) => (
             <div
@@ -404,10 +401,10 @@ const SellerInbox = ({
                   )}
 
                   <div
-                    className={`rounded-lg px-4 py-2 max-w-sm break-words ${
+                    className={`yebone-chat-bubble break-words ${
                       item.sender === sellerId
-                        ? "bg-[#29625d] text-white"
-                        : "bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white"
+                        ? "yebone-chat-bubble-sent"
+                        : "yebone-chat-bubble-received"
                     }`}
                   >
                     {item.images && (
@@ -419,7 +416,7 @@ const SellerInbox = ({
                     )}
                     {item.text && <p className="text-sm">{item.text}</p>}
                   </div>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  <span className="yebone-chat-time">
                     {format(item.createdAt)}
                   </span>
                 </div>
@@ -429,7 +426,7 @@ const SellerInbox = ({
       </div>
 
       {/* send message input */}
-       <form className="fixed bottom-0 left-0 w-full p-4 flex items-center bg-gray-100 dark:bg-[#1f1f1f] border-t border-gray-300" onSubmit={sendMessageHandler}>
+       <form className="yebone-chat-compose fixed bottom-0 left-0 w-full" onSubmit={sendMessageHandler}>
         <div className="w-8">
           <input
             type="file"
@@ -448,7 +445,7 @@ const SellerInbox = ({
             placeholder="Type a message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="w-full p-3 border rounded-lg border-gray-300 dark:bg-[#1f1f1f] dark:text-white"
+            className="yebone-chat-input w-full"
           />
         </div>
         <button type="submit" className="text-teal-600">

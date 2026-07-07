@@ -11,7 +11,26 @@ export const EnterpriseThemeProvider = ({ children, defaultMode = THEME_MODE.SYS
     const saved = typeof localStorage !== "undefined" ? localStorage.getItem("yebone-theme-mode") : null;
     engine.apply(saved || defaultMode);
     setState(engine.getMode());
-    return engine.subscribe(setState);
+
+    const unsub = engine.subscribe(setState);
+
+    let mediaCleanup = () => {};
+    if (typeof window !== "undefined") {
+      const mq = window.matchMedia("(prefers-color-scheme: dark)");
+      const onSystemChange = () => {
+        if (engine.mode === THEME_MODE.SYSTEM) {
+          engine.apply(THEME_MODE.SYSTEM);
+          setState(engine.getMode());
+        }
+      };
+      mq.addEventListener("change", onSystemChange);
+      mediaCleanup = () => mq.removeEventListener("change", onSystemChange);
+    }
+
+    return () => {
+      unsub();
+      mediaCleanup();
+    };
   }, [engine, defaultMode]);
 
   const value = useMemo(

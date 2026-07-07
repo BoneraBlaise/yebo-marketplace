@@ -3,48 +3,16 @@ import { Link } from "react-router-dom";
 import {
   HiOutlineMenu,
   HiOutlineBell,
-  HiOutlineShoppingBag,
-  HiOutlineHeart,
-  HiOutlineViewGrid,
-  HiOutlineCube,
-  HiOutlineCash,
-  HiOutlineUserGroup,
 } from "react-icons/hi";
 import { RxPerson } from "react-icons/rx";
 import { FiMessageSquare } from "react-icons/fi";
-import { GrWorkshop } from "react-icons/gr";
 import { useSelector } from "react-redux";
-import Header from "../Layout/Header";
-import Footer from "../Layout/Footer";
 import { Container } from "../ui";
 import DashboardSidebar, { DASHBOARD_TITLES } from "./DashboardSidebar";
 import VendorSidebar, { VENDOR_TITLES } from "./VendorSidebar";
 import AdminSidebar, { ADMIN_TITLES } from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
 import PageMeta from "../ui/PageMeta";
-
-const CUSTOMER_MOBILE_NAV = [
-  { id: 0, label: "Home", icon: HiOutlineViewGrid },
-  { id: 2, label: "Orders", icon: HiOutlineShoppingBag },
-  { id: 10, label: "Wishlist", icon: HiOutlineHeart },
-  { id: 1, label: "Profile", icon: RxPerson },
-];
-
-const VENDOR_MOBILE_NAV = [
-  { id: 1, label: "Home", to: "/dashboard", icon: HiOutlineViewGrid },
-  { id: 2, label: "Orders", to: "/dashboard-orders", icon: HiOutlineShoppingBag },
-  { id: 3, label: "Products", to: "/dashboard-products", icon: HiOutlineCube },
-  { id: 8, label: "Inbox", to: "/dashboard-messages", icon: FiMessageSquare },
-  { id: 7, label: "Payouts", to: "/dashboard-withdraw-money", icon: HiOutlineCash },
-];
-
-const ADMIN_MOBILE_NAV = [
-  { id: 1, label: "Home", to: "/admin/dashboard", icon: HiOutlineViewGrid },
-  { id: 2, label: "Orders", to: "/admin-orders", icon: HiOutlineShoppingBag },
-  { id: 3, label: "Vendors", to: "/admin-sellers", icon: GrWorkshop },
-  { id: 4, label: "Users", to: "/admin-users", icon: HiOutlineUserGroup },
-  { id: 7, label: "Payouts", to: "/admin-withdraw-request", icon: HiOutlineCash },
-];
 
 const DashboardLayout = ({
   active,
@@ -76,8 +44,7 @@ const DashboardLayout = ({
   return (
     <>
       {(isAdmin || isVendor) && <PageMeta title={title} noIndex />}
-      <Header />
-      <div className="dashboard-page dark:text-gray-200 pb-20 lg:pb-10">
+      <div className="dashboard-page yebone-premium-screen dark:text-gray-200 pb-10">
         <Container className="py-6 lg:py-8">
           <div className="dashboard-header yebone-fade-up">
             <div className="flex-1 min-w-0">
@@ -102,7 +69,7 @@ const DashboardLayout = ({
                 )}
                 <span className="is-current">{title}</span>
               </nav>
-              <h1 className="font-Poppins text-2xl md:text-3xl font-semibold dark:text-white">
+              <h1 className="yebone-h2 dark:text-white">
                 {title}
               </h1>
             </div>
@@ -180,11 +147,10 @@ const DashboardLayout = ({
               )}
             </aside>
 
-            <main id="main-content" className={mainClass}>{children}</main>
+            <main className={mainClass}>{children}</main>
           </div>
         </Container>
       </div>
-      <Footer />
 
       {mobileOpen && (
         <>
@@ -218,53 +184,6 @@ const DashboardLayout = ({
         </>
       )}
 
-      <div className="dashboard-mobile-nav lg:hidden flex justify-around">
-        {isAdmin
-          ? ADMIN_MOBILE_NAV.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.id}
-                  to={item.to}
-                  className={`flex flex-col items-center gap-0.5 text-[10px] font-medium ${
-                    active === item.id ? "text-yebone-primary" : "text-gray-500"
-                  }`}
-                >
-                  <Icon size={20} />
-                  {item.label}
-                </Link>
-              );
-            })
-          : isVendor
-            ? VENDOR_MOBILE_NAV.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.id}
-                    to={item.to}
-                    className={`flex flex-col items-center gap-0.5 text-[10px] font-medium ${
-                      active === item.id ? "text-yebone-primary" : "text-gray-500"
-                    }`}
-                  >
-                    <Icon size={20} />
-                    {item.label}
-                  </Link>
-                );
-              })
-            : CUSTOMER_MOBILE_NAV.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setActive(item.id)}
-                  className={`flex flex-col items-center gap-0.5 text-[10px] font-medium ${
-                    active === item.id ? "text-yebone-primary" : "text-gray-500"
-                  }`}
-                >
-                  <item.icon size={20} />
-                  {item.label}
-                </button>
-              ))}
-      </div>
     </>
   );
 };

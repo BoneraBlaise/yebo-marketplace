@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import Footer from "../components/Layout/Footer";
-import Header from "../components/Layout/Header";
 import { Helmet } from "react-helmet";
 import FlashSaleList from "../components/Route/FlashSaleList/FlashSaleList";
 import { getAllFlashSales } from "../redux/actions/flashSale"; // Ensure the action is imported
@@ -129,11 +127,9 @@ const FlashSalePage = () => {
         <>
             {isLoading || !flashSales ? (
                 <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
-                    <Header activeHeading={4} />
                     <Container className="py-8 lg:py-10">
                         <MarketplaceListingSkeleton />
                     </Container>
-                    <Footer />
                 </div>
             ) : (
                 <div>
@@ -145,7 +141,6 @@ const FlashSalePage = () => {
                         />
                     </Helmet>
                     <div className="marketplace-page dark:text-gray-200 min-h-screen">
-                        <Header activeHeading={4} />
                         <Container className="pt-6 lg:pt-8 pb-4">
                             <MarketplacePageHero
                                 title="Flash Sales"
@@ -309,7 +304,6 @@ const FlashSalePage = () => {
                                 )}
                             </div>
                         </Container>
-                        <Footer />
                     </div>
                 </div>
             )}

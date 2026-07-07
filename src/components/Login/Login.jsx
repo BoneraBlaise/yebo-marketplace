@@ -10,10 +10,12 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../ui";
 import {
   AuthLayout,
+  AuthPageChrome,
   AuthFloatingInput,
   AuthGoogleButton,
   AuthDivider,
 } from "../Auth";
+import { brandCopy } from "../../ui-polish/brandConstants";
 
 const Login = () => {
   const { t } = useTranslation();
@@ -73,11 +75,12 @@ const Login = () => {
   };
 
   return (
-    <AuthLayout
-      title={t("auth.signIn")}
-      subtitle="Welcome back to Yebone — sign in to continue shopping across Africa."
-    >
-      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+    <AuthPageChrome>
+      <AuthLayout
+        title={t("auth.signIn")}
+        subtitle={`${brandCopy.marketplaceWelcome} — sign in to continue shopping.`}
+      >
+        <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <AuthGoogleButton onClick={handleGoogleLogin} disabled={loading}>
           {t("auth.signInWithGoogle")}
         </AuthGoogleButton>
@@ -149,8 +152,14 @@ const Login = () => {
             {t("auth.signUp")}
           </Link>
         </p>
+        <div className="auth-trust-row" aria-label="Trust indicators">
+          <span className="auth-trust-item">🔒 Secure login</span>
+          <span className="auth-trust-item">✨ Powered by YEBO AI</span>
+          <span className="auth-trust-item">🛡️ Verified sellers</span>
+        </div>
       </form>
     </AuthLayout>
+    </AuthPageChrome>
   );
 };
 

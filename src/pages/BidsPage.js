@@ -2,8 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useSearchParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { getAllBids, getMyWinningBids } from "../redux/actions/bids";
-import Footer from "../components/Layout/Footer";
-import Header from "../components/Layout/Header";
 import { Helmet } from "react-helmet";
 import BidList from "../components/Route/Bids/BidList";
 import DropDownFilter from "../components/Layout/DropDownFilter";
@@ -229,8 +227,6 @@ const BidsPage = () => {
         <meta name="description" content="Browse a wide range of bids at Yebone." />
       </Helmet>
       <div className="marketplace-page dark:text-gray-200 min-h-screen">
-        <Header activeHeading={3} />
-
         <Container className="pt-6 lg:pt-8 pb-4">
           <MarketplacePageHero
             title="Auctions"
@@ -516,7 +512,6 @@ const BidsPage = () => {
           )}
         </div>
 
-        <Footer />
       </div>
     </>
   );

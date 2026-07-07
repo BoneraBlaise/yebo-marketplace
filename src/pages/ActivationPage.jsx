@@ -28,15 +28,7 @@ const ActivationPage = () => {
   }, [activation_token]);  // Trigger useEffect when the token changes
 
   return (
-    <div className="bg-white dark:bg-[#1f1f1f] dark:text-gray-200"
-      style={{
-        width: "100%",
-        height: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <div className="yebone-premium-screen bg-yebone-light-gray dark:bg-gray-950 dark:text-gray-200 w-full min-h-screen flex flex-col items-center justify-center px-4 text-center">
       {error ? (
         <p>{error}</p>  // Show error message
       ) : success ? (

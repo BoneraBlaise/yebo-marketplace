@@ -1,11 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from "react";
 import { Helmet } from "react-helmet";
 import { useSelector } from "react-redux";
-import {
-  HomeHeader,
-  HomeHero,
-  HomeFeatureStrip,
-} from "../components/Home";
+import { HomeHero, HomeFeatureStrip } from "../components/Home";
 import ProductCardSkeleton from "../components/Home/ProductCardSkeleton";
 import { Container } from "../components/ui";
 import "../components/Home/home.css";
@@ -22,7 +18,6 @@ const HomeVerifiedVendors = lazy(() => import("../components/Home/HomeVerifiedVe
 const HomeReviews = lazy(() => import("../components/Home/HomeReviews"));
 const HomeRecentlyViewed = lazy(() => import("../components/Home/HomeRecentlyViewed"));
 const HomeNewsletter = lazy(() => import("../components/Home/HomeNewsletter"));
-const HomeFooter = lazy(() => import("../components/Home/HomeFooter"));
 
 const SectionFallback = () => (
   <div className="home-section home-section-enter">
@@ -59,47 +54,35 @@ const HomePage = () => {
         />
       </Helmet>
 
-      <div className="home-page flex flex-col min-h-screen bg-yebone-light-gray dark:bg-gray-950">
-        <HomeHeader activeHeading={1} />
-
-        <main className="scroll-smooth">
-          {/* 1. Hero */}
+      <div className="home-page yebone-premium-screen flex flex-col flex-1">
+        <div className="scroll-smooth flex-1">
           <HomeHero />
-
-          {/* 2. Marketplace Benefits */}
           <HomeFeatureStrip />
 
-          {/* 3. Marketplace Categories */}
           <Suspense fallback={<SectionFallback />}>
             <HomeCategories />
           </Suspense>
 
-          {/* 4. Trending Products */}
           <Suspense fallback={<SectionFallback />}>
             <HomeProductRails />
           </Suspense>
 
-          {/* 5. AI Shopping Experience */}
           <Suspense fallback={<SectionFallback />}>
             <HomeAIExperience />
           </Suspense>
 
-          {/* 5b. AI Discovery */}
           <Suspense fallback={<SectionFallback />}>
             <HomeAIDiscovery />
           </Suspense>
 
-          {/* 5c. Shopping Assistants */}
           <Suspense fallback={<SectionFallback />}>
             <AIShoppingAssistants compact />
           </Suspense>
 
-          {/* 6. AI Picks */}
           <Suspense fallback={<SectionFallback />}>
             <HomeAIPicks />
           </Suspense>
 
-          {/* 7. Events */}
           <Suspense fallback={<SectionFallback />}>
             {isBannerVisible ? (
               <HomeEventsBanner />
@@ -108,12 +91,10 @@ const HomePage = () => {
             )}
           </Suspense>
 
-          {/* 8. Verified Vendors */}
           <Suspense fallback={<SectionFallback />}>
             <HomeVerifiedVendors />
           </Suspense>
 
-          {/* 9. Customer Reviews */}
           <Suspense fallback={<SectionFallback />}>
             <HomeReviews />
           </Suspense>
@@ -124,16 +105,10 @@ const HomePage = () => {
             </Suspense>
           )}
 
-          {/* 10. Newsletter */}
           <Suspense fallback={<SectionFallback />}>
             <HomeNewsletter />
           </Suspense>
-        </main>
-
-        {/* 11. Footer */}
-        <Suspense fallback={null}>
-          <HomeFooter />
-        </Suspense>
+        </div>
       </div>
     </>
   );

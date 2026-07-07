@@ -1,15 +1,18 @@
 import React, { useState } from "react";
-import { Card, Button, Input, Tabs, Avatar } from "../../../design-system/components";
+import { Card, Button, Input, Tabs, Avatar, Badge } from "../../../design-system/components";
+import { SectionHeader, PremiumCard } from "../../../ui-polish";
+import { AI_POWERED_BY, MARKETPLACE_NAME } from "../../../ui-polish/brandConstants";
 import { logCustomerUIDiagnostics } from "../../diagnostics/CustomerUIDiagnostics";
 
 export const ProfileHeader = ({ name = "Customer", email = "customer@example.com" }) => (
-  <Card className="flex items-center gap-4">
+  <PremiumCard className="flex items-center gap-4 mb-6">
     <Avatar name={name} size="lg" />
     <div>
-      <h2 className="text-xl font-bold">{name}</h2>
+      <h2 className="text-xl font-Poppins font-bold">{name}</h2>
       <p className="text-sm text-gray-500">{email}</p>
+      <Badge variant="success" className="mt-2">Verified member</Badge>
     </div>
-  </Card>
+  </PremiumCard>
 );
 
 export const AddressesView = ({ addresses = [] }) => (
@@ -61,6 +64,14 @@ export const SecuritySettings = () => (
   </Card>
 );
 
+export const AIHistoryPlaceholder = () => (
+  <Card aria-label="AI preview history">
+    <h3 className="font-semibold mb-2">AI Preview History</h3>
+    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{AI_POWERED_BY} — your preview sessions on {MARKETPLACE_NAME}.</p>
+    <div className="p-4 border border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-center text-gray-400 text-sm">No AI previews yet — try Preview with AI on any product.</div>
+  </Card>
+);
+
 export const ProfileView = ({ addresses = [] }) => {
   const [tab, setTab] = useState("profile");
   logCustomerUIDiagnostics("component", { name: "ProfileView", tab });
@@ -69,19 +80,24 @@ export const ProfileView = ({ addresses = [] }) => {
     { id: "profile", label: "Profile" },
     { id: "addresses", label: "Addresses" },
     { id: "payments", label: "Payments" },
-    { id: "settings", label: "Settings" },
+    { id: "ai-history", label: "AI History" },
+    { id: "notifications", label: "Notifications" },
     { id: "security", label: "Security" },
   ];
 
   return (
-    <div>
+    <div className="yebone-fade-up">
+      <SectionHeader title="My Account" subtitle={`Manage your ${MARKETPLACE_NAME} profile`} />
       <ProfileHeader />
       <Tabs tabs={tabs} active={tab} onChange={setTab} />
-      <div className="mt-4">
+      <div className="mt-6">
         {tab === "profile" && <ProfileSettings />}
         {tab === "addresses" && <AddressesView addresses={addresses} />}
         {tab === "payments" && <SavedPaymentsPlaceholder />}
-        {tab === "settings" && <ProfileSettings />}
+        {tab === "ai-history" && <AIHistoryPlaceholder />}
+        {tab === "notifications" && (
+          <Card><h3 className="font-semibold mb-2">Notifications</h3><p className="text-sm text-gray-500">All caught up — no new notifications.</p></Card>
+        )}
         {tab === "security" && <SecuritySettings />}
       </div>
     </div>

@@ -1,20 +1,22 @@
 import React from "react";
 import classNames from "classnames";
+import { polishClasses } from "../../ui-polish/polishClasses";
 
 /**
  * Styling shell for product cards. Wrap existing product card content for consistent layout.
  */
-const ProductCardShell = ({ children, className, onMouseEnter, onMouseLeave }) => (
-  <div
+const ProductCardShell = ({ children, className, onMouseEnter, onMouseLeave, as: Component = "article" }) => (
+  <Component
     className={classNames(
-      "group relative bg-white dark:bg-gray-900 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow duration-300",
+      polishClasses.productCard,
+      "group relative cursor-pointer",
       className
     )}
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
   >
     {children}
-  </div>
+  </Component>
 );
 
 export default ProductCardShell;

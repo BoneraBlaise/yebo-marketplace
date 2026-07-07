@@ -33,7 +33,7 @@ const AIShoppingAssistants = ({ compact = false, contained = false }) => (
       {SHOPPING_ASSISTANTS.map(({ id, title, description, tag }) => {
         const Icon = ICONS[id] || HiOutlineStar;
         return (
-          <AICard key={id} padding="sm" className="cursor-default">
+          <AICard key={id} padding="sm" className="home-surface-card cursor-default">
             <div className="flex items-start justify-between gap-2 mb-2">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yebone-primary to-yebone-primary-dark flex items-center justify-center">
                 <Icon className="text-white" size={20} />

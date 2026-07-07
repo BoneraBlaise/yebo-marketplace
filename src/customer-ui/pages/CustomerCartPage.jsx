@@ -1,11 +1,11 @@
 import React from "react";
 import CustomerPageShell from "../components/CustomerPageShell";
 import { CartView } from "../components/cart/CartView";
-import { mockCartItems } from "../data/mockCustomerData";
+import { mockCartItems, mockProducts } from "../data/mockCustomerData";
 
 export const CustomerCartPage = () => (
   <CustomerPageShell pageName="cart" activeNavId="cart" title="Shopping Cart" breadcrumbs={[{ label: "Cart" }]}>
-    <CartView items={mockCartItems} />
+    <CartView items={mockCartItems} recommendations={mockProducts} />
   </CustomerPageShell>
 );
 

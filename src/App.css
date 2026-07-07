@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import './design-system/global.css';
+@import './ui-polish/platformPolish.css';
 @import './components/Marketplace/marketplace.css';
 @import './components/Auth/auth.css';
 @import './components/Dashboard/dashboard.css';

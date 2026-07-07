@@ -7,6 +7,7 @@ const SectionTitle = ({
   subtitle,
   align = "center",
   className,
+  as: Tag = "h2",
 }) => {
   const alignClass =
     align === "left"
@@ -16,10 +17,10 @@ const SectionTitle = ({
       : "text-center";
 
   return (
-    <div className={classNames("mb-6 md:mb-8", alignClass, className)}>
-      <h2 className={typography.heading}>{title}</h2>
+    <div className={classNames("mb-8 md:mb-10", alignClass, className)}>
+      <Tag className={typography.heading}>{title}</Tag>
       {subtitle && (
-        <p className={classNames(typography.body, "mt-2 text-gray-600 dark:text-gray-400")}>
+        <p className={classNames(typography.subtitle, "mt-2 max-w-2xl", align === "center" && "mx-auto")}>
           {subtitle}
         </p>
       )}

@@ -14,11 +14,13 @@ import { useTranslation } from "react-i18next";
 import { Button } from "../ui";
 import {
   AuthLayout,
+  AuthPageChrome,
   AuthFloatingInput,
   AuthGoogleButton,
   AuthDivider,
   AuthPasswordStrength,
 } from "../Auth";
+import { brandCopy } from "../../ui-polish/brandConstants";
 
 const Singup = () => {
   const { t } = useTranslation();
@@ -66,12 +68,13 @@ const Singup = () => {
   };
 
   return (
-    <AuthLayout
-      wide
-      title="Create your account"
-      subtitle="Join Yebone and discover premium products from verified sellers."
-    >
-      <form className="space-y-4" onSubmit={handleSubmit} noValidate>
+    <AuthPageChrome>
+      <AuthLayout
+        wide
+        title="Create your account"
+        subtitle={brandCopy.marketplaceJoin}
+      >
+        <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <AuthGoogleButton onClick={handleGoogleLogin} disabled={loading}>
           {t("auth.signUpWithGoogle")}
         </AuthGoogleButton>
@@ -177,6 +180,7 @@ const Singup = () => {
         </p>
       </form>
     </AuthLayout>
+    </AuthPageChrome>
   );
 };
 

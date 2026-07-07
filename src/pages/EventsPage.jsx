@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import EventCard from "../components/Events/EventCard";
-import Header from "../components/Layout/Header";
-import Footer from "../components/Layout/Footer";
 import { Helmet } from "react-helmet";
 import { IoCalendarOutline } from "react-icons/io5";
 import { Container, Button } from "../components/ui";
@@ -69,18 +67,16 @@ const EventsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
-        <Header activeHeading={4} />
+      <div className="marketplace-page yebone-premium-screen min-h-screen dark:bg-gray-950 bg-yebone-light-gray">
         <Container className="py-8 lg:py-10">
           <MarketplaceListingSkeleton count={6} />
         </Container>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
+    <div className="marketplace-page yebone-premium-screen min-h-screen dark:bg-gray-950 bg-yebone-light-gray">
       <Helmet>
         <title>All Events - Yebone</title>
         <meta
@@ -93,8 +89,6 @@ const EventsPage = () => {
           content="Discover Events at Yebone. Best prices guaranteed!"
         />
       </Helmet>
-      <Header activeHeading={4} />
-
       <Container className="pt-6 lg:pt-8 pb-16">
         <MarketplacePageHero
           title="Events"
@@ -168,7 +162,7 @@ const EventsPage = () => {
                 </div>
 
                 {shouldShowPagination && (
-                  <div className="flex justify-center items-center mt-8 gap-4">
+                  <div className="yebone-pagination mt-8">
                     <Button
                       variant="outline"
                       size="sm"
@@ -197,7 +191,6 @@ const EventsPage = () => {
         </div>
       </Container>
 
-      <Footer />
     </div>
   );
 };

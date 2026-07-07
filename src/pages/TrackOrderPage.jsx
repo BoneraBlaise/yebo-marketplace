@@ -1,14 +1,10 @@
 import React from 'react'
-import Header from '../components/Layout/Header'
-import Footer from '../components/Layout/Footer'
 import TrackOrder from "../components/Profile/TrackOrder";
 
 const TrackOrderPage = () => {
   return (
-    <div>
-        <Header />
+    <div className="yebone-premium-screen min-h-screen bg-yebone-light-gray dark:bg-gray-950">
         <TrackOrder />
-        <Footer />
     </div>
   )
 }

@@ -1,8 +1,8 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { HiOutlineSparkles } from "react-icons/hi";
 import { useAI } from "./core/AIContext";
 import AIPanel from "./AIPanel";
+import YEBOSparkleMark from "./YEBOSparkleMark";
 import "./core/ai.css";
 
 const HIDDEN_PATHS = ["/login", "/sign-up", "/payment", "/shop-login"];
@@ -17,7 +17,8 @@ const GlobalAIFab = () => {
 
   if (isHidden) return null;
 
-  const fabClass = isDashboard || isCheckout ? "ai-fab ai-fab--offset-mobile" : "ai-fab ai-fab--default";
+  const fabClass =
+    isDashboard || isCheckout ? "ai-fab ai-fab--offset-mobile" : "ai-fab ai-fab--default";
 
   return (
     <>
@@ -29,7 +30,7 @@ const GlobalAIFab = () => {
           aria-label="Open YEBO Assistant"
           title="Chat with YEBO"
         >
-          <HiOutlineSparkles size={24} className="text-yebone-gold" />
+          <YEBOSparkleMark />
         </button>
       )}
       <AIPanel />

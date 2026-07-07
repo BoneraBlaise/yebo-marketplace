@@ -14,10 +14,10 @@ const SignupPage = () => {
     }
   }, [])
   return (
-    <div>
+    <div className="yebone-premium-screen">
       <Helmet>
-        <title>Sign Up | Yebone</title>
-        <meta name="description" content="Create your Yebone account and start shopping premium products." />
+        <title>Sign Up | YEBONE</title>
+        <meta name="description" content="Create your YEBONE account and start shopping with AI-powered previews." />
       </Helmet>
       <Signup />
     </div>

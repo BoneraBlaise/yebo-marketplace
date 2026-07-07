@@ -8,14 +8,14 @@ const VendorTableSection = ({ title, subtitle, children, id, className = "" }) =
     {(title || subtitle) && (
       <div className="mb-4">
         {title && (
-          <h3 className="font-Poppins font-semibold text-lg dark:text-white">{title}</h3>
+          <h3 className="yebone-section-title dark:text-white">{title}</h3>
         )}
         {subtitle && (
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>
         )}
       </div>
     )}
-    <div className="vendor-datagrid-wrap">{children}</div>
+    <div className="vendor-datagrid-wrap yebone-datagrid yebone-table-wrap">{children}</div>
   </section>
 );
 

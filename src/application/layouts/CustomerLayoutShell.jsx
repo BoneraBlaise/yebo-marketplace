@@ -1,8 +1,7 @@
 import React from "react";
 import { CustomerLayout } from "../../design-system/layouts";
-import { BottomNav } from "../../design-system/navigation";
 import { GlobalNavigation } from "../navigation/GlobalNavigation";
-import { customerNavItems, customerBottomNav } from "../navigation/NavigationConfig";
+import { customerNavItems } from "../navigation/NavigationConfig";
 import { logShellDiagnostics } from "../diagnostics/ShellDiagnostics";
 
 /** Customer portal layout shell — Phase 8H.1 */
@@ -37,21 +36,16 @@ export const CustomerLayoutShell = ({
     </>
   );
 
-  const mobileNav = <BottomNav items={customerBottomNav} activeId={activeNavId} />;
-
   return (
     <CustomerLayout
       className={className}
       header={header}
       footer={
-        <>
-          {mobileNav}
-          {footer || (
-            <footer className="border-t border-gray-200 dark:border-gray-700 px-4 py-6 text-center text-sm text-gray-500 pb-20 lg:pb-6" role="contentinfo">
-              © YEBO Marketplace
-            </footer>
-          )}
-        </>
+        footer || (
+          <footer className="border-t border-gray-200 dark:border-gray-700 px-4 py-6 text-center text-sm text-gray-500" role="contentinfo">
+            © YEBO Marketplace
+          </footer>
+        )
       }
     >
       <div id="main-content" tabIndex={-1}>

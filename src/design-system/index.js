@@ -20,7 +20,7 @@ export { DesignSystemProvider } from "./DesignSystemProvider";
 
 export * from "./accessibility";
 export * from "./layouts";
-export * from "./navigation";
+export { Sidebar, TopNav, BottomNav, Breadcrumbs, NavSearch, CommandPalette, NavNotifications, ProfileMenu, OrganizationSwitcher, ThemeToggle } from "./navigation";
 export * from "./components";
 export * from "./ai";
 export * from "./charts";

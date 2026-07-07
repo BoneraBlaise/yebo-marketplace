@@ -21,7 +21,8 @@
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.65rem 0.85rem;
+  padding: 0.625rem 0.875rem;
+  min-height: 2.75rem;
   border-radius: 0.875rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -29,7 +30,8 @@
   transition:
     background-color 0.2s ease,
     color 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .dark .dashboard-nav-item {
@@ -90,7 +92,7 @@
 
 .dashboard-stat-card {
   border-radius: 1.25rem;
-  padding: 1.25rem;
+  padding: 1.25rem 1.5rem;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -240,11 +242,29 @@
 }
 
 /* Vendor platform extensions */
+.vendor-table-row:nth-child(even) {
+  background: rgba(41, 98, 93, 0.02);
+}
+
+.dark .vendor-table-row:nth-child(even) {
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.vendor-table-row:hover {
+  background: rgba(41, 98, 93, 0.06);
+}
+
+.dark .vendor-table-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
 .vendor-datagrid-wrap {
   width: 100%;
   min-height: 320px;
   border-radius: 1rem;
   overflow: hidden;
+  border: 1px solid rgba(41, 98, 93, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .vendor-datagrid-wrap .MuiDataGrid-root {
@@ -258,8 +278,11 @@
 }
 
 .vendor-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -271,10 +294,6 @@
 .vendor-table-row td {
   padding: 0.85rem 1rem;
   border-bottom: 1px solid rgba(41, 98, 93, 0.06);
-}
-
-.vendor-table-row:hover {
-  background: rgba(41, 98, 93, 0.04);
 }
 
 .vendor-status-pill {

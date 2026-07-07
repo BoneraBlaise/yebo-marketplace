@@ -94,6 +94,7 @@ import CommissionDashboard from "./components/Commission/CommissionDashboard";
 import { ReferralProvider } from './context/ReferralContext';
 import { AIProvider } from "./components/ai/core/AIContext";
 import GlobalAIFab from "./components/ai/GlobalAIFab";
+import AppLayout from "./components/Layout/AppLayout";
 import "./components/ai/core/ai.css";
 
 // Google Analytics tracking code inside App component
@@ -132,22 +133,19 @@ const App = () => {
         <Suspense fallback={<LoadingFallback />}>
         <div>
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            {/* Auth & onboarding — no global chrome */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route
-              path="/reset-password/:token"
-              element={<ResetPasswordPage />}
-            />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
             <Route path="/sign-up" element={<SignupPage />} />
-            <Route
-              path="/activation/:activation_token"
-              element={<ActivationPage />}
-            />
-            <Route
-              path="/seller/activation/:activation_token"
-              element={<SellerActivationPage />}
-            />
+            <Route path="/activation/:activation_token" element={<ActivationPage />} />
+            <Route path="/seller/activation/:activation_token" element={<SellerActivationPage />} />
+            <Route path="/shop-login" element={<ShopLoginPage />} />
+            <Route path="/login-success" element={<LoginSuccessHandler />} />
+
+            {/* Global Header + Footer shell */}
+            <Route element={<AppLayout />}>
+            <Route path="/" element={<HomePage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
             <Route path="/best-selling" element={<BestSellingPage />} />
@@ -157,25 +155,22 @@ const App = () => {
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/bid/:bidId" element={<BidDetailsPage />} />
 
-            {/* Routes for all Legal documents */}
-            <Route path='/shipping' element={<ShippingPage />} />
-            <Route path='/about' element={<AboutPage />} />
+            {/* Legal & info */}
+            <Route path="/shipping" element={<ShippingPage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/careers" element={<CareerPage />} />
-            <Route path='/live-chat' element={<LiveChatPage />} />
-            <Route path='contact' element={<ContactPage />} />
+            <Route path="/live-chat" element={<LiveChatPage />} />
+            <Route path="contact" element={<ContactPage />} />
             <Route path="/selling" element={<SellingPage />} />
             <Route path="/locations" element={<LocationsPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/transaction" element={<TransactionPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/cookie-policy" element={<CookiesPage />} />
-            <Route path='/blog' element={<BlogPage />} />
-            <Route path='/blog/:id' element={<BlogDetailsPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:id" element={<BlogDetailsPage />} />
 
-            <Route
-              path="/flashsale/:flashSaleId"
-              element={<FlashSaleDetailsPage />}
-            />
+            <Route path="/flashsale/:flashSaleId" element={<FlashSaleDetailsPage />} />
             <Route
               path="/checkout"
               element={
@@ -226,9 +221,7 @@ const App = () => {
               }
             />
             <Route path="/shop/preview/:id" element={<ShopPreviewPage />} />
-            {/* shop Routes */}
             <Route path="/shop-create" element={<ShopCreatePage />} />
-            <Route path="/shop-login" element={<ShopLoginPage />} />
             <Route
               path="/shop/:id"
               element={
@@ -309,7 +302,6 @@ const App = () => {
                 </SellerProtectedRoute>
               }
             />
-
             <Route
               path="/order/:id"
               element={
@@ -366,7 +358,6 @@ const App = () => {
                 </SellerProtectedRoute>
               }
             />
-            {/* Admin Routes */}
             <Route
               path="/admin/dashboard"
               element={
@@ -423,17 +414,16 @@ const App = () => {
                 </ProtectedAdminRoute>
               }
             />
-            <Route path="/login-success" element={<LoginSuccessHandler />} />
-            {/* Commission routes */}
-            <Route 
-              path="/commission/dashboard" 
+            <Route
+              path="/commission/dashboard"
               element={
                 <ProtectedRoute>
                   <CommissionDashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route path="*" element={<NotFoundPage />} />
+            </Route>
           </Routes>
         </div>
         <ToastContainer

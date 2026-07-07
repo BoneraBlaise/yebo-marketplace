@@ -8,7 +8,21 @@ module.exports = {
       Roboto: ["Roboto", "sans-serif"],
       Poppins: ['Poppins', "sans-serif"],
     },
-    extend: {
+      extend: {
+      boxShadow: {
+        yebo: "var(--yebone-shadow, 0 4px 6px rgba(0,0,0,0.08))",
+        "yebo-lg": "0 10px 25px rgba(41,98,93,0.12)",
+        "yebo-gold": "0 4px 14px rgba(254,213,146,0.25)",
+      },
+      keyframes: {
+        shimmer: {
+          "0%": { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+      },
+      animation: {
+        shimmer: "shimmer 1.5s ease-in-out infinite",
+      },
       colors: {
         yebone: {
           primary: "#29625d",

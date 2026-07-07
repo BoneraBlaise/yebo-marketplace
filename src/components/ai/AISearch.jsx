@@ -20,7 +20,7 @@ const AISearch = ({ className, placeholder = "Ask YEBO to find products..." }) =
   return (
     <div
       className={classNames(
-        "relative w-full rounded-2xl border border-yebone-primary/15 yebone-glass p-5 yebone-card-lift",
+        "home-ai-search relative w-full yebone-glass yebone-card-lift",
         className
       )}
       aria-label="AI Search"
@@ -38,7 +38,7 @@ const AISearch = ({ className, placeholder = "Ask YEBO to find products..." }) =
           onFocus={handleFocus}
           onClick={handleFocus}
           placeholder={placeholder}
-          className="w-full h-12 pl-4 pr-12 rounded-xl border-2 border-yebone-primary/20 bg-white dark:bg-gray-800 dark:text-white cursor-pointer focus:border-yebone-primary focus:ring-4 focus:ring-yebone-primary/10 outline-none transition text-sm"
+          className="w-full h-12 pl-4 pr-12 rounded-xl border border-yebone-primary/20 bg-white dark:bg-gray-900 dark:text-white cursor-pointer focus:border-yebone-primary focus:ring-4 focus:ring-yebone-primary/10 outline-none transition text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500"
           aria-label="Open AI search assistant"
         />
         <AiOutlineSearch

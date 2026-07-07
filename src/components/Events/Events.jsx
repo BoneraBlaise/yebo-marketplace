@@ -59,22 +59,20 @@ const Events = ({ isMobile }) => {
 
   if (allEvents.length === 0) {
     return (
-      <div className='w-full dark:bg-[#1f1f1f] dark:text-gray-200'>
-        <div className={`${styles.section} mb-2`}>
-          <div className={`${styles.heading} text-sm mt-2 md:text-base lg:text-lg text-start`}>
-            <h1 className="p-1 mt-2">Scheduled Events</h1>
-          </div>
-          <h4 className="text-center mt-4 text-md mb-4 dark:text-gray-400">No Scheduled Events!</h4>
+      <div className="w-full home-events-rail dark:text-gray-200">
+        <div className="w-full mb-2 mt-4">
+          <h2 className="yebone-section-title dark:text-white mb-3">Scheduled Events</h2>
+          <h4 className="text-center mt-4 text-sm mb-4 dark:text-gray-400">No Scheduled Events!</h4>
         </div>
       </div>
     );
   }
 
   return (
-    <div className='w-full dark:bg-[#1f1f1f] dark:text-gray-200'>
-      <div className={`${styles.section} mb-2 ${isMobile ? 'mt-4' : 'mt-8'}`}>
-        <div className={`${styles.heading} text-sm mt-2 md:text-base lg:text-lg text-start flex justify-between items-center`}>
-          <h1>Scheduled Events</h1>
+    <div className="w-full home-events-rail dark:text-gray-200">
+      <div className={`w-full mb-2 ${isMobile ? "mt-2" : "mt-4"}`}>
+        <div className="flex justify-between items-center mb-5">
+          <h2 className="yebone-section-title dark:text-white">Scheduled Events</h2>
           
           {isMobile && (
             <div className="flex gap-2">

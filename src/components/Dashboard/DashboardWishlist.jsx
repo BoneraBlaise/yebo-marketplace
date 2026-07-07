@@ -6,6 +6,7 @@ import { addTocart } from "../../redux/actions/cart";
 import { removeFromWishlist } from "../../redux/actions/wishlist";
 import HomeProductCard from "../Home/HomeProductCard";
 import DashboardEmptyState from "./DashboardEmptyState";
+import { MarketplaceCardGrid, MarketplaceCardSlot } from "../Marketplace/cards";
 
 const DashboardWishlist = () => {
   const { wishlist } = useSelector((state) => state.wishlist);
@@ -28,11 +29,12 @@ const DashboardWishlist = () => {
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
         {wishlist.length} saved item{wishlist.length === 1 ? "" : "s"}
       </p>
-      <div className="marketplace-product-grid">
+      <MarketplaceCardGrid>
         {wishlist.map((item) => (
-          <div key={item._id} className="relative flex justify-center">
-            <HomeProductCard data={item} compact />
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 w-[calc(100%-2rem)] max-w-[200px]">
+          <MarketplaceCardSlot key={item._id}>
+            <div className="relative w-full">
+              <HomeProductCard data={item} compact fluid />
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 w-[calc(100%-2rem)] max-w-[200px]">
               <button
                 type="button"
                 className="flex-1 text-xs py-1.5 rounded-lg bg-yebone-primary text-white font-semibold yebone-btn-lift"
@@ -54,10 +56,11 @@ const DashboardWishlist = () => {
               >
                 ✕
               </button>
+              </div>
             </div>
-          </div>
+          </MarketplaceCardSlot>
         ))}
-      </div>
+      </MarketplaceCardGrid>
     </div>
   );
 };

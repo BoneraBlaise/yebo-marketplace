@@ -1,39 +1,33 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { navItems } from '../../static/data';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { navItems } from "../../static/data";
+import { useTranslation } from "react-i18next";
 
-const Navbar = ({ active }) => {
+const Navbar = () => {
   const { t } = useTranslation();
-  const location = useLocation();  // Get the current location (path + query parameters)
+  const location = useLocation();
 
-  // Function to check if the current link matches the active URL including query parameters
-  const getLinkClass = (url) => {
-    // Split URL into base path and query params (if any)
-    const [baseUrl, queryParams] = url.split('?');
-
-    // Construct the full URL from current location (path + search query)
+  const isActive = (url) => {
     const currentUrl = location.pathname + location.search;
-
-    // Check if the base URL and query parameters match
-    const isActive = currentUrl === url;
-
-    return isActive ? "text-yebone-primary text-sm" : "text-yebone-dark-text text-sm 800px:dark:text-gray-200";
+    return currentUrl === url;
   };
 
   return (
-    <div className="block flex items-center z-40">
-      {navItems.map((i, index) => (
-        <div key={i.id} className="flex justify-center">
+    <nav className="home-nav" aria-label="Marketplace categories">
+      {navItems.map((item) => {
+        const active = isActive(item.url);
+        return (
           <Link
-            to={i.url}
-            className={`${getLinkClass(i.url)} pb-[30px] 800px:pb-0 px-4 cursor-pointer`}
+            key={item.id}
+            to={item.url}
+            className={`home-nav__link${active ? " is-active" : ""}`}
+            aria-current={active ? "page" : undefined}
           >
-            {t(`common.${i.title.toLowerCase()}`)}
+            {t(`common.${item.title.toLowerCase()}`)}
           </Link>
-        </div>
-      ))}
-    </div>
+        );
+      })}
+    </nav>
   );
 };
 

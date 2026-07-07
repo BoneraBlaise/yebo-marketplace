@@ -63,6 +63,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "build": "set NODE_OPTIONS=--max-old-space-size=8192 && react-scripts build",
+    "lint": "eslint src --ext .js,.jsx",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

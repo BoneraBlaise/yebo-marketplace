@@ -45,7 +45,9 @@ export const getVerifiedVendors = (allProducts = [], limit = 6) => {
     const existing = shopMap.get(shop._id);
     if (existing) {
       existing.productCount += 1;
-      if (product.images?.[0]?.url) existing.previewImages.push(product.images[0].url);
+      if (product.images?.[0]?.url && existing.previewImages.length < 3) {
+        existing.previewImages.push(product.images[0].url);
+      }
     } else {
       shopMap.set(shop._id, {
         ...shop,
@@ -60,3 +62,9 @@ export const getVerifiedVendors = (allProducts = [], limit = 6) => {
     .sort((a, b) => b.productCount - a.productCount)
     .slice(0, limit);
 };
+
+export const getFeaturedVerifiedVendors = (allProducts = [], limit = 4) =>
+  getVerifiedVendors(allProducts, limit);
+
+export const getBrowseVerifiedVendors = (allProducts = [], limit = 16) =>
+  getVerifiedVendors(allProducts, limit);

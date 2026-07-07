@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import Header from "../components/Layout/Header";
 import Loader from "../components/Layout/Loader";
 import ProductCard from "../components/Route/ProductCard/ProductCard";
 import styles from "../styles/styles";
-import Footer from "../components/Layout/Footer";
 import ProductList from "../components/Route/ProductList/ProductList";
 import { categoriesData } from "../static/data";
 import { RiEqualizerLine } from "react-icons/ri";
@@ -67,8 +65,7 @@ const BestSellingPage = () => {
       {isLoading ? (
         <Loader />
       ) : (
-        <div className="bg-white dark:text-gray-200 dark:bg-[#1f1f1f]">
-          <Header activeHeading={2} />
+        <div className="marketplace-page yebone-premium-screen bg-white dark:text-gray-200 dark:bg-gray-950 min-h-screen">
           <div className="flex flex-col lg:flex-row justify-center items-start">
             {/* Button to toggle filters on mobile */}
             {isMobile && (
@@ -205,7 +202,6 @@ const BestSellingPage = () => {
               </div>
             </div>
           </div>
-          <Footer />
         </div>
       )}
     </>

@@ -1,19 +1,35 @@
 import React, { useState } from "react";
-import { Card, Select, Pagination, EmptyState } from "../../../design-system/components";
+import { Card, Select, Pagination, Badge, Button } from "../../../design-system/components";
+import { PolishedEmptyState, SectionHeader } from "../../../ui-polish";
+import { AI_POWERED_BY } from "../../../ui-polish/brandConstants";
 import { logCustomerUIDiagnostics } from "../../diagnostics/CustomerUIDiagnostics";
 
-export const ProductCard = ({ product }) => (
-  <Card className="cursor-pointer" role="article" aria-label={product.name}>
-    <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-lg mb-3 flex items-center justify-center text-3xl">🛍️</div>
-    <p className="text-sm font-medium truncate">{product.name}</p>
-    <p className="text-xs text-gray-500">{product.vendor}</p>
-    <div className="flex items-center justify-between mt-2">
-      <p className="text-yebone-primary font-bold">${product.price}</p>
-      <span className="text-xs text-gray-400">⭐ {product.rating}</span>
-    </div>
-    {!product.inStock && <p className="text-xs text-red-500 mt-1">Out of stock</p>}
-  </Card>
-);
+export const ProductCard = ({ product }) => {
+  const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+  return (
+    <Card className="cursor-pointer yebone-card-lift !p-4 group relative" role="article" aria-label={product.name}>
+      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+        {discount > 0 && <Badge variant="error">-{discount}%</Badge>}
+        <Badge variant="warning" className="text-[10px]">✨ AI</Badge>
+      </div>
+      <div className="absolute top-3 right-3 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <Button size="sm" variant="ghost" aria-label="Add to wishlist">♡</Button>
+        <Button size="sm" variant="ghost" aria-label="Compare">⇄</Button>
+      </div>
+      <div className="aspect-square bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl mb-3 flex items-center justify-center text-3xl">🛍️</div>
+      <p className="text-xs text-gray-500 mb-1">{product.vendor}</p>
+      <p className="text-sm font-semibold truncate">{product.name}</p>
+      <div className="flex items-center justify-between mt-2">
+        <p className="text-yebone-primary font-bold">${product.price}</p>
+        <span className="text-xs text-gray-400">⭐ {product.rating}</span>
+      </div>
+      <div className="flex flex-wrap gap-1 mt-2">
+        {product.inStock ? <Badge variant="success">In stock</Badge> : <Badge variant="error">Out of stock</Badge>}
+        <Badge variant="default">Free ship</Badge>
+      </div>
+    </Card>
+  );
+};
 
 export const ProductGrid = ({ products = [] }) => (
   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" role="list" aria-label="Products">
@@ -24,7 +40,7 @@ export const ProductGrid = ({ products = [] }) => (
 export const ProductFilters = ({ filters = {}, onChange }) => {
   logCustomerUIDiagnostics("component", { name: "ProductFilters" });
   return (
-    <aside aria-label="Filters" className="space-y-4 p-4 border rounded-xl">
+    <aside aria-label="Filters" className="space-y-4 p-5 border border-gray-200/80 dark:border-gray-700/80 rounded-2xl bg-white dark:bg-gray-900 shadow-yebo lg:w-64 shrink-0">
       <h3 className="font-semibold text-sm">Filters</h3>
       <div>
         <label className="text-xs text-gray-500">Category</label>
@@ -68,7 +84,7 @@ export const ProductPagination = ({ page = 1, totalPages = 5, onChange }) => (
 export const RecentlyViewed = ({ products = [] }) => (
   <section aria-label="Recently Viewed" className="mb-8">
     <h2 className="text-lg font-semibold mb-4">Recently Viewed</h2>
-    {products.length === 0 ? <EmptyState title="No recently viewed items" /> : (
+    {products.length === 0 ? <PolishedEmptyState preset="noProducts" title="No recently viewed items" /> : (
       <div className="flex gap-3 overflow-x-auto pb-2">{products.map((p) => <div key={p.id} className="min-w-[140px]"><ProductCard product={p} /></div>)}</div>
     )}
   </section>

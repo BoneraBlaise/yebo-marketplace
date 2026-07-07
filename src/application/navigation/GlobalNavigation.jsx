@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Sidebar,
   TopNav,
-  BottomNav,
   Breadcrumbs,
   NavSearch,
   CommandPalette,
@@ -11,7 +10,7 @@ import {
   OrganizationSwitcher,
 } from "../../design-system/navigation";
 import { Button } from "../../design-system/components";
-import { customerNavItems, customerBottomNav, vendorNavItems, adminNavItems } from "./NavigationConfig";
+import { customerNavItems, vendorNavItems, adminNavItems } from "./NavigationConfig";
 
 /** Global navigation infrastructure — Phase 8H.1 */
 export const GlobalNavigation = ({
@@ -59,10 +58,6 @@ export const GlobalNavigation = ({
     <Sidebar items={navItems} activeId={activeId} />
   ) : null;
 
-  const bottomNav = variant === "customer" ? (
-    <BottomNav items={customerBottomNav} activeId={activeId} />
-  ) : null;
-
   if (chromeOnly) {
     return (
       <>
@@ -84,9 +79,8 @@ export const GlobalNavigation = ({
       {breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} className="px-4 py-2" />}
       <div className="flex flex-col lg:flex-row flex-1">
         {sidebar}
-        <div className="flex-1 pb-16 lg:pb-0">{children}</div>
+        <div className="flex-1">{children}</div>
       </div>
-      {bottomNav}
       <CommandPalette open={cmdOpen}>
         <div className="bg-white dark:bg-gray-900 rounded-xl p-4 w-full max-w-lg mx-4 shadow-xl">
           <NavSearch placeholder="Type a command..." className="w-full" />

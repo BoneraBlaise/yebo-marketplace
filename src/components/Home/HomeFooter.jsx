@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   AiFillFacebook,
   AiFillInstagram,
@@ -7,7 +7,6 @@ import {
 } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import BottomNav from "../Layout/BottomNav";
 import { Container } from "../ui";
 import { typography } from "../../design-system/typography";
 import YeboneLogo from "./YeboneLogo";
@@ -17,8 +16,6 @@ const FOOTER_COMPANY = [
   { label: "Careers", to: "/careers" },
   { label: "Press", to: "/about" },
   { label: "Investors", to: "/about" },
-  { label: "Privacy Policy", to: "/privacy-policy" },
-  { label: "Terms of Service", to: "/terms" },
   { label: "Contact", to: "/contact" },
 ];
 
@@ -40,28 +37,20 @@ const FOOTER_SUPPORT = [
   { label: "Blog", to: "/blog" },
 ];
 
+const FOOTER_LEGAL = [
+  { label: "Terms of Service", to: "/terms" },
+  { label: "Privacy Policy", to: "/privacy-policy" },
+  { label: "Cookie Policy", to: "/cookie-policy" },
+];
+
 const HomeFooter = () => {
-  const [isSmallScreen, setIsSmallScreen] = useState(false);
   const { t } = useTranslation();
-
-  useEffect(() => {
-    const handleResize = () => setIsSmallScreen(window.innerWidth < 900);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  if (isSmallScreen) {
-    return <BottomNav />;
-  }
-
-  const linkClass =
-    "text-gray-500 dark:text-gray-400 hover:text-yebone-primary transition-colors duration-200 text-sm leading-7 block";
+  const linkClass = "home-footer-link";
 
   const renderLinks = (links) => (
-    <ul className="space-y-1">
+    <ul className="home-footer__links">
       {links.map((link) => (
-        <li key={link.label}>
+        <li key={`${link.label}-${link.to}`}>
           <Link to={link.to} className={linkClass}>
             {link.label}
           </Link>
@@ -71,62 +60,59 @@ const HomeFooter = () => {
   );
 
   return (
-    <footer className="bg-gray-950 text-gray-300 mt-auto">
-      <Container className="py-16 lg:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-12">
-          <div className="lg:col-span-2">
-            <YeboneLogo variant="light" size="lg" className="mb-6" />
-            <p className={`${typography.body} text-gray-400 max-w-sm mb-6`}>
-              {t("footer.brandSlogan")}
-            </p>
-            <p className="text-sm text-gray-500 mb-6">
-              Africa&apos;s AI-powered marketplace. Shop smarter with virtual
-              try-on, intelligent search, and verified vendors.
-            </p>
-            <div className="flex gap-3">
-              {[AiFillFacebook, AiOutlineTwitter, AiFillInstagram, AiFillYoutube].map(
-                (Icon, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-yebone-primary active:scale-95 flex items-center justify-center transition-all duration-200"
-                    aria-label="Social link"
-                  >
-                    <Icon size={18} />
-                  </button>
-                )
-              )}
-            </div>
+    <footer className="home-footer mt-auto">
+      <Container className="home-footer__container">
+        <div className="home-footer__brand-block">
+          <YeboneLogo size="lg" className="home-footer__logo" />
+          <p className={`${typography.body} home-footer-muted home-footer__tagline`}>
+            {t("footer.brandSlogan")}
+          </p>
+          <p className="text-sm home-footer-muted home-footer__desc">
+            Africa&apos;s AI-powered marketplace. Shop smarter with virtual try-on,
+            intelligent search, and verified vendors.
+          </p>
+          <div className="home-footer__socials">
+            {[AiFillFacebook, AiOutlineTwitter, AiFillInstagram, AiFillYoutube].map(
+              (Icon, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  className="home-footer-social active:scale-95"
+                  aria-label="Social link"
+                >
+                  <Icon size={16} />
+                </button>
+              )
+            )}
           </div>
+        </div>
 
-          <div>
-            <h4 className="font-Poppins font-semibold text-white mb-4">Company</h4>
+        <div className="home-footer__columns">
+          <div className="home-footer__column">
+            <h4 className="home-footer-heading home-footer__heading">Company</h4>
             {renderLinks(FOOTER_COMPANY)}
           </div>
 
-          <div>
-            <h4 className="font-Poppins font-semibold text-white mb-4">Shop</h4>
+          <div className="home-footer__column">
+            <h4 className="home-footer-heading home-footer__heading">Shop</h4>
             {renderLinks(FOOTER_SHOP)}
           </div>
 
-          <div>
-            <h4 className="font-Poppins font-semibold text-white mb-4">Support</h4>
+          <div className="home-footer__column">
+            <h4 className="home-footer-heading home-footer__heading">Support</h4>
             {renderLinks(FOOTER_SUPPORT)}
+          </div>
+
+          <div className="home-footer__column">
+            <h4 className="home-footer-heading home-footer__heading">Legal</h4>
+            {renderLinks(FOOTER_LEGAL)}
           </div>
         </div>
       </Container>
 
-      <div className="border-t border-white/10">
-        <Container className="py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+      <div className="home-footer__bottom">
+        <Container className="home-footer__bottom-inner">
           <span>© {new Date().getFullYear()} Yebone. All rights reserved.</span>
-          <div className="flex gap-4">
-            <Link to="/terms" className="hover:text-white transition-colors duration-200">
-              Terms
-            </Link>
-            <Link to="/privacy-policy" className="hover:text-white transition-colors duration-200">
-              Privacy
-            </Link>
-          </div>
         </Container>
       </div>
     </footer>

@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
-import Footer from "../components/Layout/Footer";
-import Header from "../components/Layout/Header";
 import ProductList from "../components/Route/ProductList/ProductList";
 import DropDownFilter from "../components/Layout/DropDownFilter";
 import { categoriesData } from "../static/data"; // Import your categories data
@@ -532,12 +530,10 @@ const ProductsPage = () => {
   return (
     <>
       {isLoading ? (
-        <div className="marketplace-page min-h-screen dark:bg-[#1f1f1f]">
-          <Header activeHeading={3} />
+        <div className="marketplace-page yebone-premium-screen min-h-screen dark:bg-gray-950">
           <Container className="py-8 lg:py-10">
             <MarketplaceListingSkeleton />
           </Container>
-          <Footer />
         </div>
       ) : (
         <div>
@@ -546,9 +542,7 @@ const ProductsPage = () => {
             <meta name="description" content="Browse a wide range of products at Yebone." />
             <script type="application/ld+json">{JSON.stringify(structuredDataString)}</script>
           </Helmet>
-          <div className="marketplace-page dark:text-gray-200 min-h-screen">
-            <Header activeHeading={3} />
-
+          <div className="marketplace-page yebone-premium-screen dark:text-gray-200 min-h-screen bg-yebone-light-gray dark:bg-gray-950">
             <Container className="pt-6 lg:pt-8 pb-4">
               <MarketplacePageHero
                 title={pageTitle}
@@ -844,7 +838,6 @@ const ProductsPage = () => {
                 </div>
               </div>
             </Container>
-            <Footer />
           </div>
         </div>
       )}

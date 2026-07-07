@@ -37,24 +37,17 @@ const FEATURES = [
 ];
 
 const HomeFeatureStrip = () => (
-  <section className="home-section border-y border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
-    <Container className="py-6">
+  <section className="home-section home-section--tight home-feature-strip">
+    <Container className="py-6 lg:py-7">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
         {FEATURES.map(({ icon: Icon, title, description }) => (
-          <div
-            key={title}
-            className="flex items-center gap-3 p-3 lg:p-4 rounded-2xl hover:bg-yebone-light-gray dark:hover:bg-gray-900 transition group"
-          >
-            <div className="w-11 h-11 rounded-xl bg-yebone-primary/10 flex items-center justify-center shrink-0 group-hover:bg-yebone-primary group-hover:text-white transition">
-              <Icon className="w-5 h-5 text-yebone-primary group-hover:text-white" />
+          <div key={title} className="home-feature-item flex items-center gap-3 p-3 lg:p-4 group">
+            <div className="home-feature-item__icon">
+              <Icon className="w-5 h-5" />
             </div>
             <div>
-              <p className="font-Poppins font-semibold text-sm text-yebone-dark-text dark:text-white">
-                {title}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {description}
-              </p>
+              <p className="home-feature-item__title">{title}</p>
+              <p className="home-feature-item__desc">{description}</p>
             </div>
           </div>
         ))}

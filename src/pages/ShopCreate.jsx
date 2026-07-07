@@ -13,7 +13,7 @@ const ShopCreatePage = () => {
     }
   }, [])
   return (
-    <div>
+    <div className="yebone-premium-screen">
       <Helmet>
         <title>Sell on Yebone</title>
         <meta name="description" content="Become a seller on Yebone and reach thousands of potential buyers. Start selling today!" />

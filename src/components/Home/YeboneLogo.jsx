@@ -22,7 +22,7 @@ const YeboneLogo = ({
   const textColor =
     variant === "light"
       ? "text-white"
-      : "text-yebone-primary dark:text-white";
+      : "text-yebone-primary dark:text-[var(--yebone-fg,#f5f5f5)]";
 
   const content = (
     <>

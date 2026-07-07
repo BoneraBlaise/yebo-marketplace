@@ -1,6 +1,4 @@
 import React from "react";
-import Header from "../components/Layout/Header";
-import Footer from "../components/Layout/Footer";
 import { Container } from "../components/ui";
 import PageMeta from "../components/ui/PageMeta";
 import ErrorState from "../components/ui/ErrorState";
@@ -12,13 +10,11 @@ const NotFoundPage = () => (
       description="The requested page could not be found on Yebone."
       noIndex
     />
-    <Header />
-    <main id="main-content" className="dashboard-page min-h-[60vh]">
+    <main id="main-content" className="dashboard-page yebone-premium-screen min-h-[60vh]">
       <Container>
         <ErrorState variant="404" />
       </Container>
     </main>
-    <Footer />
   </>
 );
 

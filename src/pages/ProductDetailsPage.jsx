@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import Footer from "../components/Layout/Footer";
-import Header from "../components/Layout/Header";
 import ProductDetails from "../components/Products/ProductDetails";
 import SuggestedProduct from "../components/Products/SuggestedProduct";
 import { useSelector } from "react-redux";
@@ -59,7 +57,7 @@ const ProductDetailsPage = () => {
     "View product details on Yebone marketplace.";
 
   return (
-    <div className="bg-yebone-light-gray dark:bg-gray-950 min-h-screen flex flex-col">
+    <div className="yebone-premium-screen bg-yebone-light-gray dark:bg-gray-950 min-h-screen flex flex-col">
       <PageMeta
         title={metaTitle}
         description={metaDescription}
@@ -83,8 +81,6 @@ const ProductDetailsPage = () => {
             : undefined
         }
       />
-      <Header activeHeading={3} />
-
       <main id="main-content" className="flex-1">
         {isLoading ? (
           <GallerySkeleton />
@@ -100,7 +96,6 @@ const ProductDetailsPage = () => {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 };

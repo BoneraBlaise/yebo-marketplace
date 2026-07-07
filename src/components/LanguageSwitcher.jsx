@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import styles from "../styles/styles";
+import { MdKeyboardArrowDown } from "react-icons/md";
 
-const LanguageSwitcher = () => {
-  const { i18n, t } = useTranslation();
+const LanguageSwitcher = ({ className = "" }) => {
+  const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -13,7 +13,6 @@ const LanguageSwitcher = () => {
     { code: "rw", name: "Kinyarwanda", flag: "🇷🇼" },
   ];
 
-  // Get the current language
   const currentLanguage = languages.find((lang) => lang.code === i18n.language) || languages[0];
 
   const handleLanguageChange = (langCode) => {
@@ -22,7 +21,6 @@ const LanguageSwitcher = () => {
     setIsOpen(false);
   };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -31,48 +29,45 @@ const LanguageSwitcher = () => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className={`relative ${className}`} ref={dropdownRef}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center text-gray-800 dark:text-white hover:text-[#3bc177] focus:outline-none"
+        className="home-header__picker"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-label="Select language"
       >
-        <span className="mr-1">{currentLanguage.flag}</span>
+        <span>{currentLanguage.flag}</span>
         <span className="hidden md:inline">{currentLanguage.name}</span>
-        <svg
-          className="w-4 h-4 ml-1"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d={isOpen ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-          ></path>
-        </svg>
+        <MdKeyboardArrowDown size={16} />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-[#2d2d2d] rounded-md shadow-lg z-50">
-          <ul className={`${styles.noramlFlex} flex-col py-2`}>
+        <div
+          className="home-lang-switcher__menu absolute right-0 mt-2 w-48 rounded-xl overflow-hidden z-50"
+          role="listbox"
+          aria-label="Languages"
+        >
+          <ul>
             {languages.map((language) => (
-              <li
-                key={language.code}
-                className={`px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-[#3a3a3a] cursor-pointer flex items-center gap-2 ${
-                  language.code === i18n.language ? "text-[#3bc177] font-medium" : "text-gray-700 dark:text-gray-200"
-                }`}
-                onClick={() => handleLanguageChange(language.code)}
-              >
-                <span>{language.flag}</span>
-                <span>{language.name}</span>
+              <li key={language.code}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={language.code === i18n.language}
+                  className={`home-lang-switcher__item w-full text-left flex items-center gap-2 ${
+                    language.code === i18n.language ? "is-active" : ""
+                  }`}
+                  onClick={() => handleLanguageChange(language.code)}
+                >
+                  <span>{language.flag}</span>
+                  <span>{language.name}</span>
+                </button>
               </li>
             ))}
           </ul>
@@ -82,4 +77,4 @@ const LanguageSwitcher = () => {
   );
 };
 
-export default LanguageSwitcher; 
+export default LanguageSwitcher;

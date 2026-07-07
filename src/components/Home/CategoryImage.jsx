@@ -42,7 +42,7 @@ const CategoryImage = ({ src, title, className }) => {
           className
         )}
       >
-        <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-gray-900/80 shadow-inner flex items-center justify-center mb-2">
+        <div className="w-14 h-14 rounded-2xl bg-[var(--home-surface)] shadow-inner flex items-center justify-center mb-2">
           <Icon className="w-7 h-7 text-yebone-primary" />
         </div>
         <span className="text-[10px] font-semibold uppercase tracking-wider text-yebone-primary/70 px-2 text-center line-clamp-2">
