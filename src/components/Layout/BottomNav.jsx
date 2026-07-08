@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { AiOutlineSearch, AiOutlineHeart, AiOutlineUser } from "react-icons/ai";
-import Wishlist from "../Wishlist/Wishlist";
-import { RxCross1 } from "react-icons/rx";
+import WishlistPanel from "../Layout/overlays/WishlistPanel";
+import MobileCategoriesPanel from "../Home/MobileCategoriesPanel";
+import useHeaderDropdown from "../Layout/overlays/useHeaderDropdown";
 import { categoriesData } from "../../static/data";
+import { RxCross1 } from "react-icons/rx";
 import { IoGridOutline } from "react-icons/io5";
 import { GrHomeRounded } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +22,12 @@ const BottomNav = () => {
   const [searchData, setSearchData] = useState(null);
   const [openWishlist, setOpenWishlist] = useState(false);
   const [openCategories, setOpenCategories] = useState(false);
+  const wishlistRef = useRef(null);
+  const categoriesRef = useRef(null);
   const navigate = useNavigate();
+
+  useHeaderDropdown(openWishlist, () => setOpenWishlist(false), wishlistRef);
+  useHeaderDropdown(openCategories, () => setOpenCategories(false), categoriesRef);
   const handleSearchChange = (e) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
@@ -35,13 +42,8 @@ const BottomNav = () => {
     setSearchData(filteredProducts);
   };
 
-  const handleCategoryClick = (category) => {
-    setOpenCategories(false);
-    navigate(`/products?category=${category.title}`);
-  };
-
   const handleCategoryToggle = () => {
-    setOpenCategories(!openCategories);
+    setOpenCategories((prev) => !prev);
   };
 
   return (
@@ -82,6 +84,7 @@ const BottomNav = () => {
             </span>
           </Link>
           <div
+            ref={categoriesRef}
             style={{
               width: "25%",
               display: "flex",
@@ -92,8 +95,15 @@ const BottomNav = () => {
               paddingBottom: "5px",
               color: openCategories ? "#0f7c5b" : "#4B5563",
               textDecoration: "none",
+              position: "relative",
             }}
             onClick={handleCategoryToggle}
+            onKeyDown={(e) => e.key === "Enter" && handleCategoryToggle()}
+            role="button"
+            tabIndex={0}
+            aria-expanded={openCategories}
+            aria-haspopup="dialog"
+            aria-label="Categories"
           >
             <IoGridOutline className="text-[24px] hover:text-[#29625d] dark:text-gray-200" />
             <span className="tab block text-xs hover:text-[#29625d] dark:text-gray-200">
@@ -101,6 +111,7 @@ const BottomNav = () => {
             </span>
           </div>
           <div
+            ref={wishlistRef}
             style={{
               width: "25%",
               display: "flex",
@@ -111,8 +122,15 @@ const BottomNav = () => {
               paddingBottom: "5px",
               color: "#4B5563",
               textDecoration: "none",
+              position: "relative",
             }}
-            onClick={() => setOpenWishlist(true)}
+            onClick={() => setOpenWishlist(!openWishlist)}
+            onKeyDown={(e) => e.key === "Enter" && setOpenWishlist(!openWishlist)}
+            role="button"
+            tabIndex={0}
+            aria-expanded={openWishlist}
+            aria-haspopup="true"
+            aria-label="Wishlist"
           >
             <div className="relative flex flex-col items-center">
               <AiOutlineHeart
@@ -126,6 +144,12 @@ const BottomNav = () => {
             <span className="tab block text-xs hover:text-[#29625d] dark:text-gray-200">
               {t("common.wishlist")}
             </span>
+            {openWishlist && (
+              <WishlistPanel
+                anchor="bottom"
+                onClose={() => setOpenWishlist(false)}
+              />
+            )}
           </div>
           <div
             style={{
@@ -265,51 +289,12 @@ const BottomNav = () => {
         </div>
       </div>
 
-      {/* Categories Modal */}
-      {openCategories && (
-        <div
-          style={{
-            position: "fixed",
-            bottom: "60px",
-            left: 0,
-            width: "100%",
-            backgroundColor: "white",
-            zIndex: 1000,
-            maxHeight: "70vh",
-            overflowY: "auto",
-            boxShadow: "0 -4px 6px rgba(0, 0, 0, 0.1)",
-            borderTopLeftRadius: "15px",
-            borderTopRightRadius: "15px",
-          }}
-        >
-          <div className="flex justify-between items-center px-4 py-3 border-b">
-            <h3 className="text-lg font-semibold">{t("categories.all")}</h3>
-            <RxCross1
-              size={18}
-              className="cursor-pointer"
-              onClick={() => setOpenCategories(false)}
-            />
-          </div>
-          <div className="grid grid-cols-3 gap-4 p-4">
-            {categoriesData.map((category) => (
-              <div
-                key={category.id}
-                className="flex flex-col items-center p-2 rounded-lg shadow-sm border cursor-pointer hover:bg-gray-50"
-                onClick={() => handleCategoryClick(category)}
-              >
-                <img
-                  src={category.image_Url}
-                  alt={category.title}
-                  className="w-[60px] h-[60px] object-contain"
-                />
-                <p className="text-xs mt-2 text-center">{t(`categories.${category.title.toLowerCase().replace('&', '').trim()}`)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {openWishlist ? <Wishlist setOpenWishlist={setOpenWishlist} /> : null}
+      <MobileCategoriesPanel
+        open={openCategories}
+        onClose={() => setOpenCategories(false)}
+        categoriesData={categoriesData}
+      />
     </div>
   );
 };

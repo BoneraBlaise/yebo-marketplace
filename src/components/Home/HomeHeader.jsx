@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -10,14 +10,17 @@ import { BiMenuAltLeft } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { IoNotificationsOutline } from "react-icons/io5";
-import { MdKeyboardArrowDown } from "react-icons/md";
 import DropDown from "../Layout/DropDown";
 import Navbar from "../Layout/Navbar";
-import Cart from "../cart/Cart";
-import Wishlist from "../Wishlist/Wishlist";
 import LanguageSwitcher from "../LanguageSwitcher";
-import MobileProfileMenu from "./MobileProfileMenu";
 import MobileCategoriesPanel from "./MobileCategoriesPanel";
+import {
+  CountrySwitcher,
+  NotificationsPanel,
+  WishlistPanel,
+  CartPanel,
+} from "../Layout/overlays";
+import useHeaderDropdown from "../Layout/overlays/useHeaderDropdown";
 import { categoriesData } from "../../static/data";
 import useSiteSearch from "../../hooks/useSiteSearch";
 import { Container } from "../ui";
@@ -25,12 +28,8 @@ import YeboneLogo from "./YeboneLogo";
 import SkipToContent from "../Layout/SkipToContent";
 import "./home.css";
 
-const COUNTRIES = [
-  { code: "RW", label: "Rwanda", flag: "🇷🇼" },
-  { code: "KE", label: "Kenya", flag: "🇰🇪" },
-  { code: "UG", label: "Uganda", flag: "🇺🇬" },
-  { code: "NG", label: "Nigeria", flag: "🇳🇬" },
-];
+/** Presentation-only unread count for notification badge (Phase 8H.11) */
+const NOTIFICATION_UNREAD_MOCK = 2;
 
 const HomeHeader = ({ activeHeading: _activeHeading }) => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
@@ -40,10 +39,11 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
   const [dropDown, setDropDown] = useState(false);
   const [openCart, setOpenCart] = useState(false);
   const [openWishlist, setOpenWishlist] = useState(false);
-  const [country, setCountry] = useState(COUNTRIES[0]);
-  const [countryOpen, setCountryOpen] = useState(false);
+  const [openNotifications, setOpenNotifications] = useState(false);
+  const notificationsRef = useRef(null);
+  const wishlistRef = useRef(null);
+  const cartRef = useRef(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
   const {
     searchTerm,
@@ -66,6 +66,39 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!dropDown) return undefined;
+
+    const updateMegaMenuTop = () => {
+      const headerEl = document.querySelector(".home-header");
+      if (!headerEl) return;
+      const { bottom } = headerEl.getBoundingClientRect();
+      document.documentElement.style.setProperty(
+        "--home-mega-menu-top",
+        `${bottom + 8}px`
+      );
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setDropDown(false);
+    };
+
+    updateMegaMenuTop();
+    window.addEventListener("resize", updateMegaMenuTop);
+    window.addEventListener("scroll", updateMegaMenuTop, { passive: true });
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("resize", updateMegaMenuTop);
+      window.removeEventListener("scroll", updateMegaMenuTop);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [dropDown]);
+
+  useHeaderDropdown(openNotifications, () => setOpenNotifications(false), notificationsRef);
+  useHeaderDropdown(openWishlist, () => setOpenWishlist(false), wishlistRef);
+  useHeaderDropdown(openCart, () => setOpenCart(false), cartRef);
+
   return (
     <>
       <SkipToContent />
@@ -78,46 +111,7 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
           <Container className="home-header__utility-inner">
             <p className="home-header__utility-tagline">Yebone — Everything in one place</p>
             <div className="home-header__utility-actions">
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setCountryOpen(!countryOpen)}
-                  className="home-header__picker"
-                  aria-expanded={countryOpen}
-                  aria-haspopup="listbox"
-                  aria-label="Select country"
-                >
-                  <span>{country.flag}</span>
-                  <span>{country.label}</span>
-                  <MdKeyboardArrowDown size={16} />
-                </button>
-                {countryOpen && (
-                  <div
-                    className="home-lang-switcher__menu absolute right-0 mt-2 w-44 rounded-xl overflow-hidden z-50"
-                    role="listbox"
-                    aria-label="Countries"
-                  >
-                    {COUNTRIES.map((c) => (
-                      <button
-                        key={c.code}
-                        type="button"
-                        role="option"
-                        aria-selected={c.code === country.code}
-                        className={`home-lang-switcher__item w-full text-left flex items-center gap-2 ${
-                          c.code === country.code ? "is-active" : ""
-                        }`}
-                        onClick={() => {
-                          setCountry(c);
-                          setCountryOpen(false);
-                        }}
-                      >
-                        <span>{c.flag}</span>
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <CountrySwitcher />
 
               <span className="home-header__utility-divider" aria-hidden="true" />
 
@@ -154,19 +148,32 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
             </div>
 
             <div
-              className="relative hidden lg:block shrink-0"
-              onMouseLeave={() => setDropDown(false)}
+              className={`home-header__categories-wrap hidden lg:block shrink-0${
+                dropDown ? " is-open" : ""
+              }`}
             >
               <button
                 type="button"
                 onClick={() => setDropDown(!dropDown)}
-                className="home-header__categories-btn flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--home-border)] bg-[var(--home-surface-muted)] hover:bg-[var(--home-surface-muted)] font-medium text-sm text-[var(--home-text)] transition"
+                className={`home-header__categories-btn flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--home-border)] bg-[var(--home-surface-muted)] hover:bg-[var(--home-surface-muted)] font-medium text-sm text-[var(--home-text)] transition${
+                  dropDown ? " is-active" : ""
+                }`}
+                aria-expanded={dropDown}
+                aria-haspopup="menu"
               >
                 <BiMenuAltLeft size={22} />
                 Categories
               </button>
               {dropDown && (
-                <DropDown categoriesData={categoriesData} setDropDown={setDropDown} />
+                <>
+                  <button
+                    type="button"
+                    className="yebone-nav-mega-backdrop"
+                    onClick={() => setDropDown(false)}
+                    aria-label="Close categories menu"
+                  />
+                  <DropDown categoriesData={categoriesData} setDropDown={setDropDown} />
+                </>
               )}
             </div>
 
@@ -214,22 +221,48 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
               </div>
 
               {searchData?.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--home-surface)] rounded-2xl shadow-2xl border border-[var(--home-border)] max-h-80 overflow-y-auto z-50">
-                  {searchData.slice(0, 8).map((item) => (
-                    <Link
-                      key={item._id}
-                      to={`/product/${item._id}`}
-                      onClick={() => setSearchData(null)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--home-surface-muted)] border-b border-[var(--home-border)] last:border-0"
-                    >
-                      <img
-                        src={item.images?.[0]?.url}
-                        alt=""
-                        className="w-10 h-10 rounded-lg object-cover bg-[var(--home-surface-muted)]"
-                      />
-                      <span className="text-sm text-[var(--home-text)] truncate">{item.name}</span>
-                    </Link>
-                  ))}
+                <div
+                  className="home-search-suggest"
+                  role="listbox"
+                  aria-label="Search suggestions"
+                >
+                  <div className="home-search-suggest__scroll">
+                    {searchData.slice(0, 8).map((item) => {
+                      const meta =
+                        item.shop?.name ||
+                        item.category ||
+                        (item.type === "flashsale"
+                          ? "Flash Sale"
+                          : item.type === "bid"
+                          ? "Auction"
+                          : null);
+
+                      return (
+                        <Link
+                          key={`${item.type || "product"}-${item._id}`}
+                          to={`/product/${item._id}`}
+                          onClick={() => setSearchData(null)}
+                          className="home-search-suggest__row"
+                          role="option"
+                        >
+                          <span className="home-search-suggest__thumb">
+                            <img
+                              src={item.images?.[0]?.url}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </span>
+                          <span className="home-search-suggest__body">
+                            <span className="home-search-suggest__title">{item.name}</span>
+                            {meta && (
+                              <span className="home-search-suggest__meta">{meta}</span>
+                            )}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </form>
@@ -242,47 +275,86 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
                 {sellerAction.label}
               </Link>
 
-              <button
-                type="button"
-                onClick={() => setOpenWishlist(true)}
-                className="home-header__icon-btn"
-                aria-label="Wishlist"
-              >
-                <AiOutlineHeart size={22} />
-                {wishlist?.length > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yebone-primary text-white text-[10px] font-bold flex items-center justify-center">
-                    {wishlist.length}
-                  </span>
+              <div className="relative" ref={wishlistRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenCart(false);
+                    setOpenNotifications(false);
+                    setOpenWishlist(!openWishlist);
+                  }}
+                  className="home-header__icon-btn"
+                  aria-expanded={openWishlist}
+                  aria-haspopup="true"
+                  aria-label="Wishlist"
+                >
+                  <AiOutlineHeart size={22} />
+                  {wishlist?.length > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yebone-primary text-white text-[10px] font-bold flex items-center justify-center">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </button>
+                {openWishlist && (
+                  <WishlistPanel onClose={() => setOpenWishlist(false)} />
                 )}
-              </button>
+              </div>
+
+              <div className="relative hidden lg:block" ref={notificationsRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenWishlist(false);
+                    setOpenCart(false);
+                    setOpenNotifications(!openNotifications);
+                  }}
+                  className="home-header__icon-btn home-header__notifications"
+                  aria-expanded={openNotifications}
+                  aria-haspopup="true"
+                  aria-label="Notifications"
+                >
+                  <IoNotificationsOutline size={22} />
+                  {NOTIFICATION_UNREAD_MOCK > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yebone-primary text-white text-[10px] font-bold flex items-center justify-center">
+                      {NOTIFICATION_UNREAD_MOCK}
+                    </span>
+                  )}
+                </button>
+                {openNotifications && (
+                  <NotificationsPanel
+                    onClose={() => setOpenNotifications(false)}
+                    isAuthenticated={isAuthenticated}
+                  />
+                )}
+              </div>
+
+              <div className="relative" ref={cartRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenWishlist(false);
+                    setOpenNotifications(false);
+                    setOpenCart(!openCart);
+                  }}
+                  className="home-header__icon-btn"
+                  aria-expanded={openCart}
+                  aria-haspopup="true"
+                  aria-label="Cart"
+                >
+                  <AiOutlineShoppingCart size={22} />
+                  {cart?.length > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yebone-gold text-yebone-dark-text text-[10px] font-bold flex items-center justify-center">
+                      {cart.length}
+                    </span>
+                  )}
+                </button>
+                {openCart && <CartPanel onClose={() => setOpenCart(false)} />}
+              </div>
 
               <Link
                 to={isAuthenticated ? "/profile" : "/login"}
-                className="home-header__icon-btn home-header__notifications hidden lg:flex"
-                aria-label="Notifications"
-              >
-                <IoNotificationsOutline size={22} />
-              </Link>
-
-              <button
-                type="button"
-                onClick={() => setOpenCart(true)}
-                className="home-header__icon-btn"
-                aria-label="Cart"
-              >
-                <AiOutlineShoppingCart size={22} />
-                {cart?.length > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yebone-gold text-yebone-dark-text text-[10px] font-bold flex items-center justify-center">
-                    {cart.length}
-                  </span>
-                )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setMobileProfileOpen(true)}
                 className="home-header__profile-mobile lg:hidden p-0.5 rounded-full border-2 border-yebone-primary/25 hover:border-yebone-primary transition"
-                aria-label={isAuthenticated ? "Open account menu" : "Sign in"}
+                aria-label={isAuthenticated ? "Go to profile" : "Sign in"}
               >
                 {isAuthenticated && user?.avatar?.url ? (
                   <img
@@ -295,7 +367,7 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
                     <CgProfile size={20} className="text-yebone-primary" />
                   </div>
                 )}
-              </button>
+              </Link>
 
               <Link
                 to={isAuthenticated ? "/profile" : "/login"}
@@ -324,9 +396,7 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
           </Container>
         </div>
 
-        {openCart && <Cart setOpenCart={setOpenCart} />}
-        {openWishlist && <Wishlist setOpenWishlist={setOpenWishlist} />}
-        <MobileProfileMenu open={mobileProfileOpen} onClose={() => setMobileProfileOpen(false)} />
+
         <MobileCategoriesPanel
           open={mobileCategoriesOpen}
           onClose={() => setMobileCategoriesOpen(false)}

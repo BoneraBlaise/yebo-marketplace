@@ -4,6 +4,8 @@ import Header from "./Header";
 import Footer from "./Footer";
 import "../Home/home.css";
 import "../Marketplace/cards/marketplaceCards.css";
+import "../Layout/navigation/navDesignSystem.css";
+import "../Layout/overlays/headerOverlays.css";
 
 /**
  * Global production shell — single Header + Footer for all public marketplace routes.

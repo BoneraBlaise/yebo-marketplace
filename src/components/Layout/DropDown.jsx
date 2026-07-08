@@ -1,50 +1,73 @@
 import React from "react";
-import { useNavigate, Link } from "react-router-dom";
-import styles from "../../styles/styles";
+import { Link } from "react-router-dom";
+import { IoChevronForward } from "react-icons/io5";
 import { useTranslation } from "react-i18next";
 
 const DropDown = ({ categoriesData, setDropDown }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const close = () => setDropDown(false);
 
-  const submitHandle = (category, subcategory) => {
-    // Use navigate to handle the routing
-    navigate(`/products?category=${category}&subcategory=${subcategory}`);
-    setDropDown(false);
-  };
+  const subKey = (title) =>
+    `categories.sub.${title.toLowerCase().replace(/\s+/g, "")}`;
 
   return (
-    <div className="pb-6 w-[900px] h-[60vh] bg-white dark:bg-[#0f0f0f] text-gray-600 dark:text-gray-200 absolute z-[2000] dark:border-2 dark:border-gray-500 rounded-b-md shadow-lg dark:shadow-lg overflow-hidden overflow-y-auto hide-scrollbar">
-      <div className="grid grid-cols-3 gap-4 h-full"> {/* Ensuring grid has equal column width */}
-        {categoriesData &&
-          categoriesData.map((category, index) => (
-            <div
-              key={index}
-              className="flex flex-col justify-between items-center h-full p-4"
-            >
-              {/* Category Title with bold font */}
+    <div className="home-mega-menu yebone-nav-surface" role="menu" aria-label="Browse categories">
+      <div className="home-mega-menu__inner">
+        <header className="yebone-nav-panel-header home-mega-menu__header">
+          <div>
+            <p className="home-mega-menu__eyebrow">Shop by department</p>
+            <h2 className="yebone-nav-panel-title">All categories</h2>
+          </div>
+          <Link to="/products" className="home-mega-menu__browse-all" onClick={close}>
+            Browse all
+            <IoChevronForward size={16} aria-hidden="true" />
+          </Link>
+        </header>
+
+        <div className="home-mega-menu__grid">
+          {categoriesData?.map((category) => (
+            <section key={category.id} className="home-mega-menu__column">
               <Link
-                key={category.id}
-                to={`/products?category=${encodeURIComponent(category.title)}`} >
-                <h3 className="cursor-pointer select-none text-start font-bold">
-                  {category.title}
-                </h3>
+                to={`/products?category=${encodeURIComponent(category.title)}`}
+                className="home-mega-menu__title"
+                onClick={close}
+              >
+                {category.image_Url && (
+                  <span className="home-mega-menu__icon" aria-hidden="true">
+                    <img src={category.image_Url} alt="" loading="lazy" />
+                  </span>
+                )}
+                <span>{category.title}</span>
               </Link>
-              {/* Subcategories listed under the category */}
-              <div className="flex flex-col items-start flex-grow">
-                {category.subcategories.map((subcategory) => (
-                  <Link
-                    key={subcategory.id}
-                    to={`/products?category=${encodeURIComponent(subcategory.title)}`} // Using the specified link format
-                    className="text-sm text-center dark:text-gray-200 hidden md:block cursor-pointer hover:underline"
-                    onClick={() => setDropDown(false)} // Close dropdown on link click
-                  >
-                    {t(`categories.sub.${subcategory.title.toLowerCase().replace(/\s+/g, '')}`, subcategory.title)}
-                  </Link>
-                ))}
-              </div>
-            </div>
+              {category.subcategories?.length > 0 && (
+                <ul className="home-mega-menu__links">
+                  {category.subcategories.slice(0, 8).map((sub) => (
+                    <li key={sub.id}>
+                      <Link
+                        to={`/products?category=${encodeURIComponent(sub.title)}`}
+                        className="home-mega-menu__link"
+                        onClick={close}
+                      >
+                        {t(subKey(sub.title), sub.title)}
+                      </Link>
+                    </li>
+                  ))}
+                  {category.subcategories.length > 8 && (
+                    <li>
+                      <Link
+                        to={`/products?category=${encodeURIComponent(category.title)}`}
+                        className="home-mega-menu__link home-mega-menu__link--more"
+                        onClick={close}
+                      >
+                        See all in {category.title}
+                      </Link>
+                    </li>
+                  )}
+                </ul>
+              )}
+            </section>
           ))}
+        </div>
       </div>
     </div>
   );

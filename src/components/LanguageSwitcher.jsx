@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { MdKeyboardArrowDown } from "react-icons/md";
+import HeaderDropdownPanel from "./Layout/overlays/HeaderDropdownPanel";
+import useHeaderDropdown from "./Layout/overlays/useHeaderDropdown";
 
 const LanguageSwitcher = ({ className = "" }) => {
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const containerRef = useRef(null);
 
   const languages = [
     { code: "en", name: "English", flag: "🇺🇸" },
@@ -13,7 +15,10 @@ const LanguageSwitcher = ({ className = "" }) => {
     { code: "rw", name: "Kinyarwanda", flag: "🇷🇼" },
   ];
 
-  const currentLanguage = languages.find((lang) => lang.code === i18n.language) || languages[0];
+  const currentLanguage =
+    languages.find((lang) => lang.code === i18n.language) || languages[0];
+
+  useHeaderDropdown(isOpen, () => setIsOpen(false), containerRef);
 
   const handleLanguageChange = (langCode) => {
     i18n.changeLanguage(langCode);
@@ -21,19 +26,8 @@ const LanguageSwitcher = ({ className = "" }) => {
     setIsOpen(false);
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <div className={`relative ${className}`} ref={containerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -42,36 +36,31 @@ const LanguageSwitcher = ({ className = "" }) => {
         aria-haspopup="listbox"
         aria-label="Select language"
       >
-        <span>{currentLanguage.flag}</span>
+        <span aria-hidden="true">{currentLanguage.flag}</span>
         <span className="hidden md:inline">{currentLanguage.name}</span>
-        <MdKeyboardArrowDown size={16} />
+        <MdKeyboardArrowDown size={16} aria-hidden="true" />
       </button>
 
       {isOpen && (
-        <div
-          className="home-lang-switcher__menu absolute right-0 mt-2 w-48 rounded-xl overflow-hidden z-50"
-          role="listbox"
-          aria-label="Languages"
-        >
-          <ul>
-            {languages.map((language) => (
-              <li key={language.code}>
-                <button
-                  type="button"
-                  role="option"
-                  aria-selected={language.code === i18n.language}
-                  className={`home-lang-switcher__item w-full text-left flex items-center gap-2 ${
-                    language.code === i18n.language ? "is-active" : ""
-                  }`}
-                  onClick={() => handleLanguageChange(language.code)}
-                >
-                  <span>{language.flag}</span>
-                  <span>{language.name}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <HeaderDropdownPanel ariaLabel="Languages">
+          {languages.map((language) => (
+            <button
+              key={language.code}
+              type="button"
+              role="option"
+              aria-selected={language.code === i18n.language}
+              className={`yebone-header-dropdown__item${
+                language.code === i18n.language ? " is-active" : ""
+              }`}
+              onClick={() => handleLanguageChange(language.code)}
+            >
+              <span className="yebone-header-dropdown__flag" aria-hidden="true">
+                {language.flag}
+              </span>
+              <span>{language.name}</span>
+            </button>
+          ))}
+        </HeaderDropdownPanel>
       )}
     </div>
   );
