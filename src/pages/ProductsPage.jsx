@@ -31,6 +31,8 @@ import { AISearchNatural } from "../components/ai";
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryData = searchParams.get("category");
+  const chipParam = searchParams.get("chip");
+  const brandParam = searchParams.get("brand");
   const searchTerm = searchParams.get("search") || ""; // Extract search term
   const { allProducts, isLoading } = useSelector((state) => state.products);
   const [data, setData] = useState([]);
@@ -69,14 +71,22 @@ const ProductsPage = () => {
   const location = useLocation();
 
   const categoryContext = useMemo(
-    () => resolveCategoryContext(categoryData),
-    [categoryData]
+    () => resolveCategoryContext(categoryData, chipParam),
+    [categoryData, chipParam]
   );
 
   const categoryBaseProducts = useMemo(() => {
     if (!categoryContext || !Array.isArray(allProducts)) return [];
     return getCategoryBaseProducts(allProducts, categoryContext.matchTitles);
   }, [allProducts, categoryContext]);
+
+  const categoryBrands = useMemo(() => {
+    const brands = new Set();
+    categoryBaseProducts.forEach((product) => {
+      if (product?.brand) brands.add(product.brand);
+    });
+    return [...brands].sort((a, b) => a.localeCompare(b));
+  }, [categoryBaseProducts]);
 
   // Add this near the top of the component
   const sections = [
@@ -153,14 +163,22 @@ const ProductsPage = () => {
         (product.tags && product.tags.toLowerCase().includes(searchTerm.toLowerCase()))
         : true;
 
+      const matchesBrand = brandParam
+        ? product.brand === brandParam
+        : true;
+
       // Price range filter from URL parameters
       const matchesPriceFromUrl = (() => {
         const productPrice = Number(product.discountPrice);
         const categoryFromUrl = searchParams.get("category");
 
-        // Only filter products from the same category
         if (!categoryFromUrl) return true;
-        if (product.category !== categoryFromUrl) return false;
+
+        if (categoryContext) {
+          if (!matchesCategoryScope(product, categoryContext.matchTitles)) return false;
+        } else if (product.category !== categoryFromUrl) {
+          return false;
+        }
 
         if (minPriceParam && maxPriceParam) {
           return productPrice >= Number(minPriceParam) &&
@@ -206,6 +224,7 @@ const ProductsPage = () => {
       return (
         matchesCategory &&
         matchesSearch &&
+        matchesBrand &&
         matchesLocation &&
         matchesCondition &&
         matchesShop &&
@@ -259,16 +278,31 @@ const ProductsPage = () => {
     inStock,
     productType,
     categoryContext,
+    brandParam,
   ]);
 
   const handleCategoryChange = (category) => {
     const newParams = new URLSearchParams(searchParams);
     if (category === categoryData) {
-      newParams.delete("category"); // Remove category if it's already selected
+      newParams.delete("category");
+      newParams.delete("chip");
+      newParams.delete("brand");
     } else {
-      newParams.set("category", category); // Set the new category
+      newParams.set("category", category);
+      newParams.delete("chip");
+      newParams.delete("brand");
     }
-    setSearchParams(newParams); // Update the URL parameters
+    setSearchParams(newParams);
+  };
+
+  const handleBrandChange = (brand) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (!brand || brand === brandParam) {
+      newParams.delete("brand");
+    } else {
+      newParams.set("brand", brand);
+    }
+    setSearchParams(newParams);
   };
 
   const handlePriceChange = (newRange) => {
@@ -399,10 +433,21 @@ const ProductsPage = () => {
 
     // Add category filter
     if (categoryData) {
+      const chipLabel = categoryContext?.activeChipId && categoryContext.activeChipId !== "all"
+        ? categoryContext.title
+        : null;
       filters.push({
         type: 'category',
-        label: `Category: ${categoryData}`,
+        label: chipLabel ? `${categoryData} · ${chipLabel}` : `Category: ${categoryData}`,
         value: categoryData
+      });
+    }
+
+    if (brandParam) {
+      filters.push({
+        type: 'brand',
+        label: `Brand: ${brandParam}`,
+        value: brandParam
       });
     }
 
@@ -455,6 +500,11 @@ const ProductsPage = () => {
         break;
       case 'category':
         newParams.delete('category');
+        newParams.delete('chip');
+        newParams.delete('brand');
+        break;
+      case 'brand':
+        newParams.delete('brand');
         break;
       case 'price':
         setIsPriceFiltered(false);
@@ -521,7 +571,11 @@ const ProductsPage = () => {
   ];
 
   const clearAllFilters = () => {
-    const preservedCategory = categoryData ? new URLSearchParams({ category: categoryData }) : new URLSearchParams();
+    const preservedCategory = new URLSearchParams();
+    if (categoryData) {
+      preservedCategory.set("category", categoryData);
+      if (chipParam) preservedCategory.set("chip", chipParam);
+    }
     setSearchParams(preservedCategory);
     setPriceRange([1, 10000000]);
     setSelectedRating(0);
@@ -551,6 +605,10 @@ const ProductsPage = () => {
     onProductTypeChange: setProductType,
     categoryData,
     onCategoryChange: handleCategoryChange,
+    brandOptions: categoryBrands,
+    selectedBrand: brandParam || "",
+    onBrandChange: handleBrandChange,
+    hideLegacyCategories: Boolean(categoryContext?.mainCategory),
   };
 
   return (
@@ -603,6 +661,7 @@ const ProductsPage = () => {
                 <>
                   <CategoryShortcuts
                     shortcuts={categoryContext.shortcuts}
+                    activeChipId={categoryContext.activeChipId || "all"}
                     activeTitle={categoryContext.type === "sub" ? categoryContext.title : null}
                   />
                   <CategoryFeaturedCollections
@@ -691,7 +750,9 @@ const ProductsPage = () => {
 
                 {categoryContext && (
                   <h2 className="cat-landing-collection__title mb-4">
-                    All {categoryContext.title} products
+                    {categoryContext.type === "main-chip"
+                      ? `${categoryContext.displayTitle} · ${categoryContext.title}`
+                      : `All ${categoryContext.displayTitle || categoryContext.title} products`}
                   </h2>
                 )}
 

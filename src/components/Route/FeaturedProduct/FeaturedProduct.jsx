@@ -147,13 +147,10 @@ const FeaturedProduct = () => {
             </div>
 
             {/* Mobile Products Grid */}
-            <div className="w-[90%] mx-auto grid grid-cols-2 justify-items-center gap-4 mb-8">
+            <div className="marketplace-product-grid mpc-grid--page w-full mb-8">
               {currentProducts.length > 0 ? (
-                currentProducts.map((product, index) => (
-                  <div 
-                    key={index} 
-                    className={`${currentProducts.length === 1 ? 'col-span-2 justify-self-start' : ''}`}
-                  >
+                currentProducts.map((product) => (
+                  <div key={product._id} className="mpc-card-slot">
                     <MobileProductCard data={product} />
                   </div>
                 ))

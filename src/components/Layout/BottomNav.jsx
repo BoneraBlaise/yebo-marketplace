@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { AiOutlineSearch, AiOutlineHeart, AiOutlineUser } from "react-icons/ai";
 import WishlistPanel from "../Layout/overlays/WishlistPanel";
 import MobileCategoriesPanel from "../Home/MobileCategoriesPanel";
 import useHeaderDropdown from "../Layout/overlays/useHeaderDropdown";
-import { categoriesData } from "../../static/data";
+import { buildMobileNavCategories } from "../Home/mainCategoryHierarchy";
 import { RxCross1 } from "react-icons/rx";
 import { IoGridOutline } from "react-icons/io5";
 import { GrHomeRounded } from "react-icons/gr";
@@ -25,6 +25,7 @@ const BottomNav = () => {
   const wishlistRef = useRef(null);
   const categoriesRef = useRef(null);
   const navigate = useNavigate();
+  const marketplaceNavCategories = useMemo(() => buildMobileNavCategories(), []);
 
   useHeaderDropdown(openWishlist, () => setOpenWishlist(false), wishlistRef);
   useHeaderDropdown(openCategories, () => setOpenCategories(false), categoriesRef);
@@ -293,7 +294,7 @@ const BottomNav = () => {
       <MobileCategoriesPanel
         open={openCategories}
         onClose={() => setOpenCategories(false)}
-        categoriesData={categoriesData}
+        categoriesData={marketplaceNavCategories}
       />
     </div>
   );

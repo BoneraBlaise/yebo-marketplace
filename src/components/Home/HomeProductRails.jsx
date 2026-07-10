@@ -62,12 +62,12 @@ const HomeProductRails = () => {
         ) : !products?.length ? (
           <p className="text-center py-16 text-[var(--home-text-muted)]">No products in this collection yet.</p>
         ) : (
-          <MarketplaceCardRail>
+          <MarketplaceCardRail aria-label={`${PRODUCT_TABS.find((t) => t.id === activeTab)?.label || "Products"} carousel`}>
             {products.map((item) =>
               activeTab === "flash" ? (
                 <HomeFlashSaleCard key={item._id} data={item} />
               ) : (
-                <HomeProductCard key={item._id} data={item} />
+                <HomeProductCard key={item._id} data={item} fluid />
               )
             )}
           </MarketplaceCardRail>

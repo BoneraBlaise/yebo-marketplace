@@ -3,6 +3,7 @@ import { useMediaQuery } from "react-responsive";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { AiFillHeart, AiOutlineHeart, AiOutlineShoppingCart, AiOutlineEye } from "react-icons/ai";
+import { MdVerified } from "react-icons/md";
 import { Link } from "react-router-dom";
 import Cookies from "js-cookie";
 import { addToWishlist, removeFromWishlist } from "../../../redux/actions/wishlist";
@@ -11,6 +12,8 @@ import MobileProductCard from "./MobileProductCard";
 import axios from "axios";
 import { server } from "../../../server";
 import ProductCardShell from "../../ui/ProductCardShell";
+import ProductCardReviews from "./ProductCardReviews";
+import "./productCard.css";
 
 const ProductCard = ({ data, isEvent }) => {
   const isMobile = useMediaQuery({ query: "(max-width: 900px)" });
@@ -101,6 +104,9 @@ const ProductCard = ({ data, isEvent }) => {
     data.discountPrice > 0 &&
     data.originalPrice > data.discountPrice;
   const soldCount = data?.sold_out ?? 0;
+  const isVerified = data.shop?.isVerified;
+  const rating = data.ratings || 0;
+  const reviewCount = data.reviews?.length || 0;
 
   if (isMobile) {
     return <MobileProductCard data={data} isEvent={isEvent} />;
@@ -108,84 +114,74 @@ const ProductCard = ({ data, isEvent }) => {
 
   return (
     <ProductCardShell
-      className="w-full max-w-[280px]"
+      className="ypc--fixed w-full max-w-[280px]"
       onClick={handleProductClick}
     >
-      <div className="yebone-product-card__media">
-        <Link to={productUrl} className="block w-full h-full" onClick={handleProductClick}>
+      <div className="ypc__media">
+        <Link to={productUrl} className="ypc__media-link" onClick={handleProductClick}>
           <img
             src={data.images && data.images[0]?.url}
             alt={data.name || "Product"}
-            className={data.stock === 0 ? "opacity-60" : ""}
+            className={`ypc__img${data.stock === 0 ? " ypc__img--dimmed" : ""}`}
             loading="lazy"
           />
         </Link>
 
         {data.stock === 0 && (
-          <span className="absolute top-3 right-3 px-2 py-0.5 rounded-lg bg-gray-900/80 text-white text-[10px] font-semibold">
-            Sold out
-          </span>
+          <span className="ypc__sold-out">Sold out</span>
         )}
 
         <button
           type="button"
           onClick={handleWishlistToggle}
           aria-label={click ? "Remove from wishlist" : "Add to wishlist"}
-          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/95 dark:bg-gray-900/95 shadow-md flex items-center justify-center hover:scale-110 active:scale-95 transition-transform duration-200"
+          className={`ypc__wishlist${click ? " ypc__wishlist--active" : ""}`}
         >
-          {click ? (
-            <AiFillHeart className="text-red-500" size={18} />
-          ) : (
-            <AiOutlineHeart className="text-gray-700 dark:text-gray-200" size={18} />
-          )}
+          {click ? <AiFillHeart size={17} /> : <AiOutlineHeart size={17} />}
         </button>
 
-        <div className="absolute inset-x-0 bottom-0 p-3 flex gap-2 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out bg-gradient-to-t from-black/75 to-transparent pt-12">
+        <div className="ypc__actions">
           <button
             type="button"
             onClick={addToCartHandler}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-yebone-primary text-white text-xs font-semibold hover:bg-yebone-primary-dark active:scale-[0.98] transition-all duration-200"
+            className="ypc__action-btn ypc__action-btn--primary"
           >
-            <AiOutlineShoppingCart size={16} />
+            <AiOutlineShoppingCart size={15} />
             Add to Cart
           </button>
           <Link
             to={productUrl}
             onClick={handleProductClick}
-            className="flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl bg-white/95 text-yebone-dark-text text-xs font-semibold hover:bg-white active:scale-[0.98] transition-all duration-200"
+            className="ypc__action-btn ypc__action-btn--secondary"
           >
-            <AiOutlineEye size={16} />
+            <AiOutlineEye size={15} />
             View
           </Link>
         </div>
       </div>
 
-      <div className="yebone-product-card__body">
-        <Link to={productUrl} onClick={handleProductClick}>
-          <h4 className="yebone-card-title text-yebone-dark-text dark:text-white line-clamp-2 leading-snug group-hover:text-yebone-primary transition-colors">
-            {data.name.length > 48 ? `${data.name.slice(0, 48)}…` : data.name}
-          </h4>
+      <div className="ypc__body">
+        {isVerified && (
+          <p className="ypc__verified">
+            <MdVerified className="ypc__verified-icon" size={13} aria-hidden="true" />
+            Verified Seller
+          </p>
+        )}
+
+        <Link to={productUrl} className="ypc__title-link" onClick={handleProductClick}>
+          <h3 className="ypc__title">{data.name}</h3>
         </Link>
 
-        <div className="flex items-end justify-between mt-auto pt-1">
-          <div>
-            <p className="font-Poppins font-bold text-yebone-primary text-base">
-              RWF {formatPrice(price)}
-            </p>
-            {hasDiscount && (
-              <p className="text-xs text-gray-400 line-through">
-                RWF {formatPrice(data.originalPrice)}
-              </p>
-            )}
-          </div>
-          <span
-            className={`text-[11px] font-medium ${
-              soldCount < 1 ? "text-orange-600" : "text-emerald-600 dark:text-emerald-400"
-            }`}
-          >
-            {soldCount} sold
-          </span>
+        <ProductCardReviews rating={rating} reviewCount={reviewCount} />
+
+        <div className="ypc__pricing">
+          <p className="ypc__price">RWF {formatPrice(price)}</p>
+          {hasDiscount && (
+            <p className="ypc__price-old">RWF {formatPrice(data.originalPrice)}</p>
+          )}
         </div>
+
+        <p className="ypc__sold">{soldCount} sold</p>
       </div>
     </ProductCardShell>
   );

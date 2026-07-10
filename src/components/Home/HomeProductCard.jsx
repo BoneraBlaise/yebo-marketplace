@@ -14,6 +14,8 @@ import axios from "axios";
 import { server } from "../../server";
 import { addToWishlist, removeFromWishlist } from "../../redux/actions/wishlist";
 import { addTocart } from "../../redux/actions/cart";
+import ProductCardReviews from "../Route/ProductCard/ProductCardReviews";
+import "../Route/ProductCard/productCard.css";
 
 const formatPrice = (price) =>
   (price ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -93,140 +95,83 @@ const HomeProductCard = ({ data, isEvent, compact = false, fluid = false }) => {
     data.originalPrice > 0 &&
     data.discountPrice > 0 &&
     data.originalPrice > data.discountPrice;
-  const discountPct = hasDiscount
-    ? Math.round(
-        ((data.originalPrice - data.discountPrice) / data.originalPrice) * 100
-      )
-    : 0;
   const soldCount = data.sold_out ?? 0;
   const isVerified = data.shop?.isVerified;
   const rating = data.ratings || 0;
   const reviewCount = data.reviews?.length || 0;
-  const showRating = reviewCount > 0 && rating > 0;
+
+  const sizeClass = fluid ? "ypc--fluid" : compact ? "ypc--compact" : "ypc--fixed";
 
   return (
     <article
-      className={`yebone-product-card home-card-lift group relative flex flex-col overflow-hidden ${
-        fluid
-          ? "w-full"
-          : compact
-          ? "w-[160px] sm:w-[200px]"
-          : "w-[260px] sm:w-[280px]"
-      }`}
+      className={`ypc home-card-lift group ${sizeClass}`}
       onClick={saveToRecentlyViewed}
     >
-      {/* Image */}
-      <div className="relative aspect-[4/5] overflow-hidden bg-[var(--home-surface-muted)]">
-        <Link to={productUrl} className="block w-full h-full">
+      <div className="ypc__media">
+        <Link to={productUrl} className="ypc__media-link" onClick={saveToRecentlyViewed}>
           <img
             src={data.images?.[0]?.url}
             alt={data.name || "Yebone product"}
-            className={`w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04] home-img-fade ${
-              data.stock === 0 ? "opacity-60" : ""
-            }`}
+            className={`ypc__img${data.stock === 0 ? " ypc__img--dimmed" : ""}`}
             loading="lazy"
           />
         </Link>
 
-        <div className="home-product-card__badges">
-          {hasDiscount && (
-            <span className="home-chip home-chip--discount">-{discountPct}%</span>
-          )}
-          {data.featured && (
-            <span className="home-chip home-chip--featured">Featured</span>
-          )}
-          {data.stock === 0 && (
-            <span className="home-chip home-chip--neutral normal-case font-semibold">
-              Sold out
-            </span>
-          )}
-        </div>
+        {data.stock === 0 && (
+          <span className="ypc__sold-out">Sold out</span>
+        )}
 
         <button
           type="button"
           onClick={handleWishlistToggle}
           aria-label={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
-          className="home-product-card__wishlist hover:scale-110 active:scale-95 transition-transform duration-200"
+          className={`ypc__wishlist${inWishlist ? " ypc__wishlist--active" : ""}`}
         >
-          {inWishlist ? (
-            <AiFillHeart className="text-red-500" size={17} />
-          ) : (
-            <AiOutlineHeart className="text-gray-700 dark:text-gray-200" size={17} />
-          )}
+          {inWishlist ? <AiFillHeart size={17} /> : <AiOutlineHeart size={17} />}
         </button>
 
-        <div className="home-product-card__hover-bar">
+        <div className="ypc__actions">
           <button
             type="button"
             onClick={addToCartHandler}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-yebone-primary text-white text-xs font-semibold hover:bg-yebone-primary-dark active:scale-[0.98] transition-all duration-200 min-h-[2.5rem]"
+            className="ypc__action-btn ypc__action-btn--primary"
           >
-            <AiOutlineShoppingCart size={16} />
+            <AiOutlineShoppingCart size={15} />
             Add to Cart
           </button>
           <Link
             to={productUrl}
             onClick={saveToRecentlyViewed}
-            className="flex items-center justify-center gap-1 px-3 py-2.5 rounded-xl bg-white/95 text-yebone-dark-text text-xs font-semibold hover:bg-white active:scale-[0.98] transition-all duration-200 min-h-[2.5rem]"
+            className="ypc__action-btn ypc__action-btn--secondary"
           >
-            <AiOutlineEye size={16} />
+            <AiOutlineEye size={15} />
             Quick View
           </Link>
         </div>
       </div>
 
-      {/* Details */}
-      <div className="home-product-card__body">
+      <div className="ypc__body">
         {isVerified && (
-          <span className="home-chip home-chip--verified normal-case w-fit">
-            <MdVerified size={12} />
-            Verified seller
-          </span>
+          <p className="ypc__verified">
+            <MdVerified className="ypc__verified-icon" size={13} aria-hidden="true" />
+            Verified Seller
+          </p>
         )}
 
-        <Link to={productUrl}>
-          <h3 className="yebone-card-title text-[var(--home-text)] line-clamp-2 leading-snug group-hover:text-yebone-primary transition-colors">
-            {data.name}
-          </h3>
+        <Link to={productUrl} className="ypc__title-link" onClick={saveToRecentlyViewed}>
+          <h3 className="ypc__title">{data.name}</h3>
         </Link>
 
-        {showRating ? (
-          <div className="flex items-center gap-1.5 min-h-[1rem]">
-            <div className="flex items-center gap-0.5" aria-label={`${rating} out of 5 stars`}>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <span
-                  key={i}
-                  className={`text-xs leading-none ${
-                    i <= Math.round(rating)
-                      ? "text-yebone-gold"
-                      : "text-gray-300 dark:text-gray-600"
-                  }`}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-            <span className="text-[10px] text-gray-400">({reviewCount})</span>
-          </div>
-        ) : (
-          <p className="text-[11px] text-gray-400 italic min-h-[1rem]">No reviews yet</p>
-        )}
+        <ProductCardReviews rating={rating} reviewCount={reviewCount} />
 
-        <div className="home-product-card__price-row">
-          <div>
-            <p className="font-Poppins font-bold text-yebone-primary text-[0.9375rem] leading-tight">
-              RWF {formatPrice(price)}
-            </p>
-            {hasDiscount && (
-              <p className="text-[11px] text-gray-400 line-through mt-0.5">
-                RWF {formatPrice(data.originalPrice)}
-              </p>
-            )}
-          </div>
-          <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">
-            {soldCount} sold
-          </span>
+        <div className="ypc__pricing">
+          <p className="ypc__price">RWF {formatPrice(price)}</p>
+          {hasDiscount && (
+            <p className="ypc__price-old">RWF {formatPrice(data.originalPrice)}</p>
+          )}
         </div>
+
+        <p className="ypc__sold">{soldCount} sold</p>
       </div>
     </article>
   );

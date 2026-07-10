@@ -1,0 +1,440 @@
+/* Yebone Premium Product Card — mobile-first ecommerce */
+
+:root {
+  --ypc-radius: 0.875rem;
+  --ypc-shadow:
+    0 1px 2px rgba(15, 23, 20, 0.04),
+    0 4px 16px -4px rgba(41, 98, 93, 0.1);
+  --ypc-shadow-hover: 0 10px 32px -8px rgba(41, 98, 93, 0.2);
+  --ypc-body-min: 7.25rem;
+  --ypc-min-height: 17.5rem;
+}
+
+.ypc {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 62fr) minmax(0, 38fr);
+  width: 100%;
+  height: 100%;
+  min-height: var(--ypc-min-height);
+  border-radius: var(--ypc-radius);
+  border: 1px solid rgba(41, 98, 93, 0.1);
+  background: var(--home-surface, #fff);
+  box-shadow: var(--ypc-shadow);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.dark .ypc {
+  background: #1a1a1a;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px -6px rgba(0, 0, 0, 0.45);
+}
+
+.ypc--fluid {
+  width: 100%;
+}
+
+.ypc--compact:not(.ypc--fluid) {
+  width: 10rem;
+}
+
+.ypc--fixed:not(.ypc--fluid) {
+  width: 16.25rem;
+}
+
+@media (min-width: 640px) {
+  .ypc--compact:not(.ypc--fluid) {
+    width: 12.5rem;
+  }
+
+  .ypc--fixed:not(.ypc--fluid) {
+    width: 17.5rem;
+  }
+}
+
+@media (min-width: 901px) {
+  .ypc:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ypc-shadow-hover);
+    border-color: rgba(41, 98, 93, 0.18);
+  }
+}
+
+.ypc:active {
+  transform: scale(0.985);
+}
+
+@media (min-width: 901px) {
+  .ypc:active {
+    transform: translateY(-1px);
+  }
+}
+
+/* ── Media ── */
+.ypc__media {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--home-surface-muted, #f4f5f4);
+  border-radius: var(--ypc-radius) var(--ypc-radius) 0 0;
+}
+
+.dark .ypc__media {
+  background: #262626;
+}
+
+.ypc__media-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.ypc__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ypc:hover .ypc__img {
+  transform: scale(1.03);
+}
+
+.ypc__img--dimmed {
+  opacity: 0.55;
+}
+
+.ypc__sold-out {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  background: rgba(17, 24, 39, 0.88);
+  color: #fff;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
+/* ── Wishlist ── */
+.ypc__wishlist {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #374151;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.dark .ypc__wishlist {
+  background: rgba(26, 26, 26, 0.92);
+  color: #e5e7eb;
+}
+
+.ypc__wishlist:hover {
+  transform: scale(1.08);
+}
+
+.ypc__wishlist:active {
+  transform: scale(0.95);
+}
+
+.ypc__wishlist--active {
+  color: #ef4444;
+}
+
+.ypc__wishlist:focus-visible {
+  outline: 2px solid var(--yebone-primary-green, #29625d);
+  outline-offset: 2px;
+}
+
+/* ── Desktop hover actions ── */
+.ypc__actions {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.625rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, transparent 100%);
+  transform: translateY(100%);
+  opacity: 0;
+  transition:
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+
+.ypc:hover .ypc__actions,
+.ypc:focus-within .ypc__actions {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.ypc__action-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 2.25rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.ypc__action-btn--primary {
+  background: var(--yebone-primary-green, #29625d);
+  color: #fff;
+}
+
+.ypc__action-btn--primary:hover {
+  background: #1f4f4a;
+}
+
+.ypc__action-btn--secondary {
+  background: rgba(255, 255, 255, 0.96);
+  color: #1f2937;
+  text-decoration: none;
+}
+
+.ypc__action-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ── Body ── */
+.ypc__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+  min-height: 0;
+  padding: 0.5625rem 0.6875rem 0.6875rem;
+  overflow: hidden;
+}
+
+.ypc__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--home-text-muted, #6b7280);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dark .ypc__verified {
+  color: rgba(200, 210, 206, 0.72);
+}
+
+.ypc__verified-icon {
+  flex-shrink: 0;
+  color: var(--yebone-primary-green, #29625d);
+}
+
+.dark .ypc__verified-icon {
+  color: var(--yebone-accent, #fed592);
+}
+
+.ypc__title-link {
+  text-decoration: none;
+  color: inherit;
+  min-height: 0;
+}
+
+.ypc__title-link:focus-visible {
+  outline: 2px solid var(--yebone-primary-green, #29625d);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.ypc__title {
+  margin: 0;
+  font-family: Poppins, system-ui, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--home-text, #1f2937);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.7em;
+  word-break: break-word;
+  transition: color 0.2s ease;
+}
+
+.dark .ypc__title {
+  color: rgba(245, 245, 245, 0.96);
+}
+
+.ypc:hover .ypc__title {
+  color: var(--yebone-primary-green, #29625d);
+}
+
+.dark .ypc:hover .ypc__title {
+  color: var(--yebone-accent, #fed592);
+}
+
+/* ── Reviews ── */
+.ypc__reviews {
+  display: flex;
+  align-items: center;
+  gap: 0.3125rem;
+  min-height: 1.125rem;
+  flex-shrink: 0;
+}
+
+.ypc__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.0625rem;
+  line-height: 1;
+}
+
+.ypc__star {
+  font-size: 0.6875rem;
+  line-height: 1;
+}
+
+.ypc__star--filled {
+  color: #f59e0b;
+}
+
+.ypc__star--empty {
+  color: #d1d5db;
+}
+
+.dark .ypc__star--empty {
+  color: #4b5563;
+}
+
+.ypc__review-count {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--home-text-muted, #9ca3af);
+  line-height: 1;
+}
+
+.ypc__reviews-empty {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-style: italic;
+  line-height: 1.125rem;
+  min-height: 1.125rem;
+  color: var(--home-text-muted, #9ca3af);
+}
+
+/* ── Pricing ── */
+.ypc__pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.ypc__price {
+  margin: 0;
+  font-family: Poppins, system-ui, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--yebone-primary-green, #29625d);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dark .ypc__price {
+  color: var(--yebone-accent, #fed592);
+}
+
+.ypc__price-old {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.2;
+  color: #9ca3af;
+  text-decoration: line-through;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Sold ── */
+.ypc__sold {
+  margin: auto 0 0;
+  padding-top: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--home-text-muted, #6b7280);
+  white-space: nowrap;
+}
+
+.dark .ypc__sold {
+  color: rgba(180, 190, 186, 0.75);
+}
+
+/* Container compatibility (grids & carousels) */
+.mpc-rail__item > .ypc,
+.mpc-card-slot > .ypc {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+}
+
+/* Hide desktop hover actions on touch/mobile */
+@media (max-width: 900px) {
+  .ypc__actions {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ypc,
+  .ypc__img,
+  .ypc__wishlist,
+  .ypc__actions,
+  .ypc__action-btn {
+    transition: none;
+  }
+
+  .ypc:hover .ypc__img,
+  .ypc:hover,
+  .ypc:active {
+    transform: none;
+  }
+}

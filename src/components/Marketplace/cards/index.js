@@ -7,6 +7,8 @@ export { default as MarketplaceCardSkeleton } from "./MarketplaceCardSkeleton";
 export {
   MARKETPLACE_CARD_BREAKPOINTS,
   MARKETPLACE_GRID_COLUMNS,
+  MARKETPLACE_RAIL_VISIBLE,
+  MARKETPLACE_RAIL_GAP_PX,
   MARKETPLACE_SWIPE_PAGE_SIZE,
   chunkArray,
 } from "./constants";

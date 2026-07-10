@@ -46,13 +46,14 @@ const ShopProfileData = ({ isOwner }) => {
         )}
       </div>
       {active === 1 && (
-        <div className="marketplace-product-grid mb-12">
+        <div className="marketplace-product-grid mpc-grid--page mb-12">
           {products &&
-            // Create a shallow copy and sort it by createdAt (new to old)
             [...products]
               .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-              .map((product, index) => (
-                <ProductCard data={product} key={index} isShop={true} />
+              .map((product) => (
+                <div key={product._id} className="mpc-card-slot">
+                  <ProductCard data={product} isShop={true} />
+                </div>
               ))}
         </div>
       )}

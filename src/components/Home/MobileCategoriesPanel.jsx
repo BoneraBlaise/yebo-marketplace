@@ -205,7 +205,7 @@ const MobileCategoriesPanel = ({ open, onClose, categoriesData = [] }) => {
       openSubcategory(category);
       return;
     }
-    navigate(`/products?category=${encodeURIComponent(category.title)}`);
+    navigate(category.shopAllHref || `/products?category=${encodeURIComponent(category.title)}`);
     handleClose();
   };
 
@@ -341,7 +341,7 @@ const MobileCategoriesPanel = ({ open, onClose, categoriesData = [] }) => {
               {activeCategory && (
                 <div className="mc-nav__screen-body" ref={subBodyRef}>
                   <Link
-                    to={`/products?category=${encodeURIComponent(activeCategory.title)}`}
+                    to={activeCategory.shopAllHref || `/products?category=${encodeURIComponent(activeCategory.title)}`}
                     className="mc-nav__shop-all"
                     onClick={handleClose}
                   >
@@ -362,7 +362,7 @@ const MobileCategoriesPanel = ({ open, onClose, categoriesData = [] }) => {
                           title={sub.title}
                           label={t(subKey(sub.title), sub.title)}
                           hasChildren={false}
-                          href={`/products?category=${encodeURIComponent(sub.title)}`}
+                          href={sub.href || `/products?category=${encodeURIComponent(sub.title)}`}
                           onNavigate={handleClose}
                         />
                       </li>

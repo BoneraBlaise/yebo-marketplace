@@ -32,10 +32,10 @@ const ProductAIRail = ({ title, products }) => {
   return (
     <div className="mb-8">
       <p className="font-Poppins font-semibold text-sm lg:text-base mb-3 dark:text-white">{title}</p>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="marketplace-product-grid mpc-grid--page">
         {products.slice(0, 4).map((product) => (
-          <div key={product._id} className="flex justify-center">
-            <HomeProductCard data={product} compact />
+          <div key={product._id} className="mpc-card-slot mpc-card-slot--centered">
+            <HomeProductCard data={product} compact fluid />
           </div>
         ))}
       </div>

@@ -61,6 +61,10 @@ const CategoryFilterSidebar = ({
   onProductTypeChange,
   categoryData,
   onCategoryChange,
+  brandOptions = [],
+  selectedBrand = "",
+  onBrandChange,
+  hideLegacyCategories = false,
 }) => (
   <aside
     className={`cat-filter ${embedded ? "cat-filter--embedded" : "yebone-surface"} ${
@@ -179,6 +183,24 @@ const CategoryFilterSidebar = ({
       </select>
     </FilterGroup>
 
+    {brandOptions.length > 0 && (
+      <FilterGroup title="Brand">
+        <select
+          value={selectedBrand}
+          onChange={(e) => onBrandChange(e.target.value)}
+          className="cat-filter__select"
+        >
+          <option value="">All brands</option>
+          {brandOptions.map((brand) => (
+            <option key={brand} value={brand}>
+              {brand}
+            </option>
+          ))}
+        </select>
+      </FilterGroup>
+    )}
+
+    {!hideLegacyCategories && (
     <FilterGroup title="Categories" defaultOpen={Boolean(categoryData)}>
       {categoriesData.map((category) => (
         <div key={category.id}>
@@ -200,6 +222,7 @@ const CategoryFilterSidebar = ({
         </div>
       ))}
     </FilterGroup>
+    )}
   </aside>
 );
 

@@ -16,7 +16,7 @@ const DropDown = ({ categoriesData, setDropDown }) => {
         <header className="yebone-nav-panel-header home-mega-menu__header">
           <div>
             <p className="home-mega-menu__eyebrow">Shop by department</p>
-            <h2 className="yebone-nav-panel-title">All categories</h2>
+            <h2 className="yebone-nav-panel-title">Main categories</h2>
           </div>
           <Link to="/products" className="home-mega-menu__browse-all" onClick={close}>
             Browse all
@@ -28,7 +28,7 @@ const DropDown = ({ categoriesData, setDropDown }) => {
           {categoriesData?.map((category) => (
             <section key={category.id} className="home-mega-menu__column">
               <Link
-                to={`/products?category=${encodeURIComponent(category.title)}`}
+                to={category.shopAllHref || `/products?category=${encodeURIComponent(category.title)}`}
                 className="home-mega-menu__title"
                 onClick={close}
               >
@@ -44,7 +44,7 @@ const DropDown = ({ categoriesData, setDropDown }) => {
                   {category.subcategories.slice(0, 8).map((sub) => (
                     <li key={sub.id}>
                       <Link
-                        to={`/products?category=${encodeURIComponent(sub.title)}`}
+                        to={sub.href || `/products?category=${encodeURIComponent(sub.title)}`}
                         className="home-mega-menu__link"
                         onClick={close}
                       >
@@ -55,7 +55,7 @@ const DropDown = ({ categoriesData, setDropDown }) => {
                   {category.subcategories.length > 8 && (
                     <li>
                       <Link
-                        to={`/products?category=${encodeURIComponent(category.title)}`}
+                        to={category.shopAllHref || `/products?category=${encodeURIComponent(category.title)}`}
                         className="home-mega-menu__link home-mega-menu__link--more"
                         onClick={close}
                       >

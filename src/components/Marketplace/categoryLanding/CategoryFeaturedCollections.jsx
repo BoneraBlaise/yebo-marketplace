@@ -34,7 +34,7 @@ const CategoryFeaturedCollections = ({ products = [], isLoading = false }) => {
           </div>
           <MarketplaceCardRail>
             {collection.products.map((product) => (
-              <HomeProductCard key={`${collection.id}-${product._id}`} data={product} compact />
+              <HomeProductCard key={`${collection.id}-${product._id}`} data={product} compact fluid />
             ))}
           </MarketplaceCardRail>
         </section>
@@ -50,7 +50,7 @@ const CategoryFeaturedCollections = ({ products = [], isLoading = false }) => {
           </div>
           <MarketplaceCardRail>
             {verifiedProducts.map((product) => (
-              <HomeProductCard key={`verified-${product._id}`} data={product} compact />
+              <HomeProductCard key={`verified-${product._id}`} data={product} compact fluid />
             ))}
           </MarketplaceCardRail>
         </section>

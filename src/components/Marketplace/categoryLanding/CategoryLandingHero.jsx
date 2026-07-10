@@ -1,10 +1,17 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { typography } from "../../../design-system/typography";
+import { CATEGORY_FALLBACK_PHOTO } from "../../Home/categoryPhotoMap";
 import { formatProductCount } from "./categoryLandingUtils";
 import "./categoryLanding.css";
 
 const CategoryLandingHero = ({ context, count }) => {
+  const [imageSrc, setImageSrc] = useState(context?.imageUrl || CATEGORY_FALLBACK_PHOTO);
+
+  useEffect(() => {
+    setImageSrc(context?.imageUrl || CATEGORY_FALLBACK_PHOTO);
+  }, [context?.imageUrl, context?.title]);
+
   if (!context) return null;
 
   return (
@@ -28,17 +35,20 @@ const CategoryLandingHero = ({ context, count }) => {
 
           <span className="cat-landing-hero__badge">Category</span>
           <h1 id="category-landing-title" className={`cat-landing-hero__title ${typography.heading}`}>
-            {context.title}
+            {context.displayTitle || context.title}
           </h1>
           <p className="cat-landing-hero__desc">{context.description}</p>
           <p className="cat-landing-hero__count">{formatProductCount(count)}</p>
         </div>
 
-        {context.imageUrl && (
-          <div className="cat-landing-hero__visual" aria-hidden="true">
-            <img src={context.imageUrl} alt="" loading="lazy" />
-          </div>
-        )}
+        <div className="cat-landing-hero__visual" aria-hidden="true">
+          <img
+            src={imageSrc}
+            alt=""
+            loading="lazy"
+            onError={() => setImageSrc(CATEGORY_FALLBACK_PHOTO)}
+          />
+        </div>
       </div>
     </section>
   );

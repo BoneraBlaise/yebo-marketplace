@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import {
@@ -21,7 +21,7 @@ import {
   CartPanel,
 } from "../Layout/overlays";
 import useHeaderDropdown from "../Layout/overlays/useHeaderDropdown";
-import { categoriesData } from "../../static/data";
+import { buildMobileNavCategories } from "./mainCategoryHierarchy";
 import useSiteSearch from "../../hooks/useSiteSearch";
 import { Container } from "../ui";
 import YeboneLogo from "./YeboneLogo";
@@ -52,6 +52,8 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
     handleSearchSubmit,
     setSearchData,
   } = useSiteSearch();
+
+  const marketplaceNavCategories = useMemo(() => buildMobileNavCategories(), []);
 
   const sellerAction = isSeller
     ? { label: "Vendor Dashboard", to: "/dashboard" }
@@ -172,7 +174,7 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
                     onClick={() => setDropDown(false)}
                     aria-label="Close categories menu"
                   />
-                  <DropDown categoriesData={categoriesData} setDropDown={setDropDown} />
+                  <DropDown categoriesData={marketplaceNavCategories} setDropDown={setDropDown} />
                 </>
               )}
             </div>
@@ -400,7 +402,7 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
         <MobileCategoriesPanel
           open={mobileCategoriesOpen}
           onClose={() => setMobileCategoriesOpen(false)}
-          categoriesData={categoriesData}
+          categoriesData={marketplaceNavCategories}
         />
       </header>
     </>

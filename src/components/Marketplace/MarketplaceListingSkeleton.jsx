@@ -1,11 +1,11 @@
 import React from "react";
 
 const MarketplaceListingSkeleton = ({ count = 8 }) => (
-  <div className="marketplace-product-grid w-full">
+  <div className="marketplace-product-grid mpc-grid--page w-full">
     {Array.from({ length: count }).map((_, i) => (
       <div
         key={i}
-        className="rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900"
+        className="mpc-card-slot rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-900"
       >
         <div className="aspect-[4/5] yebone-skeleton" />
         <div className="p-4 space-y-3">

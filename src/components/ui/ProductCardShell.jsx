@@ -1,17 +1,21 @@
 import React from "react";
 import classNames from "classnames";
-import { polishClasses } from "../../ui-polish/polishClasses";
+import "../Route/ProductCard/productCard.css";
 
 /**
  * Styling shell for product cards. Wrap existing product card content for consistent layout.
  */
-const ProductCardShell = ({ children, className, onMouseEnter, onMouseLeave, as: Component = "article" }) => (
+const ProductCardShell = ({
+  children,
+  className,
+  onClick,
+  onMouseEnter,
+  onMouseLeave,
+  as: Component = "article",
+}) => (
   <Component
-    className={classNames(
-      polishClasses.productCard,
-      "group relative cursor-pointer",
-      className
-    )}
+    className={classNames("ypc group", className)}
+    onClick={onClick}
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
   >

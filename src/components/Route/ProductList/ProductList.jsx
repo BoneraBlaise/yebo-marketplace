@@ -265,32 +265,18 @@ const ProductList = ({ products }) => {
   }
 
   return (
-    <div
-      className={`w-full mx-auto ${
-        isMobile ? "grid grid-cols-2 gap-3 sm:gap-4 p-2" : "marketplace-product-grid p-1"
-      }`}
-    >
-      {products.map((product) => {
-        if (isMobile) {
-          return (
-            <MobileProductCard
-              key={product._id}
-              data={product}
-              className="w-full gap-2"
-            />
-          );
-        }
-
-        return (
-          <div
-            key={product._id}
-            className="flex justify-center"
-            onClick={() => handleProductClick(product)}
-          >
-            <HomeProductCard data={product} compact />
-          </div>
-        );
-      })}
+    <div className="marketplace-product-grid mpc-grid--page w-full">
+      {products.map((product) => (
+        <div key={product._id} className="mpc-card-slot">
+          {isMobile ? (
+            <MobileProductCard data={product} />
+          ) : (
+            <div className="flex justify-center w-full">
+              <HomeProductCard data={product} compact />
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };

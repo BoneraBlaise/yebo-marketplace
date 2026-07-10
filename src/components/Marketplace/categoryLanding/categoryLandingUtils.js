@@ -1,4 +1,11 @@
 import { categoriesData } from "../../../static/data";
+import {
+  MAIN_CATEGORIES,
+  buildMainCategoryUrl,
+  getMainCategoryByTitle,
+  resolveMainCategoryMatchTitles,
+} from "../../Home/mainCategoryHierarchy";
+import { resolveCategoryPhoto } from "../../Home/categoryPhotoMap";
 
 const buildDescription = (title, subTitle) => {
   if (subTitle) {
@@ -7,8 +14,44 @@ const buildDescription = (title, subTitle) => {
   return `Explore thousands of ${title.toLowerCase()} products from verified sellers across Africa.`;
 };
 
-export const resolveCategoryContext = (categoryParam) => {
+export const resolveCategoryContext = (categoryParam, chipParam = null) => {
   if (!categoryParam) return null;
+
+  const mainCategory = getMainCategoryByTitle(categoryParam);
+  if (mainCategory) {
+    const chipId = chipParam && chipParam !== "all" ? chipParam : "all";
+    const activeChip =
+      mainCategory.chips.find((c) => c.id === chipId) || mainCategory.chips[0];
+    const isChipFilter = activeChip && !activeChip.isAll;
+    const matchTitles = resolveMainCategoryMatchTitles(mainCategory, activeChip.id);
+
+    const shortcuts = mainCategory.chips.map((chip) => ({
+      id: chip.id,
+      label: chip.label,
+      isAll: chip.isAll,
+      to: buildMainCategoryUrl(mainCategory.title, chip.isAll ? null : chip.id),
+    }));
+
+    return {
+      type: isChipFilter ? "main-chip" : "main",
+      mainCategory,
+      title: isChipFilter ? activeChip.label : mainCategory.title,
+      displayTitle: mainCategory.title,
+      description: isChipFilter
+        ? `Shop ${activeChip.label.toLowerCase()} in ${mainCategory.title} from verified sellers across Africa.`
+        : mainCategory.description,
+      imageUrl: resolveCategoryPhoto(mainCategory.title),
+      shortcuts,
+      activeChipId: activeChip.id,
+      matchTitles,
+      breadcrumbs: [
+        { label: "Home", to: "/" },
+        { label: "Marketplace", to: "/products" },
+        { label: mainCategory.title, to: buildMainCategoryUrl(mainCategory.title) },
+        ...(isChipFilter ? [{ label: activeChip.label }] : []),
+      ],
+    };
+  }
 
   const parent = categoriesData.find((c) => c.title === categoryParam);
   if (parent) {
@@ -18,8 +61,12 @@ export const resolveCategoryContext = (categoryParam) => {
       parent,
       title: parent.title,
       description: buildDescription(parent.title, parent.subTitle),
-      imageUrl: parent.image_Url,
-      shortcuts: parent.subcategories || [],
+      imageUrl: resolveCategoryPhoto(parent.title, parent.image_Url),
+      shortcuts: (parent.subcategories || []).map((sub) => ({
+        id: sub.id,
+        label: sub.title,
+        to: `/products?category=${encodeURIComponent(sub.title)}`,
+      })),
       matchTitles: [parent.title, ...subTitles],
       breadcrumbs: [
         { label: "Home", to: "/" },
@@ -38,8 +85,12 @@ export const resolveCategoryContext = (categoryParam) => {
         sub,
         title: sub.title,
         description: `Shop ${sub.title} in ${cat.title} from verified sellers across Africa.`,
-        imageUrl: sub.image_Url || cat.image_Url,
-        shortcuts: cat.subcategories || [],
+        imageUrl: resolveCategoryPhoto(sub.title, sub.image_Url || cat.image_Url),
+        shortcuts: (cat.subcategories || []).map((item) => ({
+          id: item.id,
+          label: item.title,
+          to: `/products?category=${encodeURIComponent(item.title)}`,
+        })),
         matchTitles: [sub.title],
         breadcrumbs: [
           { label: "Home", to: "/" },
@@ -55,7 +106,7 @@ export const resolveCategoryContext = (categoryParam) => {
     type: "unknown",
     title: categoryParam,
     description: buildDescription(categoryParam, ""),
-    imageUrl: null,
+    imageUrl: resolveCategoryPhoto(categoryParam),
     shortcuts: [],
     matchTitles: [categoryParam],
     breadcrumbs: [
@@ -119,11 +170,10 @@ export const getVerifiedSellerProducts = (products, limit = 8) =>
   products.filter((p) => p?.shop?.isVerified).slice(0, limit);
 
 export const getAlternativeCategories = (currentTitle, limit = 6) =>
-  categoriesData
-    .filter((c) => c.title !== currentTitle)
+  MAIN_CATEGORIES.filter((c) => c.title !== currentTitle)
     .slice(0, limit)
     .map((c) => ({
       title: c.title,
-      to: `/products?category=${encodeURIComponent(c.title)}`,
-      imageUrl: c.image_Url,
+      to: buildMainCategoryUrl(c.title),
+      imageUrl: resolveCategoryPhoto(c.title),
     }));

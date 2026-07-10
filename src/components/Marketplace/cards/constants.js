@@ -15,6 +15,15 @@ export const MARKETPLACE_GRID_COLUMNS = {
   desktop: 5,
 };
 
+export const MARKETPLACE_RAIL_VISIBLE = {
+  mobile: 2,
+  tablet: 3,
+  laptop: 4,
+  desktop: 5,
+};
+
+export const MARKETPLACE_RAIL_GAP_PX = 12;
+
 export const MARKETPLACE_SWIPE_PAGE_SIZE = 4;
 
 export const chunkArray = (items, size) => {

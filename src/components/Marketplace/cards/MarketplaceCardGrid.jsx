@@ -2,7 +2,7 @@ import React, { memo } from "react";
 import classNames from "classnames";
 
 const MarketplaceCardGrid = memo(({ children, className = "", as: Tag = "div", ...props }) => (
-  <Tag className={classNames("mpc-grid mpc-fade-in", className)} {...props}>
+  <Tag className={classNames("mpc-grid mpc-grid--page mpc-fade-in", className)} {...props}>
     {children}
   </Tag>
 ));

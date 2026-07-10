@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
+import { MdVerified } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToWishlist, removeFromWishlist } from "../../../redux/actions/wishlist";
-import Cookies from "js-cookie"; // Import js-cookie
-import axios from "axios"; // Import axios
-import { server } from "../../../server"; // Server URL
-import styles from "../../../styles/styles";
+import Cookies from "js-cookie";
+import axios from "axios";
+import { server } from "../../../server";
 import { toast } from "react-toastify";
-import { useTranslation } from "react-i18next"; // Import useTranslation hook
+import { useTranslation } from "react-i18next";
+import ProductCardReviews from "./ProductCardReviews";
+import "./productCard.css";
 
 const MobileProductCard = ({ data, isEvent }) => {
-  const { t } = useTranslation(); // Initialize translation hook
+  const { t } = useTranslation();
   const { wishlist } = useSelector((state) => state.wishlist);
   const [click, setClick] = useState(false);
   const dispatch = useDispatch();
@@ -22,9 +24,8 @@ const MobileProductCard = ({ data, isEvent }) => {
     } else {
       setClick(false);
     }
-  }, [wishlist]);
+  }, [wishlist, data._id]);
 
-  // Function to save product to cookies with only necessary information
   const saveToRecentlyViewed = (product) => {
     const productDetails = {
       _id: product._id,
@@ -38,20 +39,17 @@ const MobileProductCard = ({ data, isEvent }) => {
       ? JSON.parse(Cookies.get("recentlyViewed"))
       : [];
 
-    // Ensure we don't add duplicate entries for the same product
-    const updatedViewed = [productDetails, ...recentlyViewed.filter(item => item._id !== product._id)];
-
-    // Limit to 12 products in the recently viewed list
+    const updatedViewed = [
+      productDetails,
+      ...recentlyViewed.filter((item) => item._id !== product._id),
+    ];
     const limitedViewed = updatedViewed.slice(0, 12);
-
-    // Save the updated list to cookies, with a 7-day expiration
     Cookies.set("recentlyViewed", JSON.stringify(limitedViewed), { expires: 7 });
   };
 
-  // Handle adding/removing product from wishlist and liking/unliking
-  // Handle Wishlist toggle (Add to or remove from wishlist)
   const handleWishlistToggle = async (e) => {
-    e.stopPropagation(); // Prevent triggering the card's onClick
+    e.preventDefault();
+    e.stopPropagation();
     try {
       const response = await axios.put(
         `${server}/product/like-product`,
@@ -63,98 +61,96 @@ const MobileProductCard = ({ data, isEvent }) => {
         if (click) {
           dispatch(removeFromWishlist(data));
           setClick(false);
-          toast.info('Removed from wishlist!');
+          toast.info("Removed from wishlist!");
         } else {
           dispatch(addToWishlist(data));
           setClick(true);
-          toast.success('Added to wishlist!');
+          toast.success("Added to wishlist!");
         }
       } else {
-        toast.error('Something went wrong!');
+        toast.error("Something went wrong!");
       }
     } catch (error) {
-      toast.error('Cannot watch this product at the moment!');
-      console.error('Error during request:', error);
+      toast.error("Cannot watch this product at the moment!");
+      console.error("Error during request:", error);
     }
   };
 
-  const formatPrice = (price) => {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  const formatPrice = (price) =>
+    (price ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  const handleProductClick = () => {
+    saveToRecentlyViewed(data);
   };
 
-  // Handle product click (e.g., when user views product details)
-  const handleProductClick = () => {
-    saveToRecentlyViewed(data); // Save product to cookies
-  };
+  const productUrl =
+    isEvent === true ? `/product/${data._id}?isEvent=true` : `/product/${data._id}`;
+  const price = data.discountPrice || data.originalPrice;
+  const hasDiscount =
+    data.originalPrice > 0 &&
+    data.discountPrice > 0 &&
+    data.originalPrice > data.discountPrice;
+  const soldCount = data.sold_out ?? 0;
+  const isVerified = data.shop?.isVerified;
+  const rating = data.ratings || 0;
+  const reviewCount = data.reviews?.length || 0;
 
   return (
-    <div
-      className="w-[150px] h-[210px] bg-white dark:bg-[#2b2b2b] dark:shadow-md dark:border-1 dark:border-[#363535] rounded-lg shadow-md p-2 relative cursor-pointer overflow-hidden"
-      onClick={handleProductClick}
-    >
-      {/* Sold Out badge */}
-      {data.stock === 0 && (
-        <div className="absolute top-[20px] right-[-35px] transform rotate-45 bg-red-500 text-white py-1 px-10 text-xs font-bold z-[5] shadow-md pointer-events-none">
-          {t("product.soldOut")}
-        </div>
-      )}
-
-      {/* Wishlist button - Only show if product is in stock */}
-      {data.stock > 0 && (
-        <div className="absolute top-3 right-2 z-[6]">
-          <div className="bg-[#646464] hover:bg-[#4a4a4a] rounded-full shadow-md p-2 flex items-center transition-colors duration-200">
-            <div className="flex items-center gap-1">
-              {click ? (
-                <AiFillHeart
-                  size={20}
-                  className="cursor-pointer"
-                  onClick={handleWishlistToggle}
-                  color="#fdd69e"
-                  title={t("product.removeFromWishlist")}
-                />
-              ) : (
-                <AiOutlineHeart
-                  size={20}
-                  className="cursor-pointer"
-                  onClick={handleWishlistToggle}
-                  color="#ffffff"
-                  title={t("product.addToWishlist")}
-                />
-              )}
-              <span className="text-xs text-white min-w-[16px] text-center">
-                {data.likes?.length || 0}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <Link to={`${isEvent === true ? `/product/${data._id}?isEvent=true` : `/product/${data._id}`}`}>
-        <div className="relative">
+    <article className="ypc ypc--fluid" onClick={handleProductClick}>
+      <div className="ypc__media">
+        <Link
+          to={productUrl}
+          className="ypc__media-link"
+          onClick={handleProductClick}
+        >
           <img
-            src={`${data.images && data.images[0]?.url}`}
-            alt={data.name}
-            className={`w-full h-[140px] object-cover bg-gray-100 dark:bg-[#2b2b2b] rounded-md ${
-              data.stock === 0 ? 'opacity-50' : ''
-            }`}
+            src={data.images && data.images[0]?.url}
+            alt={data.name || "Yebone product"}
+            className={`ypc__img${data.stock === 0 ? " ypc__img--dimmed" : ""}`}
+            loading="lazy"
           />
-        </div>
-      </Link>
+        </Link>
 
-      <Link to={`${isEvent === true ? `/product/${data._id}?isEvent=true` : `/product/${data._id}`}`}>
-        <div className="mt-2">
-          <span className="block font-medium text-gray-500 dark:text-gray-200 text-sm line-clamp-1">
-            {data.name.length > 10 ? data.name.slice(0, 10) + "..." : data.name}
-          </span>
+        {data.stock === 0 && (
+          <span className="ypc__sold-out">{t("product.soldOut")}</span>
+        )}
 
-          <div className="mt-1 flex items-center justify-between">
-            <span className={`text-xs text-red-300 dark:text-white dark:bg-[#29625d] dark:px-2 dark:py-1 dark:rounded-full dark:font-bold`}>
-              RWF {data.originalPrice === 0 ? formatPrice(data.originalPrice) : formatPrice(data.discountPrice)}
-            </span>
-          </div>
+        {data.stock > 0 && (
+          <button
+            type="button"
+            className={`ypc__wishlist${click ? " ypc__wishlist--active" : ""}`}
+            onClick={handleWishlistToggle}
+            aria-label={click ? t("product.removeFromWishlist") : t("product.addToWishlist")}
+          >
+            {click ? <AiFillHeart size={17} /> : <AiOutlineHeart size={17} />}
+          </button>
+        )}
+      </div>
+
+      <div className="ypc__body">
+        {isVerified && (
+          <p className="ypc__verified">
+            <MdVerified className="ypc__verified-icon" size={13} aria-hidden="true" />
+            Verified Seller
+          </p>
+        )}
+
+        <Link to={productUrl} className="ypc__title-link" onClick={handleProductClick}>
+          <h3 className="ypc__title">{data.name}</h3>
+        </Link>
+
+        <ProductCardReviews rating={rating} reviewCount={reviewCount} />
+
+        <div className="ypc__pricing">
+          <p className="ypc__price">RWF {formatPrice(price)}</p>
+          {hasDiscount && (
+            <p className="ypc__price-old">RWF {formatPrice(data.originalPrice)}</p>
+          )}
         </div>
-      </Link>
-    </div>
+
+        <p className="ypc__sold">{soldCount} sold</p>
+      </div>
+    </article>
   );
 };
 

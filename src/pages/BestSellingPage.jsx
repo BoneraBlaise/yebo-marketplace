@@ -174,10 +174,12 @@ const BestSellingPage = () => {
             <div className="px-1 py-4 w-full lg:w-[85%]">
               <div className={`${styles.section} flex flex-col items-center justify-center`}>
                 <h2 className="text-2xl font-bold mb-4 text-start">Best Selling Products</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 mb-12">
+                <div className="marketplace-product-grid mpc-grid--page mb-12">
                   {data.length > 0 ? (
-                    data.map((product, index) => (
-                      <ProductCard data={product} key={index} />
+                    data.map((product) => (
+                      <div key={product._id} className="mpc-card-slot">
+                        <ProductCard data={product} />
+                      </div>
                     ))
                   ) : (
                      

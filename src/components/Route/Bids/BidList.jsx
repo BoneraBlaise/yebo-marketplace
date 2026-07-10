@@ -17,7 +17,7 @@ const BidList = ({ bids }) => {
   };
 
   return (
-    <div className="marketplace-product-grid mb-8">
+    <div className="marketplace-product-grid mpc-grid--page mb-8">
       {bids?.map((bid) => {
         const time = getTimeRemaining(bid?.auctionEndTime);
         const isActive = new Date(bid?.auctionEndTime) > new Date();

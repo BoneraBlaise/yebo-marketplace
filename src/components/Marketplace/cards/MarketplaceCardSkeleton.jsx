@@ -91,7 +91,7 @@ const MarketplaceCardSkeleton = memo(({
   }
 
   return (
-    <div className={classNames("mpc-rail overflow-hidden", className)}>
+    <div className={classNames("mpc-rail mpc-rail--carousel hide-scrollbar overflow-hidden", className)}>
       {items.map((_, i) => (
         <div key={i} className="mpc-rail__item">
           <ProductSkeleton compact={compact} />
