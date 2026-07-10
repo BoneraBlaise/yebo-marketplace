@@ -26,6 +26,7 @@
   --yebone-nav-z-mega: 2100;
   --yebone-nav-z-popover: 120;
   --yebone-nav-z-drawer: 1400;
+  --yebone-nav-z-mobile-categories: 2200;
   --yebone-nav-header-height: 4.25rem;
 }
 
@@ -206,9 +207,11 @@
   background: var(--yebone-nav-surface);
   box-shadow: 12px 0 48px rgba(0, 0, 0, 0.16);
   animation: yebone-nav-drawer-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  overflow: hidden;
 }
 
-@media (min-width: 480px) {
+/* Tablet side drawer — mobile uses full viewport via home-mobile-categories-drawer */
+@media (min-width: 768px) and (max-width: 1023px) {
   .yebone-nav-drawer__panel {
     width: min(100%, 26rem);
     border-right: 1px solid var(--yebone-nav-border);

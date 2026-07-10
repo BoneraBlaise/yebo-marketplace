@@ -2124,115 +2124,11 @@
   color: var(--yebone-nav-accent);
 }
 
-/* â”€â”€ Mobile categories drawer (unified nav system) â”€â”€ */
-.home-mobile-categories__eyebrow {
-  margin: 0;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--yebone-nav-text-muted);
-}
-
-.home-mobile-categories__back {
-  width: auto;
-  min-height: auto;
-  padding: 0.375rem 0.5rem;
-  font-weight: 600;
-}
-
-.home-mobile-categories__sub-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 0.625rem 1rem 0.875rem;
-  border-top: 1px solid var(--yebone-nav-border);
-}
-
-.home-mobile-categories__list {
-  padding: 0.375rem 0.5rem calc(1.5rem + env(safe-area-inset-bottom, 0));
-}
-
-.home-mobile-categories__row-item {
-  display: flex;
-  align-items: stretch;
-  gap: 0.125rem;
-  border-bottom: 1px solid var(--yebone-nav-border);
-}
-
-.home-mobile-categories__row-link {
-  flex: 1;
-  min-height: 3.25rem;
-  border-radius: 0;
-}
-
-.home-mobile-categories__row-label {
-  flex: 1;
-  min-width: 0;
-  font-size: 0.9375rem;
-  font-weight: 600;
-}
-
-.home-mobile-categories__drill {
-  flex-shrink: 0;
-  align-self: center;
-  margin-right: 0.25rem;
-}
-
-.home-mobile-categories__thumb {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--yebone-nav-radius-sm);
-  background: var(--yebone-nav-surface-muted);
-  overflow: hidden;
-}
-
-.home-mobile-categories__thumb--sm {
-  width: 2.125rem;
-  height: 2.125rem;
-}
-
-.home-mobile-categories__thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-.home-mobile-categories__shop-all {
-  margin: 0.375rem 0.5rem 0.5rem;
-  font-weight: 600;
-  color: var(--yebone-nav-accent);
-  background: rgba(41, 98, 93, 0.08);
-  border-radius: var(--yebone-nav-radius-sm);
-}
-
-.home-mobile-categories__sub-link {
-  min-height: 3rem;
-  margin: 0 0.5rem;
-  border-radius: var(--yebone-nav-radius-sm);
-}
-
-.home-mobile-categories__empty {
-  padding: 2.5rem 1rem;
-  text-align: center;
-  font-size: 0.875rem;
-  color: var(--yebone-nav-text-muted);
-}
-
 @media (min-width: 768px) and (max-width: 1023px) {
   .home-mega-menu {
     width: min(56rem, calc(100vw - 1.5rem));
     top: var(--home-mega-menu-top, 7rem);
   }
-}
-
-.dark .home-mobile-categories__shop-all {
-  background: rgba(254, 213, 146, 0.1);
 }
 
 .dark .home-mega-menu__title:hover,
@@ -2426,9 +2322,9 @@
     transition: none;
   }
 
-  .home-mobile-categories__overlay,
-  .home-mobile-categories__panel,
-  .home-mobile-categories__view,
+  .mc-nav__shell,
+  .mc-nav__track,
+  .mc-nav__backdrop,
   .home-mega-menu,
   .home-mobile-profile__panel {
     animation: none;

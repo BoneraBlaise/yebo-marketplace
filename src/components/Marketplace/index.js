@@ -7,6 +7,17 @@ export { default as MarketplaceListingSkeleton } from "./MarketplaceListingSkele
 export { default as MarketplaceAISection } from "./MarketplaceAISection";
 export { default as MarketplaceMobileFilterButton } from "./MarketplaceMobileFilterButton";
 export {
+  CategoryLandingHero,
+  CategoryShortcuts,
+  CategoryFeaturedCollections,
+  CategoryFilterSidebar,
+  CategoryFilterDrawer,
+  CategoryEmptyState,
+  resolveCategoryContext,
+  getCategoryBaseProducts,
+  matchesCategoryScope,
+} from "./categoryLanding";
+export {
   MarketplaceCardGrid,
   MarketplaceCardSlot,
   MarketplaceCardRail,

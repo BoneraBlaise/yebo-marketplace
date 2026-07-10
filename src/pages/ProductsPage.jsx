@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import ProductList from "../components/Route/ProductList/ProductList";
-import DropDownFilter from "../components/Layout/DropDownFilter";
-import { categoriesData } from "../static/data"; // Import your categories data
 import { Helmet } from "react-helmet";
 import Cookies from "js-cookie"; // Import js-cookie to handle cookies
-import { AiFillStar, AiOutlineStar } from "react-icons/ai";
 import { IoSearchOutline } from "react-icons/io5";
 import { Container, SectionTitle } from "../components/ui";
 import {
@@ -18,7 +15,17 @@ import {
   MarketplaceAISection,
   MarketplaceMobileFilterButton,
   MarketplaceEmptyState,
+  CategoryLandingHero,
+  CategoryShortcuts,
+  CategoryFeaturedCollections,
+  CategoryFilterSidebar,
+  CategoryFilterDrawer,
+  CategoryEmptyState,
+  resolveCategoryContext,
+  getCategoryBaseProducts,
+  matchesCategoryScope,
 } from "../components/Marketplace";
+import "../components/Marketplace/categoryLanding/categoryLanding.css";
 import { AISearchNatural } from "../components/ai";
 
 const ProductsPage = () => {
@@ -60,6 +67,16 @@ const ProductsPage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const categoryContext = useMemo(
+    () => resolveCategoryContext(categoryData),
+    [categoryData]
+  );
+
+  const categoryBaseProducts = useMemo(() => {
+    if (!categoryContext || !Array.isArray(allProducts)) return [];
+    return getCategoryBaseProducts(allProducts, categoryContext.matchTitles);
+  }, [allProducts, categoryContext]);
 
   // Add this near the top of the component
   const sections = [
@@ -120,11 +137,12 @@ const ProductsPage = () => {
       const conditionParam = searchParams.get("condition");
       const productTypeParam = searchParams.get("productType");
       const shopParam = searchParams.get("shop");
-      const minPriceParam = searchParams.get("minPrice");
-      const maxPriceParam = searchParams.get("maxPrice");
+      const minPriceParam = searchParams.get("minPrice") || searchParams.get("priceMin");
+      const maxPriceParam = searchParams.get("maxPrice") || searchParams.get("priceMax");
 
-      // Basic filters
-      const matchesCategory = categoryData
+      const matchesCategory = categoryContext
+        ? matchesCategoryScope(product, categoryContext.matchTitles)
+        : categoryData
         ? product.category === categoryData
         : true;
 
@@ -240,6 +258,7 @@ const ProductsPage = () => {
     selectedRating,
     inStock,
     productType,
+    categoryContext,
   ]);
 
   const handleCategoryChange = (category) => {
@@ -257,8 +276,10 @@ const ProductsPage = () => {
     setIsPriceFiltered(true); // Mark that the price filter has been adjusted
 
     const newParams = new URLSearchParams(searchParams);
-    newParams.set("priceMin", newRange[0]); // Add or update min price
-    newParams.set("priceMax", newRange[1]); // Add or update max price
+    newParams.set("minPrice", newRange[0]);
+    newParams.set("maxPrice", newRange[1]);
+    newParams.delete("priceMin");
+    newParams.delete("priceMax");
     setSearchParams(newParams); // Update the URL parameters
   };
 
@@ -363,27 +384,6 @@ const ProductsPage = () => {
   // Optionally, you can stringify the structured data if you want to insert it directly into your HTML
   const structuredDataString = JSON.stringify(structuredData);
 
-  // Add this helper component for star rating
-  const StarRating = ({ rating, onRatingClick }) => {
-    return (
-      <div className="flex items-center cursor-pointer">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <span
-            key={star}
-            onClick={() => onRatingClick(star)}
-            className="text-xl"
-          >
-            {star <= rating ? (
-              <AiFillStar className="text-yellow-400" />
-            ) : (
-              <AiOutlineStar className="text-gray-400" />
-            )}
-          </span>
-        ))}
-      </div>
-    );
-  };
-
   // Function to get active filters
   const getActiveFilters = () => {
     const filters = [];
@@ -461,6 +461,8 @@ const ProductsPage = () => {
         setPriceRange([1, 10000000]);
         newParams.delete('priceMin');
         newParams.delete('priceMax');
+        newParams.delete('minPrice');
+        newParams.delete('maxPrice');
         break;
       case 'rating':
         setSelectedRating(0);
@@ -519,12 +521,36 @@ const ProductsPage = () => {
   ];
 
   const clearAllFilters = () => {
-    setSearchParams(new URLSearchParams());
+    const preservedCategory = categoryData ? new URLSearchParams({ category: categoryData }) : new URLSearchParams();
+    setSearchParams(preservedCategory);
     setPriceRange([1, 10000000]);
     setSelectedRating(0);
     setInStock(true);
     setProductType("all");
     setIsPriceFiltered(false);
+  };
+
+  const filterProps = {
+    sortBy,
+    onSortChange: setSortBy,
+    sortOptions,
+    selectedRating,
+    onRatingChange: setSelectedRating,
+    minPriceInput,
+    maxPriceInput,
+    onMinPriceChange: setMinPriceInput,
+    onMaxPriceChange: setMaxPriceInput,
+    onPriceSubmit: handlePriceInputSubmit,
+    priceRange,
+    onPriceRangeChange: handlePriceChange,
+    condition,
+    onConditionChange: handleConditionChange,
+    inStock,
+    onInStockChange: setInStock,
+    productType,
+    onProductTypeChange: setProductType,
+    categoryData,
+    onCategoryChange: handleCategoryChange,
   };
 
   return (
@@ -538,23 +564,60 @@ const ProductsPage = () => {
       ) : (
         <div>
           <Helmet>
-            <title>Products | Yebone</title>
-            <meta name="description" content="Browse a wide range of products at Yebone." />
+            <title>
+              {categoryContext
+                ? `${categoryContext.title} | Yebone`
+                : searchTerm
+                ? `Search: ${searchTerm} | Yebone`
+                : "Products | Yebone"}
+            </title>
+            <meta
+              name="description"
+              content={
+                categoryContext
+                  ? categoryContext.description
+                  : "Browse a wide range of products at Yebone."
+              }
+            />
             <script type="application/ld+json">{JSON.stringify(structuredDataString)}</script>
           </Helmet>
           <div className="marketplace-page yebone-premium-screen dark:text-gray-200 min-h-screen bg-yebone-light-gray dark:bg-gray-950">
             <Container className="pt-6 lg:pt-8 pb-4">
-              <MarketplacePageHero
-                title={pageTitle}
-                subtitle={pageSubtitle}
-                breadcrumbs={breadcrumbs}
-                count={data?.length || 0}
-                searchTerm={searchTerm}
-                badge={categoryData ? "Category" : searchTerm ? "Search" : "Marketplace"}
-              />
-              <div className="mt-6">
-                <AISearchNatural />
-              </div>
+              {categoryContext ? (
+                <CategoryLandingHero
+                  context={categoryContext}
+                  count={categoryBaseProducts.length}
+                />
+              ) : (
+                <MarketplacePageHero
+                  title={pageTitle}
+                  subtitle={pageSubtitle}
+                  breadcrumbs={breadcrumbs}
+                  count={data?.length || 0}
+                  searchTerm={searchTerm}
+                  badge={searchTerm ? "Search" : "Marketplace"}
+                />
+              )}
+
+              {categoryContext && (
+                <>
+                  <CategoryShortcuts
+                    shortcuts={categoryContext.shortcuts}
+                    activeTitle={categoryContext.type === "sub" ? categoryContext.title : null}
+                  />
+                  <CategoryFeaturedCollections
+                    products={categoryBaseProducts}
+                    isLoading={isLoading}
+                  />
+                  <div className="cat-landing-divider" />
+                </>
+              )}
+
+              {!categoryContext && (
+                <div className="mt-6">
+                  <AISearchNatural />
+                </div>
+              )}
             </Container>
 
             {/* Related Products Section */}
@@ -593,190 +656,22 @@ const ProductsPage = () => {
                 onClearAll={clearAllFilters}
               />
             </Container>
-            <Container className="flex justify-center items-start flex-wrap w-full mb-10 gap-6 lg:gap-8">
-              {/* Filter Sidebar for Desktop */}
-              <div className="hidden lg:block w-full lg:w-[22%] marketplace-filter-panel yebone-surface">
-                <h2 className="font-bold text-lg mb-4 text-gray-800 dark:text-white">
-                  Filters
-                </h2>
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-700 dark:text-gray-200">Sort By</h3>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full p-2 border rounded-md shadow-sm dark:bg-[#1f1f1f] dark:text-gray-200"
-                  >
-                    <option value="">Default</option>
-                    <option value="priceLowToHigh">Price: Low to High</option>
-                    <option value="priceHighToLow">Price: High to Low</option>
-                    <option value="rating">Rating</option>
-                  </select>
-                </div>
-
-                {/* Rating Filter with Stars */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-700 dark:text-gray-200 mb-2">Rating</h3>
-                  <div className="space-y-2">
-                    {[5, 4, 3, 2, 1].map((rating) => (
-                      <div
-                        key={rating}
-                        className={`flex items-center gap-2 cursor-pointer p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${selectedRating === rating ? 'bg-gray-100 dark:bg-gray-800' : ''
-                          }`}
-                        onClick={() => setSelectedRating(rating === selectedRating ? 0 : rating)}
-                      >
-                        <StarRating rating={rating} onRatingClick={() => { }} />
-                        <span className="text-sm text-gray-600 dark:text-gray-300">{rating} Stars</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Price Range Filter with Input Fields */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-700 dark:text-gray-200">Price Range</h3>
-                  <form onSubmit={handlePriceInputSubmit} className="mb-4">
-                    <div className="flex gap-2 mb-2">
-                      <div className="w-1/2">
-                        <input
-                          type="number"
-                          placeholder="Min"
-                          value={minPriceInput}
-                          onChange={(e) => setMinPriceInput(e.target.value)}
-                          className="w-full p-2 border rounded-md dark:bg-[#1f1f1f] dark:text-gray-200"
-                        />
-                      </div>
-                      <div className="w-1/2">
-                        <input
-                          type="number"
-                          placeholder="Max"
-                          value={maxPriceInput}
-                          onChange={(e) => setMaxPriceInput(e.target.value)}
-                          className="w-full p-2 border rounded-md dark:bg-[#1f1f1f] dark:text-gray-200"
-                        />
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      className="w-full bg-[#29625d] text-white py-2 px-4 rounded hover:bg-[#1f4f4a]"
-                    >
-                      Apply Price
-                    </button>
-                  </form>
-
-                  <div className="space-y-4">
-                    <input
-                      type="range"
-                      min="0"
-                      max="10000000"
-                      value={priceRange[0]}
-                      onChange={(e) => handlePriceChange([+e.target.value, priceRange[1]])}
-                      className="range-input w-full"
-                    />
-                    <input
-                      type="range"
-                      min="0"
-                      max="10000000"
-                      value={priceRange[1]}
-                      onChange={(e) => handlePriceChange([priceRange[0], +e.target.value])}
-                      className="range-input w-full"
-                    />
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                      RWF {priceRange[0].toLocaleString()} - RWF {priceRange[1].toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Condition Filter */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-700 dark:text-gray-200">Condition</h3>
-                  <select
-                    value={condition}
-                    onChange={(e) => handleConditionChange(e.target.value)}
-                    className="w-full p-2 border rounded-md shadow-sm dark:bg-[#1f1f1f] dark:text-gray-200"
-                  >
-                    <option value="">All Conditions</option>
-                    <option value="new">New</option>
-                    <option value="used">Used</option>
-                  </select>
-                </div>
-
-                {/* Stock Filter */}
-                <div className="mb-6">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={inStock}
-                      onChange={(e) => setInStock(e.target.checked)}
-                      className="mr-2 h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                    />
-                    <span className="text-gray-600 dark:text-gray-200 text-[14px]">In Stock Only</span>
-                  </label>
-                </div>
-
-                {/* Product Type Filter */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gray-700 dark:text-gray-200">Product Type</h3>
-                  <select
-                    value={productType}
-                    onChange={(e) => setProductType(e.target.value)}
-                    className="w-full p-2 border rounded-md shadow-sm dark:bg-[#1f1f1f] dark:text-gray-200"
-                  >
-                    <option value="all">All Products</option>
-                    <option value="wholesale">Wholesale</option>
-                    <option value="flash-sale">Flash Sale</option>
-                    <option value="daily-deal">Daily Deal</option>
-                  </select>
-                </div>
-
-                {/* Category Filter */}
-                <div className="mb-6">
-                  <h3 className="font-semibold text-black mb-2 dark:text-gray-200">Category</h3>
-                  <div className="flex flex-col">
-                    {categoriesData.map((category) => (
-                      <div key={category.id} className="mb-4">
-                        {/* Category checkbox */}
-                        <span className="text-gray-600 dark:text-gray-200 font-bold p-1 text-[14px]">
-                          {category.title}
-                        </span>
-                        {/* Subcategories checkboxes */}
-                        {category.subcategories && category.subcategories.length > 0 && (
-                          <div className="pl-6"> {/* Indentation for subcategories */}
-                            {category.subcategories.map((subcategory) => (
-                              <label key={subcategory.id} className="flex items-center mb-2 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={categoryData === subcategory.title}
-                                  onChange={() => handleCategoryChange(subcategory.title)}
-                                  className="mr-2 h-5 w-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 dark:bg-[#1f1f1f]"
-                                />
-                                <span className="text-gray-600 dark:text-gray-200 text-[14px]">
-                                  {subcategory.title}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <Container className="cat-landing-layout mb-10">
+              <div className="cat-landing-layout__sidebar">
+                <CategoryFilterSidebar sticky {...filterProps} />
               </div>
 
               <MarketplaceMobileFilterButton
                 open={dropdownOpen}
                 onToggle={() => setDropdownOpen(!dropdownOpen)}
               />
-              {dropdownOpen && (
-                <div id="marketplace-mobile-filters" className="lg:hidden px-4 pb-4">
-                  <DropDownFilter
-                    categoryData={categoryData}
-                    handleCategoryChange={handleCategoryChange}
-                  />
-                </div>
-              )}
+              <CategoryFilterDrawer
+                open={dropdownOpen}
+                onClose={() => setDropdownOpen(false)}
+                filterProps={filterProps}
+              />
 
-              {/* Product List Area */}
-              <div className="flex-grow w-full lg:w-[72%]">
+              <div className="cat-landing-layout__main">
                 <div className="marketplace-results-toolbar">
                   <MarketplaceSectionTabs
                     sections={sections}
@@ -794,8 +689,20 @@ const ProductsPage = () => {
                   Showing {data?.length || 0} products
                 </p>
 
+                {categoryContext && (
+                  <h2 className="cat-landing-collection__title mb-4">
+                    All {categoryContext.title} products
+                  </h2>
+                )}
+
                 {data && data.length > 0 ? (
                   <ProductList products={data} />
+                ) : categoryContext ? (
+                  <CategoryEmptyState
+                    context={categoryContext}
+                    searchTerm={searchTerm}
+                    onClearFilters={clearAllFilters}
+                  />
                 ) : (
                   <MarketplaceEmptyState
                     icon={IoSearchOutline}
