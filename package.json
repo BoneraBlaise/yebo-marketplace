@@ -2,6 +2,7 @@
   "name": "yebone",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://bonerabliaise.github.io/yebo-marketplace",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -63,6 +64,8 @@
     "dev": "react-scripts start",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
+    "deploy:gh-pages": "powershell -ExecutionPolicy Bypass -File scripts/deploy-gh-pages.ps1",
+    "smoke:production": "powershell -ExecutionPolicy Bypass -File scripts/smoke-production.ps1",
     "build": "set NODE_OPTIONS=--max-old-space-size=8192 && react-scripts build",
     "lint": "eslint src --ext .js,.jsx",
     "test": "react-scripts test",
