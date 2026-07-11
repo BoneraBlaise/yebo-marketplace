@@ -1,0 +1,25 @@
+# .htaccess file in React app's public folder
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Ensure the server handles clean URLs (removes .html extension if needed)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ /index.html [L]
+
+  # Redirect to HTTPS if not already using HTTPS (important for SEO and security)
+  RewriteCond %{HTTPS} off
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Add trailing slash to URLs for consistency
+  RewriteCond %{REQUEST_URI} !\.[a-zA-Z]{2,4}$  # Don't add a slash for file extensions
+  RewriteCond %{REQUEST_URI} !/$               # Only add trailing slash if it's not already there
+  RewriteRule ^(.*)$ /$1/ [R=301,L]
+
+  # Prevent access to hidden files and folders (security)
+  RewriteRule ^\. [F,L]
+  # RewriteRule ^secrets.txt$ - [F,L]
+
+</IfModule>

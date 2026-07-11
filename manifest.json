@@ -1,0 +1,17 @@
+{
+  "short_name": "YEBONE",
+  "name": "YEBONE — Everything in one place",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#29625d",
+  "background_color": "#ffffff",
+  "description": "Discover quality products and shop with confidence on YEBONE — Powered by YEBO AI."
+}
