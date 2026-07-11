@@ -13,13 +13,16 @@ Copy-Item -Path "$repoRoot\build\index.html" -Destination "$repoRoot\build\404.h
 Write-Host "Created build/404.html for SPA deep links"
 
 if (Test-Path $work) { Remove-Item $work -Recurse -Force }
-git clone --branch gh-pages --single-branch $remote $work 2>$null
-Set-Location $work
-if ($LASTEXITCODE -ne 0) {
-  git clone $remote $work
+
+# Git writes progress to stderr; do not treat that as failure on Windows PowerShell.
+git clone --branch gh-pages --single-branch $remote $work 2>&1 | Out-Null
+if (-not (Test-Path "$work\.git")) {
+  git clone $remote $work 2>&1 | Out-Null
   Set-Location $work
-  git checkout --orphan gh-pages
-  git rm -rf . 2>$null
+  git checkout --orphan gh-pages 2>&1 | Out-Null
+  git rm -rf . 2>&1 | Out-Null
+} else {
+  Set-Location $work
 }
 
 Get-ChildItem -Force | Where-Object { $_.Name -ne ".git" } | Remove-Item -Recurse -Force
@@ -30,5 +33,8 @@ git add -A
 $sha = git -C $repoRoot rev-parse --short HEAD
 git commit -m "deploy: production build from main@$sha"
 git push origin gh-pages
-Write-Host "Deployed to gh-pages. Enable GitHub Pages in repo Settings if not already active."
+if ($LASTEXITCODE -ne 0) { throw "gh-pages push failed" }
+
+Write-Host "Deployed to gh-pages."
+Write-Host "Enable GitHub Pages: https://github.com/BoneraBlaise/yebo-marketplace/settings/pages"
 Write-Host "URL: https://bonerabliaise.github.io/yebo-marketplace/"
