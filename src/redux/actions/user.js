@@ -1,6 +1,7 @@
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import { clearAuthSession } from "../../config/authStorage";
 
 // load user
 export const loadUser = () => async (dispatch) => {
@@ -16,9 +17,12 @@ export const loadUser = () => async (dispatch) => {
       payload: data.user,
     });
   } catch (error) {
+    if (error?.response?.status === 401 || error?.authExpired) {
+      clearAuthSession();
+    }
     dispatch({
       type: "LoadUserFail",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || error.message || "Unable to load user",
     });
   }
 };
@@ -39,7 +43,7 @@ export const loadSeller = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: "LoadSellerFail",
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || error.message || "Unable to load seller",
     });
   }
 };

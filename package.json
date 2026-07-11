@@ -60,6 +60,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "dev": "react-scripts start",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "build": "set NODE_OPTIONS=--max-old-space-size=8192 && react-scripts build",

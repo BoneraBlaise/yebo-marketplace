@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { setAuthToken } from "../../config/authStorage";
+import { buildGoogleAuthUrl } from "../../config/authService";
 import { toast } from 'react-toastify';
 
 const LoginSuccessHandler = () => {
@@ -21,8 +22,7 @@ const LoginSuccessHandler = () => {
     }
 
     if (token) {
-      // Set the token in cookies
-      Cookies.set('token', token, { expires: 90 });
+      setAuthToken(token);
       toast.success('Login Successful!');
       
       // Check if there's a redirect URL

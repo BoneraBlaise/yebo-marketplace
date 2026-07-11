@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { RxCross1 } from "react-icons/rx";
 import {
@@ -17,7 +16,7 @@ import {
   HiOutlineSparkles,
 } from "react-icons/hi";
 import { AiOutlineLogin } from "react-icons/ai";
-import { server } from "../../server";
+import { logoutUser } from "../../config/authService";
 
 const MobileProfileMenu = ({ open, onClose }) => {
   const navigate = useNavigate();
@@ -43,18 +42,12 @@ const MobileProfileMenu = ({ open, onClose }) => {
     navigate("/profile", { state: { active } });
   };
 
-  const logoutHandler = () => {
-    axios
-      .get(`${server}/user/logout`, { withCredentials: true })
-      .then((res) => {
-        toast.success(res.data.message);
-        onClose();
-        window.location.reload(true);
-        navigate("/login");
-      })
-      .catch((error) => {
-        console.log(error.response?.data?.message);
-      });
+  const logoutHandler = async () => {
+    await logoutUser();
+    toast.success("Logged out");
+    onClose();
+    navigate("/login");
+    window.location.reload();
   };
 
   if (!open) return null;

@@ -13,7 +13,9 @@ import DashboardEmptyState from "../Dashboard/DashboardEmptyState";
 import { FiMessageSquare } from "react-icons/fi";
 
 // Socket.io endpoint url
-const ENDPOINT = "https://guriraline-socket-awo9.onrender.com";
+import { socketUrl } from "../../server";
+
+const ENDPOINT = socketUrl;
 const socketId = socketIO(ENDPOINT, { transports: ["websocket"] });
 
 const DashboardMessages = () => {

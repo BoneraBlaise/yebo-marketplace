@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import { setSellerToken } from "../../config/authStorage";
+import { getAuthErrorMessage } from "../../config/authService";
 
 const ShopLogin = () => {
   const navigate = useNavigate();
@@ -25,12 +27,15 @@ const ShopLogin = () => {
         { withCredentials: true }
       )
       .then((res) => {
+        if (res.data?.token) {
+          setSellerToken(res.data.token);
+        }
         toast.success("Login Success!");
         navigate("/dashboard");
-        window.location.reload(true); 
+        window.location.reload(true);
       })
       .catch((err) => {
-        toast.error(err.response.data.message);
+        toast.error(getAuthErrorMessage(err, "Login failed"));
       });
   };
 

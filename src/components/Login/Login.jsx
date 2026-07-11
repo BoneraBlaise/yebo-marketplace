@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineMail, HiOutlineLockClosed } from "react-icons/hi";
 import axios from "axios";
 import { toast } from "react-toastify";
-import Cookies from "js-cookie";
 import { server } from "../../server";
 import { ClipLoader } from "react-spinners";
 import { useTranslation } from "react-i18next";
@@ -16,6 +15,13 @@ import {
   AuthDivider,
 } from "../Auth";
 import { brandCopy } from "../../ui-polish/brandConstants";
+import { setAuthToken } from "../../config/authStorage";
+import {
+  buildGoogleAuthUrl,
+  describeAxiosFailure,
+  formatAxiosErrorDetails,
+} from "../../config/authService";
+import { getRuntimeApiDiagnostics } from "../../config/serverConfig";
 
 const Login = () => {
   const { t } = useTranslation();
@@ -31,7 +37,7 @@ const Login = () => {
     const error = params.get("error");
 
     if (token) {
-      Cookies.set("token", token, { expires: 90 });
+      setAuthToken(token);
       toast.success(t("auth.googleLoginSuccess"));
       navigate("/");
       window.location.reload();
@@ -44,34 +50,34 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
+    const loginUrl = `${server}/user/login-user`;
+    console.info("[Login] Attempt", { loginUrl, ...getRuntimeApiDiagnostics() });
+
     try {
       const res = await axios.post(
-        `${server}/user/login-user`,
+        loginUrl,
         { email, password },
         { withCredentials: true }
       );
 
       const token = res.data.token;
 
-      Cookies.set("token", token, { expires: 90 });
+      setAuthToken(token);
 
       toast.success(t("auth.loginSuccess"));
       navigate("/");
       window.location.reload();
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.message) {
-        toast.error(err.response.data.message);
-      } else {
-        toast.error(t("auth.loginError"));
-        console.error(err);
-      }
+      const details = formatAxiosErrorDetails(err);
+      console.error("[Login] Failed", details, err);
+      toast.error(describeAxiosFailure(err));
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${server}/auth/google`;
+    window.location.href = buildGoogleAuthUrl();
   };
 
   return (

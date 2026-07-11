@@ -1,6 +1,5 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { AiOutlineLogin } from "react-icons/ai";
 import { RiLockPasswordLine } from "react-icons/ri";
@@ -26,7 +25,7 @@ import { FaCreativeCommonsSamplingPlus } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useTheme } from "../../context/ThemeContext";
 import { useTranslation } from "react-i18next";
-import { server } from "../../server";
+import { logoutUser } from "../../config/authService";
 
 export const DASHBOARD_NAV = [
   { id: 0, labelKey: "Dashboard", icon: HiOutlineViewGrid, fallback: "Dashboard" },
@@ -66,17 +65,11 @@ const DashboardSidebar = ({ active, setActive, onNavigate, className = "" }) => 
   const { user } = useSelector((state) => state.user);
   const { t } = useTranslation();
 
-  const logoutHandler = () => {
-    axios
-      .get(`${server}/user/logout`, { withCredentials: true })
-      .then((res) => {
-        toast.success(res.data.message);
-        window.location.reload(true);
-        navigate("/login");
-      })
-      .catch((error) => {
-        console.log(error.response?.data?.message);
-      });
+  const logoutHandler = async () => {
+    await logoutUser();
+    toast.success("Logged out");
+    navigate("/login");
+    window.location.reload();
   };
 
   const handleNav = (item) => {

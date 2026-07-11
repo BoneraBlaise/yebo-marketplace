@@ -8,6 +8,7 @@ import {
   HiOutlineUser,
 } from "react-icons/hi";
 import axios from "axios";
+import { buildGoogleAuthUrl, getAuthErrorMessage } from "../../config/authService";
 import { server } from "../../server";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
@@ -58,13 +59,13 @@ const Singup = () => {
         setLoading(false);
       })
       .catch((error) => {
-        toast.error(error.response.data.message);
+        toast.error(getAuthErrorMessage(error, "Sign up failed"));
         setLoading(false);
       });
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${server}/auth/google`;
+    window.location.href = buildGoogleAuthUrl();
   };
 
   return (
