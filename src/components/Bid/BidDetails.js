@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import io from 'socket.io-client';
-import { server } from "../../server";
+import { socketUrl } from "../../server";
 import { addTocart } from "../../redux/actions/cart";
 
 // Custom hook for debouncing input changes
@@ -131,7 +131,7 @@ const BidDetails = () => {
 
   // Add this useEffect for socket connection
   useEffect(() => {
-    const newSocket = io(server);
+    const newSocket = io(socketUrl);
     setSocket(newSocket);
 
     // Cleanup on unmount

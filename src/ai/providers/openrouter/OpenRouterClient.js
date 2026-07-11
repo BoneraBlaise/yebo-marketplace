@@ -7,7 +7,8 @@ import { estimateTokens } from "../ProviderHelpers";
 
 const DEFAULT_MODEL = "google/gemma-4-31b-it:free";
 const OPENROUTER_API_BASE = "https://openrouter.ai/api/v1";
-const OPENROUTER_REFERER = "http://localhost:3000";
+const OPENROUTER_REFERER =
+  process.env.REACT_APP_APP_URL || "http://localhost:3000";
 const OPENROUTER_TITLE = "YEBO Development";
 
 const buildMessages = (input) => {
