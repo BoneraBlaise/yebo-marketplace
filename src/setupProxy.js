@@ -2,7 +2,7 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const API_TARGET =
   process.env.REACT_APP_PROXY_TARGET ||
-  "https://guriraline-server-7rac.onrender.com";
+  "https://yebone-backend.onrender.com";
 
 console.info("[setupProxy] loaded by react-scripts");
 console.info("[setupProxy] browser -> /api/* ->", API_TARGET);

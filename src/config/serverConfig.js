@@ -1,7 +1,7 @@
 const trimSlash = (value = "") => String(value).replace(/\/$/, "");
 
 const REMOTE_API_DEFAULT =
-  "https://guriraline-server-7rac.onrender.com/api/v2";
+  "https://yebone-backend.onrender.com/api/v2";
 
 const REMOTE_SOCKET_DEFAULT =
   "https://guriraline-socket-awo9.onrender.com";

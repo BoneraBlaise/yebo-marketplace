@@ -1,6 +1,6 @@
 # Production smoke test - API health, CORS, and build artifacts
 $ErrorActionPreference = "Continue"
-$api = "https://guriraline-server-7rac.onrender.com/api/v2"
+$api = "https://yebone-backend.onrender.com/api/v2"
 $prodOrigin = "https://bonerabliaise.github.io"
 $passed = 0
 $failed = 0
@@ -70,7 +70,7 @@ if ((Get-ChildItem "build\static\js\main.*.js" -ErrorAction SilentlyContinue | M
 
 Write-Host ""
 Write-Host "--- Google OAuth redirect endpoint ---"
-$oauthOut = curl.exe -s -o NUL -w "%{http_code}" "https://guriraline-server-7rac.onrender.com/api/v2/auth/google?redirect=https://bonerabliaise.github.io/yebo-marketplace/login-success"
+$oauthOut = curl.exe -s -o NUL -w "%{http_code}" "https://yebone-backend.onrender.com/api/v2/auth/google?redirect=https://bonerabliaise.github.io/yebo-marketplace/login-success"
 if ($oauthOut -eq "302" -or $oauthOut -eq "301") { Write-Pass "HTTP $oauthOut redirect" } else { Write-Warn "HTTP $oauthOut" }
 
 Write-Host ""
