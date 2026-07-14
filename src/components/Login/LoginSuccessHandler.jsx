@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { setAuthToken } from "../../config/authStorage";
-import { buildGoogleAuthUrl } from "../../config/authService";
+import { loadUser } from "../../redux/actions/user";
 import { toast } from 'react-toastify';
 
 const LoginSuccessHandler = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   
@@ -23,17 +25,16 @@ const LoginSuccessHandler = () => {
 
     if (token) {
       setAuthToken(token);
+      dispatch(loadUser());
       toast.success('Login Successful!');
       
-      // Check if there's a redirect URL
-      const redirectUrl = searchParams.get('redirect') || '/';
+      const redirectUrl = searchParams.get('redirect') || '/profile';
       navigate(redirectUrl);
-      window.location.reload();
     } else {
       toast.error('Login failed - No token received');
       navigate('/login');
     }
-  }, [navigate, searchParams, location]);
+  }, [dispatch, navigate, searchParams, location]);
 
   // Show a loading state while processing
   return (

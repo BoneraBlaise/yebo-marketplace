@@ -15,6 +15,7 @@ import {
   AuthDivider,
 } from "../Auth";
 import { brandCopy } from "../../ui-polish/brandConstants";
+import { useDispatch } from "react-redux";
 import { setAuthToken } from "../../config/authStorage";
 import {
   buildGoogleAuthUrl,
@@ -26,6 +27,7 @@ import { getRuntimeApiDiagnostics } from "../../config/serverConfig";
 const Login = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
@@ -40,7 +42,6 @@ const Login = () => {
       setAuthToken(token);
       toast.success(t("auth.googleLoginSuccess"));
       navigate("/");
-      window.location.reload();
     } else if (error) {
       toast.error(decodeURIComponent(error));
     }
@@ -63,10 +64,13 @@ const Login = () => {
       const token = res.data.token;
 
       setAuthToken(token);
+      dispatch({
+        type: "LoadUserSuccess",
+        payload: res.data.user,
+      });
 
       toast.success(t("auth.loginSuccess"));
-      navigate("/");
-      window.location.reload();
+      navigate("/profile");
     } catch (err) {
       const details = formatAxiosErrorDetails(err);
       console.error("[Login] Failed", details, err);

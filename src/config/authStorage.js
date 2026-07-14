@@ -3,11 +3,18 @@ import Cookies from "js-cookie";
 const TOKEN_KEY = "token";
 const SELLER_TOKEN_KEY = "seller_token";
 
+const cookiePath = () => {
+  const publicUrl = process.env.PUBLIC_URL || "/";
+  if (!publicUrl || publicUrl === "/") return "/";
+  return publicUrl.replace(/\/$/, "") || "/";
+};
+
 const cookieOptions = () => ({
   expires: 90,
-  path: "/",
+  path: cookiePath(),
   sameSite: "Lax",
-  secure: typeof window !== "undefined" && window.location.protocol === "https:",
+  secure:
+    typeof window !== "undefined" && window.location.protocol === "https:",
 });
 
 export const getAuthToken = () => Cookies.get(TOKEN_KEY) || null;
@@ -18,7 +25,7 @@ export const setAuthToken = (token) => {
 };
 
 export const clearAuthToken = () => {
-  Cookies.remove(TOKEN_KEY, { path: "/" });
+  Cookies.remove(TOKEN_KEY, { path: cookiePath() });
 };
 
 export const getSellerToken = () => Cookies.get(SELLER_TOKEN_KEY) || null;
@@ -29,7 +36,7 @@ export const setSellerToken = (token) => {
 };
 
 export const clearSellerToken = () => {
-  Cookies.remove(SELLER_TOKEN_KEY, { path: "/" });
+  Cookies.remove(SELLER_TOKEN_KEY, { path: cookiePath() });
 };
 
 export const clearAuthSession = () => {
