@@ -13,9 +13,9 @@
 ### Production (`.env.production` — committed, no secrets)
 
 ```env
-REACT_APP_API_URL=https://guriraline-server-7rac.onrender.com/api/v2
+REACT_APP_API_URL=https://yebone-backend.onrender.com/api/v2
 REACT_APP_SOCKET_URL=https://guriraline-socket-awo9.onrender.com
-REACT_APP_APP_URL=https://bonerabliaise.github.io/yebo-marketplace
+REACT_APP_APP_URL=https://bonerablaise.github.io/yebo-marketplace
 ```
 
 CRA bakes these into the bundle at `npm run build`. Production builds **do not** use `setupProxy.js`.

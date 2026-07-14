@@ -2,7 +2,7 @@
   "name": "yebone",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://bonerabliaise.github.io/yebo-marketplace",
+  "homepage": "https://bonerablaise.github.io/yebo-marketplace",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",

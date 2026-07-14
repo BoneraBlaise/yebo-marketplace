@@ -37,4 +37,4 @@ if ($LASTEXITCODE -ne 0) { throw "gh-pages push failed" }
 
 Write-Host "Deployed to gh-pages."
 Write-Host "Enable GitHub Pages: https://github.com/BoneraBlaise/yebo-marketplace/settings/pages"
-Write-Host "URL: https://bonerabliaise.github.io/yebo-marketplace/"
+Write-Host "URL: https://bonerablaise.github.io/yebo-marketplace/"
