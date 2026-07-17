@@ -24,7 +24,10 @@ import CheckoutOrderSummary from "../Checkout/CheckoutOrderSummary";
 import CheckoutTrustBadges from "../Checkout/CheckoutTrustBadges";
 import "../Checkout/checkout.css";
 
-const stripePromise = loadStripe("your-publishable-key-here");
+const stripePublishableKey =
+  process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY || process.env.REACT_APP_STRIPE_API_KEY || "";
+
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
 const Payment = () => {
   const [orderData, setOrderData] = useState(null);

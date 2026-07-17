@@ -20,8 +20,7 @@ export const createProduct =
         type: "productCreateRequest",
       });
 
-      const { data } = await axios.post(
-        `${server}/product/create-product`,
+      const { data } = await axios.post(`${server}/product/create-product`, {
         name,
         description,
         category,
@@ -31,7 +30,7 @@ export const createProduct =
         stock,
         shopId,
         images,
-      );
+      });
       dispatch({
         type: "productCreateSuccess",
         payload: data.product,
