@@ -19,8 +19,8 @@ export const defaultFeatureFlags = {
 export const defaultYIPConfig = {
   publicName: YIP_PUBLIC_NAME,
   platformName: YIP_PLATFORM_NAME,
-  provider: "openrouter",
-  model: "google/gemma-4-31b-it:free",
+  provider: "gateway",
+  model: "yebo-mock-v1",
   temperature: 0.7,
   streaming: true,
   language: "en",

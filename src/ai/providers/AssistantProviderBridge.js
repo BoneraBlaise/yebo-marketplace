@@ -7,6 +7,7 @@ import { LocalAdapter } from "./LocalAdapter";
 import { isGeminiConfigured } from "./GeminiConfig";
 import { isOpenRouterConfigured } from "./openrouter/OpenRouterConfig";
 import { PROVIDER_STATUS } from "./ProviderTypes";
+import { GatewayAssistantAdapter } from "../gateway/GatewayAssistantAdapter";
 import {
   createConversationManager,
   createSessionManager,
@@ -246,9 +247,9 @@ export class SDKAssistantAdapter extends BaseAdapter {
   }
 }
 
-export const createAssistantAdapter = (providerId = "openrouter", factory) => {
-  if (SDK_PROVIDER_IDS.has(providerId) && factory) {
-    return new SDKAssistantAdapter(factory, providerId);
+export const createAssistantAdapter = (providerId = "gateway", _factory) => {
+  if (providerId === "gateway" || providerId === "openrouter" || providerId === "gemini" || providerId === "mock") {
+    return new GatewayAssistantAdapter();
   }
   return createLegacyAdapter(providerId);
 };

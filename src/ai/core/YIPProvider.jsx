@@ -14,6 +14,7 @@ import { YIPPromptLibrary } from "../prompts/YIPPromptLibrary";
 import { consumeStream } from "../utils/streaming";
 import { YIPAnalytics } from "../utils/analytics";
 import { normalizeError, YIP_ERROR } from "../utils/errors";
+import { YIPGatewayClient } from "../gateway/YIPGatewayClient";
 import { YIPShoppingIntelligence } from "../intelligence/YIPShoppingIntelligence";
 import { createDecisionEngine } from "../decision/DecisionEngine";
 import { createYEBOIntelligenceEngine } from "../intelligence/YEBOIntelligenceEngine";
@@ -50,10 +51,10 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const providerFactoryRef = useRef(null);
   if (!providerFactoryRef.current) {
     providerFactoryRef.current = createProviderFactory({
-      preferredProvider: "openrouter",
+      preferredProvider: "gateway",
       streamingEnabled: true,
       offlineMode: false,
-      mockMode: false,
+      mockMode: true,
     });
   }
   if (!orchestratorRef.current) {
@@ -61,7 +62,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       memoryEngine: memoryRef.current,
       decisionEngine: decisionEngineRef.current,
       intelligenceEngine: intelligenceEngineRef.current,
-      config: { preferredProvider: "mock", streamingEnabled: false },
+      config: { preferredProvider: "gateway", streamingEnabled: true },
     });
     connectOrchestrationToSDK(orchestratorRef.current);
     providerFactoryRef.current.initialize();
@@ -361,12 +362,21 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     []
   );
 
-  const runSmartSearch = useCallback(async (query, products = []) => {
+  const runSmartSearch = useCallback(async (query, _products = []) => {
     setIsTyping(true);
     setLastError(null);
     try {
       memoryRef.current.addRecentSearch(query);
-      const result = await YIPShoppingIntelligence.smartSearch(query, products);
+      const response = await YIPGatewayClient.search(query);
+      const payload = response?.data || {};
+      const result = {
+        query,
+        results: [],
+        summary: payload.message,
+        tool: payload.tool,
+        gateway: true,
+        mock: payload.provider?.mock !== false,
+      };
       setSmartSearchResults(result);
       return result;
     } catch (err) {
