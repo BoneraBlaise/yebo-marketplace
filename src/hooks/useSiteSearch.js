@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { fetchSearchSuggestions } from "../redux/actions/search";
 
 const useSiteSearch = () => {
   const { allProducts } = useSelector((state) => state.products);
@@ -9,16 +10,9 @@ const useSiteSearch = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchData, setSearchData] = useState(null);
   const navigate = useNavigate();
+  const suggestionRequestRef = useRef(0);
 
-  const handleSearchChange = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-
-    if (term === "") {
-      setSearchData(null);
-      return;
-    }
-
+  const filterLocalSuggestions = (term) => {
     const filteredProducts = (allProducts || [])
       .filter((product) => {
         const productName = product.name?.toLowerCase() || "";
@@ -58,17 +52,39 @@ const useSiteSearch = () => {
       })
       .map((item) => ({ ...item, type: "bid" }));
 
-    setSearchData([
-      ...filteredProducts,
-      ...filteredFlashSales,
-      ...filteredBids,
-    ]);
+    return [...filteredProducts, ...filteredFlashSales, ...filteredBids].slice(0, 8);
+  };
+
+  const handleSearchChange = async (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+
+    if (term === "") {
+      setSearchData(null);
+      return;
+    }
+
+    const requestId = ++suggestionRequestRef.current;
+
+    try {
+      const suggestions = await fetchSearchSuggestions(term, { limit: 8 });
+      if (requestId !== suggestionRequestRef.current) return;
+
+      if (suggestions.length) {
+        setSearchData(suggestions.map((item) => ({ ...item, type: "product" })));
+        return;
+      }
+    } catch (_error) {
+      // Fall back to local catalog suggestions.
+    }
+
+    setSearchData(filterLocalSuggestions(term));
   };
 
   const handleSearchSubmit = (e) => {
     e?.preventDefault?.();
     if (searchTerm.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchTerm.trim())}`);
+      navigate(`/search?search=${encodeURIComponent(searchTerm.trim())}`);
     }
     setSearchData(null);
   };

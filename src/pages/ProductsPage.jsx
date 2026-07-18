@@ -27,6 +27,9 @@ import {
 } from "../components/Marketplace";
 import "../components/Marketplace/categoryLanding/categoryLanding.css";
 import { AISearchNatural } from "../components/ai";
+import useProductSearch from "../hooks/useProductSearch";
+import SearchResultsPagination from "../components/Search/SearchResultsPagination";
+import { ErrorState } from "../components/ui";
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -69,6 +72,31 @@ const ProductsPage = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const {
+    useServerSearch,
+    serverProducts,
+    serverMeta,
+    serverLoading,
+    serverError,
+  } = useProductSearch({
+    searchParams,
+    sortBy,
+    selectedRating,
+    inStock,
+    productType,
+  });
+
+  const handleSearchPageChange = (nextPage) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (nextPage <= 1) {
+      newParams.delete("page");
+    } else {
+      newParams.set("page", String(nextPage));
+    }
+    setSearchParams(newParams);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const categoryContext = useMemo(
     () => resolveCategoryContext(categoryData, chipParam),
@@ -127,6 +155,11 @@ const ProductsPage = () => {
   };
 
   useEffect(() => {
+    if (useServerSearch) {
+      setData(serverProducts || []);
+      return;
+    }
+
     if (isLoading) return;
     if (!Array.isArray(allProducts)) {
       console.error("allProducts is not an array");
@@ -279,6 +312,8 @@ const ProductsPage = () => {
     productType,
     categoryContext,
     brandParam,
+    useServerSearch,
+    serverProducts,
   ]);
 
   const handleCategoryChange = (category) => {
@@ -651,7 +686,7 @@ const ProductsPage = () => {
                   title={pageTitle}
                   subtitle={pageSubtitle}
                   breadcrumbs={breadcrumbs}
-                  count={data?.length || 0}
+                  count={useServerSearch ? serverMeta?.total || 0 : data?.length || 0}
                   searchTerm={searchTerm}
                   badge={searchTerm ? "Search" : "Marketplace"}
                 />
@@ -744,10 +779,6 @@ const ProductsPage = () => {
                   />
                 </div>
 
-                <p className="marketplace-results-count mb-4">
-                  Showing {data?.length || 0} products
-                </p>
-
                 {categoryContext && (
                   <h2 className="cat-landing-collection__title mb-4">
                     {categoryContext.type === "main-chip"
@@ -756,8 +787,32 @@ const ProductsPage = () => {
                   </h2>
                 )}
 
-                {data && data.length > 0 ? (
-                  <ProductList products={data} />
+                <p className="marketplace-results-count mb-4">
+                  Showing {useServerSearch ? serverMeta?.count || 0 : data?.length || 0} products
+                  {useServerSearch && serverMeta?.total ? ` of ${serverMeta.total}` : ""}
+                </p>
+
+                {serverError && useServerSearch && (
+                  <ErrorState
+                    preset="network"
+                    title="Search unavailable"
+                    description={serverError}
+                  />
+                )}
+
+                {(useServerSearch ? serverLoading : isLoading) ? (
+                  <MarketplaceListingSkeleton count={8} />
+                ) : data && data.length > 0 ? (
+                  <>
+                    <ProductList products={data} />
+                    {useServerSearch && (
+                      <SearchResultsPagination
+                        page={serverMeta?.page || 1}
+                        totalPages={serverMeta?.totalPages || 1}
+                        onPageChange={handleSearchPageChange}
+                      />
+                    )}
+                  </>
                 ) : categoryContext ? (
                   <CategoryEmptyState
                     context={categoryContext}

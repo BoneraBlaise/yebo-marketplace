@@ -10,6 +10,7 @@ import {
   ActivationPage,
   HomePage,
   ProductsPage,
+  SearchPage,
   BestSellingPage,
   EventsPage,
   FAQPage,
@@ -147,6 +148,7 @@ const App = () => {
             <Route element={<AppLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/products" element={<ProductsPage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
             <Route path="/best-selling" element={<BestSellingPage />} />
             <Route path="/events" element={<EventsPage />} />
