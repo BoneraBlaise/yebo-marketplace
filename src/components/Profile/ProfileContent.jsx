@@ -256,31 +256,33 @@ const ProfileContent = ({ active, setActive }) => {
 
 const AllOrders = () => {
   const { user } = useSelector((state) => state.user);
-  const { orders } = useSelector((state) => state.order);
+  const { orders, error } = useSelector((state) => state.order);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getAllOrdersOfUser(user._id));
-  }, [dispatch, user._id]);
+    if (user?._id) dispatch(getAllOrdersOfUser(user._id));
+  }, [dispatch, user?._id]);
 
   return (
     <DashboardOrderList
       orders={orders || []}
       emptyTitle="No orders yet"
       emptyMessage="Your order history will appear here after you shop on Yebone."
+      error={error}
+      onRetry={() => user?._id && dispatch(getAllOrdersOfUser(user._id))}
     />
   );
 };
 
 const AllRefundOrders = () => {
   const { user } = useSelector((state) => state.user);
-  const { orders } = useSelector((state) => state.order);
+  const { orders, error } = useSelector((state) => state.order);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getAllOrdersOfUser(user._id));
-  }, []);
+    if (user?._id) dispatch(getAllOrdersOfUser(user._id));
+  }, [dispatch, user?._id]);
 
   const eligibleOrders =
     orders && orders.filter((item) => item.status === "Processing refund");
@@ -290,18 +292,20 @@ const AllRefundOrders = () => {
       orders={eligibleOrders || []}
       emptyTitle="No refund orders"
       emptyMessage="Orders with refund status will appear here."
+      error={error}
+      onRetry={() => user?._id && dispatch(getAllOrdersOfUser(user._id))}
     />
   );
 };
 
 const TrackOrder = () => {
   const { user } = useSelector((state) => state.user);
-  const { orders } = useSelector((state) => state.order);
+  const { orders, error } = useSelector((state) => state.order);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getAllOrdersOfUser(user._id));
-  }, []);
+    if (user?._id) dispatch(getAllOrdersOfUser(user._id));
+  }, [dispatch, user?._id]);
 
   return (
     <DashboardOrderList
@@ -309,6 +313,8 @@ const TrackOrder = () => {
       showTrack
       emptyTitle="No orders to track"
       emptyMessage="Place an order to start tracking delivery."
+      error={error}
+      onRetry={() => user?._id && dispatch(getAllOrdersOfUser(user._id))}
     />
   );
 };

@@ -4,6 +4,7 @@ import { AiOutlineArrowRight } from "react-icons/ai";
 import { MdTrackChanges } from "react-icons/md";
 import { Badge, Button } from "../ui";
 import DashboardEmptyState from "./DashboardEmptyState";
+import { OrderErrorState } from "../Orders/OrderStateViews";
 
 const statusVariant = (status) => {
   const s = (status || "").toLowerCase();
@@ -18,7 +19,13 @@ const DashboardOrderList = ({
   emptyTitle = "No orders yet",
   emptyMessage = "When you place orders, they'll appear here.",
   showTrack = false,
+  error = null,
+  onRetry,
 }) => {
+  if (error) {
+    return <OrderErrorState message={error} onRetry={onRetry} />;
+  }
+
   if (!orders.length) {
     return (
       <DashboardEmptyState

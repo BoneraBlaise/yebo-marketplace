@@ -9,17 +9,19 @@ import { AiOutlineArrowRight } from "react-icons/ai";
 import { HiOutlineShoppingBag } from "react-icons/hi";
 import VendorCustomersSummary from "../Dashboard/vendor/VendorCustomersSummary";
 import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
-import DashboardEmptyState from "../Dashboard/DashboardEmptyState";
+import OrderSellerCardList from "../Orders/OrderSellerCardList";
+import { OrderEmptyState, OrderErrorState } from "../Orders/OrderStateViews";
 
 const AllOrders = () => {
-  const { orders, isLoading } = useSelector((state) => state.order);
+  const { orders, isLoading, error } = useSelector((state) => state.order);
   const { seller } = useSelector((state) => state.seller);
-
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getAllOrdersOfShop(seller._id));
-  }, [dispatch, seller._id]);
+    if (seller?._id) {
+      dispatch(getAllOrdersOfShop(seller._id));
+    }
+  }, [dispatch, seller?._id]);
 
   useEffect(() => {
     if (window.location.hash) {
@@ -29,22 +31,19 @@ const AllOrders = () => {
   }, [orders]);
 
   const getOrderType = (order) => {
-    if (order.cart?.some(item => item.isFlashSale)) return "Flash Sale";
-    if (order.cart?.some(item => item.isWonBid)) return "Auction Bid";
+    if (order.cart?.some((item) => item.isFlashSale)) return "Flash Sale";
+    if (order.cart?.some((item) => item.isWonBid)) return "Auction Bid";
     return "Regular Order";
   };
 
-  const getItemsQty = (order) => {
-    if (!order.cart) return 0;
-    return order.cart.reduce((total, item) => total + (item.qty || 1), 0);
-  };
+  const getItemsQty = (order) =>
+    (order.cart || []).reduce((total, item) => total + (item.qty || 1), 0);
 
-  const getOrderTotal = (order) => {
-    if (!order.cart) return 0;
-    return order.cart.reduce((total, item) => {
-      const itemPrice = item.isWonBid ? item.highestBid : item.discountPrice || item.price;
-      return total + (itemPrice * (item.qty || 1));
-    }, 0);
+  const getOrderTotal = (order) => Number(order.totalPrice || 0);
+
+  const calculateCommission = (order) => {
+    const rate = order.commissionRate || 5;
+    return ((order.totalPrice * rate) / 100).toFixed(2);
   };
 
   const columns = [
@@ -53,37 +52,24 @@ const AllOrders = () => {
       headerName: "Order ID",
       minWidth: 150,
       flex: 0.7,
-      headerClassName: 'dark:text-white',
-      cellClassName: 'dark:text-white',
+      headerClassName: "dark:text-white",
+      cellClassName: "dark:text-white",
     },
     {
       field: "orderType",
       headerName: "Type",
       minWidth: 130,
       flex: 0.7,
-      headerClassName: 'dark:text-white',
-      cellClassName: (params) => {
-        const type = params.value;
-        let colorClass = 'dark:text-white';
-        if (type === 'Flash Sale') colorClass += ' text-red-500';
-        if (type === 'Auction Bid') colorClass += ' text-blue-500';
-        return colorClass;
-      },
+      headerClassName: "dark:text-white",
+      cellClassName: "dark:text-white",
     },
     {
       field: "status",
       headerName: "Status",
       minWidth: 130,
       flex: 0.7,
-      headerClassName: 'dark:text-white',
-      cellClassName: (params) => {
-        const status = params.value;
-        let colorClass = 'dark:text-white';
-        if (status === 'Processing') colorClass += ' text-yellow-500';
-        if (status === 'Delivered') colorClass += ' text-green-500';
-        if (status === 'Pending') colorClass += ' text-orange-500';
-        return colorClass;
-      },
+      headerClassName: "dark:text-white",
+      cellClassName: "dark:text-white",
     },
     {
       field: "itemsQty",
@@ -91,8 +77,8 @@ const AllOrders = () => {
       type: "number",
       minWidth: 130,
       flex: 0.7,
-      headerClassName: 'dark:text-white',
-      cellClassName: 'dark:text-white',
+      headerClassName: "dark:text-white",
+      cellClassName: "dark:text-white",
     },
     {
       field: "total",
@@ -100,82 +86,77 @@ const AllOrders = () => {
       type: "number",
       minWidth: 130,
       flex: 0.8,
-      headerClassName: 'dark:text-white',
-      cellClassName: 'dark:text-white',
+      headerClassName: "dark:text-white",
+      cellClassName: "dark:text-white",
     },
     {
       field: "commission",
       headerName: "Commission",
       minWidth: 130,
       flex: 0.7,
-      headerClassName: 'dark:text-white',
-      cellClassName: 'dark:text-white',
-      renderCell: (params) => {
-        const hasCommission = params.value !== "N/A";
-        return (
-          <div className={`${hasCommission ? 'text-green-600' : 'text-gray-500'}`}>
-            {params.value}
-          </div>
-        );
-      }
+      headerClassName: "dark:text-white",
+      cellClassName: "dark:text-white",
     },
     {
       field: " ",
       flex: 1,
       minWidth: 150,
       headerName: "",
-      type: "number",
       sortable: false,
-      headerClassName: 'dark:text-white',
-      cellClassName: 'dark:text-white',
-      renderCell: (params) => {
-        return (
-          <>
-            <Link to={`/order/${params.id}`}>
-              <Button>
-                <AiOutlineArrowRight size={20} className="dark:text-white"/>
-              </Button>
-            </Link>
-          </>
-        );
-      },
+      headerClassName: "dark:text-white",
+      cellClassName: "dark:text-white",
+      renderCell: (params) => (
+        <Link to={`/order/${params.id}`}>
+          <Button>
+            <AiOutlineArrowRight size={20} className="dark:text-white" />
+          </Button>
+        </Link>
+      ),
     },
   ];
 
-  const row = [];
+  const row =
+    orders?.map((item) => ({
+      id: item._id,
+      orderType: getOrderType(item),
+      itemsQty: getItemsQty(item),
+      total: `RWF ${getOrderTotal(item).toLocaleString()}`,
+      status: item.status,
+      commission: item.referralCode ? `RWF ${calculateCommission(item)}` : "N/A",
+    })) || [];
 
-  orders &&
-    orders.forEach((item) => {
-      row.push({
-        id: item._id,
-        orderType: getOrderType(item),
-        itemsQty: getItemsQty(item),
-        total: "RWF " + getOrderTotal(item).toLocaleString(),
-        status: item.status,
-        commission: item.referralCode ? `RWF ${calculateCommission(item)}` : "N/A",
-      });
-    });
+  if (isLoading) {
+    return <Loader />;
+  }
 
-  const calculateCommission = (order) => {
-    const rate = order.commissionRate || 5;
-    return ((order.totalPrice * rate) / 100).toFixed(2);
-  };
+  if (error) {
+    return (
+      <OrderErrorState
+        message={error}
+        onRetry={() => seller?._id && dispatch(getAllOrdersOfShop(seller._id))}
+      />
+    );
+  }
 
   return (
-    <>
-      {isLoading ? (
-        <Loader />
+    <div className="yebone-fade-up space-y-6 lg:space-y-8 p-1">
+      <VendorCustomersSummary orders={orders} />
+
+      {row.length === 0 ? (
+        <OrderEmptyState
+          title="No orders found"
+          message="You haven't received any orders yet."
+          actionLabel="Go to dashboard"
+          actionTo="/dashboard"
+        />
       ) : (
-        <div className="yebone-fade-up space-y-8 p-1">
-          <VendorCustomersSummary orders={orders} />
-          {row.length === 0 ? (
-            <DashboardEmptyState
-              icon={HiOutlineShoppingBag}
-              title="No orders found"
-              message="You haven't received any orders yet."
-            />
-          ) : (
-            <VendorTableSection title="Order management" subtitle="Track fulfillment, payments, and status">
+        <>
+          <OrderSellerCardList orders={orders} />
+          <div className="hidden lg:block">
+            <VendorTableSection
+              title="Order management"
+              subtitle="Track fulfillment, payments, and status"
+            >
               <DataGrid
                 rows={row}
                 columns={columns}
@@ -185,10 +166,10 @@ const AllOrders = () => {
                 className="dark:bg-[#1f1f1f]"
               />
             </VendorTableSection>
-          )}
-        </div>
+          </div>
+        </>
       )}
-    </>
+    </div>
   );
 };
 

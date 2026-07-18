@@ -109,29 +109,14 @@ export const createOrder = (orderData) => async (dispatch) => {
   try {
     dispatch({ type: "createOrderRequest" });
 
-    // Get referral code from localStorage
-    const globalReferralCode = localStorage.getItem('referralCode');
-    
-    // Get product-specific referral codes
-    const referralProducts = JSON.parse(localStorage.getItem('referralProducts') || '{}');
-    
-    // Log referral information for debugging
-    console.log("Creating order with referral data:", {
-      globalReferralCode,
-      referralProducts,
-      cartItems: orderData.cart.length
-    });
-    
-    // Enrich cart items with referral codes
-    const enrichedCart = orderData.cart.map(item => {
-      // Check if this product has a specific referral code
+    const globalReferralCode = localStorage.getItem("referralCode");
+    const referralProducts = JSON.parse(localStorage.getItem("referralProducts") || "{}");
+
+    const enrichedCart = orderData.cart.map((item) => {
       if (referralProducts[item._id]) {
-        console.log(`Applying product-specific referral code ${referralProducts[item._id]} to ${item._id}`);
         return { ...item, referralCode: referralProducts[item._id] };
       }
-      // Otherwise use the global referral code if available
-      else if (globalReferralCode) {
-        console.log(`Applying global referral code ${globalReferralCode} to ${item._id}`);
+      if (globalReferralCode) {
         return { ...item, referralCode: globalReferralCode };
       }
       return item;
@@ -140,36 +125,58 @@ export const createOrder = (orderData) => async (dispatch) => {
     const enrichedOrderData = {
       ...orderData,
       cart: enrichedCart,
-      // Include global referral code for the order
-      referralCode: globalReferralCode
+      referralCode: globalReferralCode,
     };
 
-    // Log the final order data being sent
-    console.log("Sending order with referral data:", {
-      orderReferralCode: enrichedOrderData.referralCode,
-      cartItemsWithReferrals: enrichedCart.filter(item => item.referralCode).length
-    });
-
     const { data } = await axios.post(
-      `${server}/order/create-order`, 
+      `${server}/order/create-order`,
       enrichedOrderData,
       { withCredentials: true }
     );
-    
-    // Clear referral codes after successful order
-    localStorage.removeItem('referralCode');
-    localStorage.removeItem('referralProducts');
-    
-    dispatch({ type: "createOrderSuccess", payload: data.order });
-    return data.order;
+
+    localStorage.removeItem("referralCode");
+    localStorage.removeItem("referralProducts");
+
+    dispatch({ type: "createOrderSuccess", payload: data.orders || data.order });
+    return data.orders || data.order;
   } catch (error) {
-    console.error("Order creation error:", error);
     dispatch({
       type: "createOrderFail",
       payload: error.response?.data?.message || error.message,
     });
     throw error;
   }
+};
+
+export const requestOrderRefund = (orderId, status = "Processing refund") => async () => {
+  const { data } = await axios.put(`${server}/order/order-refund/${orderId}`, { status });
+  return data;
+};
+
+export const cancelOrder = (orderId) => requestOrderRefund(orderId, "Processing refund");
+
+export const updateOrderStatus = (orderId, status) => async (dispatch) => {
+  const { data } = await axios.put(
+    `${server}/order/update-order-status/${orderId}`,
+    { status },
+    { withCredentials: true }
+  );
+  if (dispatch) {
+    dispatch({ type: "updateOrderStatusSuccess", payload: data.order });
+  }
+  return data;
+};
+
+export const acceptOrderRefund = (orderId, status) => async (dispatch) => {
+  const { data } = await axios.put(
+    `${server}/order/order-refund-success/${orderId}`,
+    { status },
+    { withCredentials: true }
+  );
+  if (dispatch) {
+    dispatch({ type: "acceptOrderRefundSuccess", payload: { orderId, status } });
+  }
+  return data;
 };
 
 // Get commission dashboard
