@@ -12,7 +12,7 @@ import { Badge } from "../../ui";
 import { SMART_SEARCH_EXAMPLES } from "../../../ai/intelligence/yipMockData";
 
 /**
- * Natural language search UI — mock results via YIP.
+ * Natural language search UI — gateway SearchPlatform results via YIP.
  * Does not modify existing search logic or navigation.
  */
 const AISearchNatural = ({ className }) => {

@@ -369,13 +369,28 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       memoryRef.current.addRecentSearch(query);
       const response = await YIPGatewayClient.search(query);
       const payload = response?.data || {};
+      const toolPayload = payload.tool || {};
+      const toolData = toolPayload.data || {};
+      const products = toolPayload.success ? toolData.products || [] : [];
       const result = {
         query,
-        results: [],
+        results: products.map((product) => ({
+          _id: product._id,
+          name: product.name,
+          discountPrice: product.discountPrice,
+          images: product.images,
+          shop: product.shop,
+          reason: payload.message,
+        })),
         summary: payload.message,
-        tool: payload.tool,
+        searchRequest: payload.searchRequest || null,
+        meta: toolData.meta || null,
+        parsedIntent: payload.searchRequest
+          ? { type: "search", language: payload.searchRequest.language }
+          : { type: "search" },
+        tool: toolPayload,
         gateway: true,
-        mock: payload.provider?.mock !== false,
+        production: true,
       };
       setSmartSearchResults(result);
       return result;
