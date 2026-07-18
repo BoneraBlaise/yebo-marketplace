@@ -21,6 +21,7 @@ const AIConversation = ({ messages = [], isTyping = false, className, emptyState
           role={msg.role}
           content={msg.content}
           placeholder={msg.placeholder || msg.isWelcome}
+          recommendations={msg.recommendations || []}
         />
       ))}
       {isTyping && (

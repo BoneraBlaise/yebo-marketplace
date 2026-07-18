@@ -2,8 +2,9 @@ import React from "react";
 import classNames from "classnames";
 import { HiOutlineSparkles } from "react-icons/hi";
 import AICard from "./AICard";
+import YEBOSmartSearchResults from "../intelligence/YEBOSmartSearchResults";
 
-const AIResponseCard = ({ content, role = "assistant", className, placeholder = false }) => (
+const AIResponseCard = ({ content, role = "assistant", className, placeholder = false, recommendations = [] }) => (
   <div
     className={classNames(
       role === "user" ? "ai-message-user" : "ai-message-assistant",
@@ -17,6 +18,16 @@ const AIResponseCard = ({ content, role = "assistant", className, placeholder = 
       </span>
     )}
     <p>{content}</p>
+    {role === "assistant" && recommendations.length > 0 && (
+      <YEBOSmartSearchResults
+        compact
+        data={{
+          results: recommendations,
+          summary: content,
+          parsedIntent: { type: "recommendation" },
+        }}
+      />
+    )}
     {placeholder && (
       <p className="text-[10px] text-gray-400 mt-2 italic">Presentation preview · No AI backend</p>
     )}

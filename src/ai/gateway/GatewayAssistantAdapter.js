@@ -41,6 +41,15 @@ export class GatewayAssistantAdapter extends BaseAdapter {
       language: options.language,
     });
     const payload = response?.data || {};
+    const recommendations = Array.isArray(payload.recommendations)
+      ? payload.recommendations.map((entry) => ({
+          _id: entry.searchPreview?.id || entry.product?._id,
+          name: entry.searchPreview?.name || entry.product?.name,
+          discountPrice: entry.searchPreview?.discountPrice ?? entry.product?.discountPrice,
+          images: entry.searchPreview?.images || entry.product?.images,
+          reason: (entry.reasons || []).join("; "),
+        }))
+      : [];
     return {
       content: payload.message || "YEBO gateway response unavailable.",
       placeholder: payload.provider?.mock !== false,
@@ -48,6 +57,8 @@ export class GatewayAssistantAdapter extends BaseAdapter {
         provider: payload.provider?.id || "gateway",
         requestId: payload.requestId,
         toolId: payload.toolId,
+        recommendations,
+        intent: payload.intent,
       },
     };
   }

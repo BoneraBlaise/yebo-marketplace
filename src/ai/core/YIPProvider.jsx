@@ -218,6 +218,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
           });
           conversationRef.current.add("assistant", response.content, {
             placeholder: response.placeholder,
+            recommendations: response.metadata?.recommendations || [],
           });
           YIPEvents.emit(YIP_EVENT.MESSAGE_RECEIVED, { content: response.content });
         }
