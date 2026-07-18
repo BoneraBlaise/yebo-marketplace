@@ -1,26 +1,15 @@
 import axios from "axios";
 import { server } from "../../config/serverConfig";
-
-const buildSearchParams = (query = {}) => {
-  const params = new URLSearchParams();
-
-  Object.entries(query).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      params.set(key, String(value));
-    }
-  });
-
-  return params.toString();
-};
+import {
+  buildSearchParams,
+  requestSearchProducts,
+  requestSearchSuggestions,
+} from "../../lib/searchQuery";
 
 export const searchProducts = (query = {}) => async (dispatch) => {
   try {
     dispatch({ type: "searchProductsRequest" });
-
-    const queryString = buildSearchParams(query);
-    const { data } = await axios.get(`${server}/search/products?${queryString}`, {
-      withCredentials: true,
-    });
+    const data = await requestSearchProducts(query);
 
     dispatch({
       type: "searchProductsSuccess",
@@ -41,16 +30,7 @@ export const searchProducts = (query = {}) => async (dispatch) => {
   }
 };
 
-export const fetchSearchSuggestions = async (term, { limit = 8 } = {}) => {
-  if (!term?.trim()) return [];
-
-  const { data } = await axios.get(`${server}/search/suggestions`, {
-    params: { q: term.trim(), limit },
-    withCredentials: true,
-  });
-
-  return data.suggestions || [];
-};
+export const fetchSearchSuggestions = requestSearchSuggestions;
 
 export const fetchSearchCategories = () => async (dispatch) => {
   try {
@@ -71,3 +51,5 @@ export const fetchSearchCategories = () => async (dispatch) => {
     return [];
   }
 };
+
+export { buildSearchParams };

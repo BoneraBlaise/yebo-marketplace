@@ -45,7 +45,11 @@ Creates a production build in the `build` folder.
 - `src/pages/` — route-level pages
 - `src/routes/` — route definitions and protected routes
 - `src/redux/` — state management
+- `src/hooks/` — shared hooks (`useProductSearch`, `useSiteSearch`)
+- `src/lib/` — pure helpers (search query builders)
 - `public/locales/` — i18n translations (en, fr, rw)
+
+**Architecture:** See [docs/FRONTEND_ARCHITECTURE.md](docs/FRONTEND_ARCHITECTURE.md) — the canonical frontend standard (frozen at `search-production-v1`).
 
 ## Notes
 

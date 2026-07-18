@@ -69,6 +69,7 @@
     "build": "set NODE_OPTIONS=--max-old-space-size=8192 && react-scripts build",
     "lint": "eslint src --ext .js,.jsx",
     "test": "react-scripts test",
+    "test:search-smoke": "node --test src/lib/__tests__/searchQuery.test.js",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

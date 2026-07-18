@@ -29,7 +29,7 @@ import "../components/Marketplace/categoryLanding/categoryLanding.css";
 import { AISearchNatural } from "../components/ai";
 import useProductSearch from "../hooks/useProductSearch";
 import SearchResultsPagination from "../components/Search/SearchResultsPagination";
-import { ErrorState } from "../components/ui";
+import SearchStateViews from "../components/Search/SearchStateViews";
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -79,6 +79,8 @@ const ProductsPage = () => {
     serverMeta,
     serverLoading,
     serverError,
+    slowNetwork,
+    retrySearch,
   } = useProductSearch({
     searchParams,
     sortBy,
@@ -792,27 +794,33 @@ const ProductsPage = () => {
                   {useServerSearch && serverMeta?.total ? ` of ${serverMeta.total}` : ""}
                 </p>
 
-                {serverError && useServerSearch && (
-                  <ErrorState
-                    preset="network"
-                    title="Search unavailable"
-                    description={serverError}
-                  />
+                {slowNetwork && useServerSearch && serverLoading && (
+                  <p className="text-sm text-yebone-muted mb-3" role="status">
+                    Search is taking longer than usual. Please wait or try again.
+                  </p>
                 )}
 
-                {(useServerSearch ? serverLoading : isLoading) ? (
-                  <MarketplaceListingSkeleton count={8} />
-                ) : data && data.length > 0 ? (
-                  <>
-                    <ProductList products={data} />
-                    {useServerSearch && (
+                {useServerSearch ? (
+                  <SearchStateViews
+                    isLoading={serverLoading}
+                    error={serverError}
+                    hasResults={Boolean(data?.length)}
+                    searchTerm={searchTerm}
+                    onRetry={retrySearch}
+                  >
+                    <>
+                      <ProductList products={data} />
                       <SearchResultsPagination
                         page={serverMeta?.page || 1}
                         totalPages={serverMeta?.totalPages || 1}
                         onPageChange={handleSearchPageChange}
                       />
-                    )}
-                  </>
+                    </>
+                  </SearchStateViews>
+                ) : isLoading ? (
+                  <MarketplaceListingSkeleton count={8} />
+                ) : data && data.length > 0 ? (
+                  <ProductList products={data} />
                 ) : categoryContext ? (
                   <CategoryEmptyState
                     context={categoryContext}
