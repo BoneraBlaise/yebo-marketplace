@@ -201,7 +201,9 @@ export const YIPProvider = ({ children, config: configOverride }) => {
           const reply = conversationRef.current.add("assistant", "", { partial: true });
           syncMessages();
 
-          await consumeStream(adapter.stream(trimmed, { config }), (_chunk, accumulated) => {
+          await consumeStream(
+            adapter.stream(trimmed, { config, sessionId: sessionRef.current.id }),
+            (_chunk, accumulated) => {
             reply.content = accumulated;
             setPartialResponse(accumulated);
             syncMessages();
@@ -210,7 +212,10 @@ export const YIPProvider = ({ children, config: configOverride }) => {
           reply.partial = false;
           reply.placeholder = true;
         } else {
-          const response = await adapter.complete(trimmed, { config });
+          const response = await adapter.complete(trimmed, {
+            config,
+            sessionId: sessionRef.current.id,
+          });
           conversationRef.current.add("assistant", response.content, {
             placeholder: response.placeholder,
           });

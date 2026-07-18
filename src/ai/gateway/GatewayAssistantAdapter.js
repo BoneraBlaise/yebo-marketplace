@@ -34,7 +34,12 @@ export class GatewayAssistantAdapter extends BaseAdapter {
   }
 
   async complete(input, options = {}) {
-    const response = await YIPGatewayClient.chat(input, options);
+    const response = await YIPGatewayClient.chat(input, {
+      sessionId: options.sessionId || options.config?.session?.id || null,
+      scope: options.scope,
+      region: options.region,
+      language: options.language,
+    });
     const payload = response?.data || {};
     return {
       content: payload.message || "YEBO gateway response unavailable.",
@@ -48,7 +53,12 @@ export class GatewayAssistantAdapter extends BaseAdapter {
   }
 
   async *stream(input, options = {}) {
-    yield* YIPGatewayClient.streamChat(input, options);
+    yield* YIPGatewayClient.streamChat(input, {
+      sessionId: options.sessionId || options.config?.session?.id || null,
+      scope: options.scope,
+      region: options.region,
+      language: options.language,
+    });
   }
 
   getSuggestedPrompts() {
