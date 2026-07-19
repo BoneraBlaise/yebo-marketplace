@@ -65,17 +65,19 @@ const Payment = () => {
         shippingAddress: orderData.shippingAddress,
         user: orderData.user,
         totalPrice: orderData.totalPrice,
+        subTotalPrice: orderData.subTotalPrice,
         paymentInfo: {
           ...paymentInfo,
           status: "Pending",
         },
         shipping: orderData.shipping,
         discountPrice: orderData.discountPrice,
+        couponCode: orderData.couponCode || null,
+        attributionTokens: orderData.attributionTokens || [],
+        referralCode:
+          orderData.cart?.find((item) => item.referralCode)?.referralCode || null,
         orderType: orderData.orderType,
         bidId: orderData.bidId,
-        referralCodes: orderData.cart
-          .filter((item) => item.referralCode)
-          .map((item) => item.referralCode),
       };
 
       const { data } = await axios.post(
@@ -87,9 +89,7 @@ const Payment = () => {
       if (data.success) {
         if (orderData.orderType === "regular") {
           localStorage.removeItem("cartItems");
-          if (window.referralContext) {
-            window.referralContext.clearAllReferrals();
-          }
+          clearAllReferrals?.();
         } else {
           const updatedCart = JSON.parse(localStorage.getItem("cartItems") || "[]").filter(
             (item) => !orderData.cart.find((orderItem) => orderItem._id === item._id)

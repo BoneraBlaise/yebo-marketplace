@@ -72,8 +72,16 @@ const Checkout = () => {
     try {
       const result = await validateGrowthCoupon({
         code: couponCode.trim(),
+        cart: cart.map((item) => ({
+          _id: item._id,
+          shopId: item.shopId || item.shop?._id,
+          category: item.category,
+          brand: item.tags || item.brand,
+          discountPrice: item.discountPrice,
+          price: item.price,
+          qty: item.qty,
+        })),
         cartTotal: subTotalPrice,
-        shopId: cart[0]?.shopId || cart[0]?.shop?._id,
       });
 
       if (result.valid) {
