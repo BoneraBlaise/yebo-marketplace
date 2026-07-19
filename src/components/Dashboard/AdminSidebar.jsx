@@ -15,6 +15,7 @@ import {
   HiOutlineSparkles,
   HiOutlineCollection,
   HiOutlineDocumentReport,
+  HiOutlineTruck,
 } from "react-icons/hi";
 import { GrWorkshop } from "react-icons/gr";
 import { MdOutlineLocalOffer } from "react-icons/md";
@@ -44,6 +45,7 @@ export const ADMIN_NAV_PLATFORM = [
   { id: 21, label: "Commission", to: "/admin/dashboard", hash: "#admin-commission", icon: HiOutlineChartBar },
   { id: 22, label: "Referrals", to: "/admin/dashboard", hash: "#admin-referrals", icon: HiOutlineReceiptRefund },
   { id: 23, label: "AI Control", to: "/admin/dashboard", hash: "#admin-ai", icon: HiOutlineSparkles },
+  { id: 27, label: "Delivery Settings", to: "/admin/dashboard", hash: "#admin-delivery", icon: HiOutlineTruck },
   { id: 24, label: "System Settings", to: "/admin/dashboard", hash: "#admin-settings", icon: HiOutlineCog },
   { id: 26, label: "Support", to: "/admin/dashboard", hash: "#admin-support", icon: HiOutlineSupport },
 ];
@@ -61,6 +63,7 @@ export const ADMIN_TITLES = {
   21: "Commission Management",
   22: "Referral Management",
   23: "AI Control Center",
+  27: "Delivery Settings",
   24: "System Settings",
   25: "Executive Reports",
   26: "Support Center",

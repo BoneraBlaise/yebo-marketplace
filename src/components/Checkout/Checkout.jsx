@@ -12,6 +12,7 @@ import { typography } from "../../design-system/typography";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutCartItem from "./CheckoutCartItem";
 import CheckoutEmptyCart from "./CheckoutEmptyCart";
+import CheckoutDeliveryMethods from "./CheckoutDeliveryMethods";
 import { YEBOCheckoutIntelligence } from "../ai";
 import "./checkout.css";
 
@@ -29,6 +30,7 @@ const Checkout = () => {
   const [couponCode, setCouponCode] = useState("");
   const [couponCodeData, setCouponCodeData] = useState(null);
   const [discountPrice, setDiscountPrice] = useState(null);
+  const [deliveryMethod, setDeliveryMethod] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { referralProducts } = useReferral();
@@ -73,6 +75,11 @@ const Checkout = () => {
       return;
     }
 
+    if (!deliveryMethod) {
+      toast.error("Please choose a delivery method!");
+      return;
+    }
+
     const cartWithReferrals = cart.map((item) => {
       const referralCode = referralProducts.get(item._id);
       return referralCode ? { ...item, referralCode } : item;
@@ -93,6 +100,7 @@ const Checkout = () => {
       },
       cart: cartWithReferrals,
       shipping,
+      deliveryMethod,
       discountPrice: discountPrice || 0,
     };
 
@@ -197,6 +205,8 @@ const Checkout = () => {
               zipCode={zipCode}
               setZipCode={setZipCode}
             />
+
+            <CheckoutDeliveryMethods value={deliveryMethod} onChange={setDeliveryMethod} />
           </div>
 
           <div className="space-y-6">
