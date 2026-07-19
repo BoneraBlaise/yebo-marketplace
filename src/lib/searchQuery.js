@@ -1,27 +1,27 @@
 import axios from "axios";
 import { server } from "../config/serverConfig";
-import {
-  buildSearchParams,
-  buildSearchQueryFromParams,
-  mapSortToApi,
-  shouldUseServerSearch,
-  SERVER_SEARCH_KEYS,
-} from "./searchQueryUtils.cjs";
 
-export {
-  buildSearchParams,
-  buildSearchQueryFromParams,
-  mapSortToApi,
-  shouldUseServerSearch,
-  SERVER_SEARCH_KEYS,
-};
+const searchQueryUtils = require("./searchQueryUtils.cjs");
+
+export const buildSearchParams = searchQueryUtils.buildSearchParams;
+export const buildSearchQueryFromParams = searchQueryUtils.buildSearchQueryFromParams;
+export const mapSortToApi = searchQueryUtils.mapSortToApi;
+export const shouldUseServerSearch = searchQueryUtils.shouldUseServerSearch;
+export const SERVER_SEARCH_KEYS = searchQueryUtils.SERVER_SEARCH_KEYS;
 
 export const requestSearchProducts = async (query = {}) => {
   const queryString = buildSearchParams(query);
-  const { data } = await axios.get(`${server}/search/products?${queryString}`, {
-    withCredentials: true,
-  });
-  return data;
+  try {
+    const { data } = await axios.get(`${server}/marketplace/growth-commerce/search/enriched?${queryString}`, {
+      withCredentials: true,
+    });
+    return data?.data || data;
+  } catch (_error) {
+    const { data } = await axios.get(`${server}/search/products?${queryString}`, {
+      withCredentials: true,
+    });
+    return data;
+  }
 };
 
 export const requestSearchSuggestions = async (term, { limit = 8 } = {}) => {

@@ -5,7 +5,7 @@ import {
   fetchDeliveryAuditHistory,
   fetchDeliveryConfiguration,
   updateDeliveryConfiguration,
-} from "../../services/deliveryConfigurationService";
+} from "../../../services/deliveryConfigurationService";
 
 const SETTING_LABELS = {
   vendorDelivery: "Vendor Delivery",

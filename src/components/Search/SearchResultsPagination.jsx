@@ -1,5 +1,5 @@
 import React from "react";
-import { Pagination } from "../design-system/components";
+import { Pagination } from "../../design-system/components";
 
 const SearchResultsPagination = ({ page = 1, totalPages = 1, onPageChange }) => {
   if (!totalPages || totalPages <= 1) return null;

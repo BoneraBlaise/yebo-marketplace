@@ -4,7 +4,7 @@ import { searchProducts } from "../redux/actions/search";
 import {
   buildSearchQueryFromParams,
   shouldUseServerSearch,
-} from "../lib/searchQueryUtils.cjs";
+} from "../lib/searchQuery";
 
 export { shouldUseServerSearch };
 

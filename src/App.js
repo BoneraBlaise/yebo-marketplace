@@ -92,6 +92,8 @@ import { getAllFlashSales } from "./redux/actions/flashSale.js";
 import { getActiveBids } from "./redux/actions/bids.js";
 import LoginSuccessHandler from "./components/Login/LoginSuccessHandler";
 import CommissionDashboard from "./components/Commission/CommissionDashboard";
+import AdminGrowthCommercePage from "./pages/AdminGrowthCommercePage";
+import VendorCampaignsPage from "./pages/VendorCampaignsPage";
 import { ReferralProvider } from './context/ReferralContext';
 import { AIProvider } from "./components/ai/core/AIContext";
 import GlobalAIFab from "./components/ai/GlobalAIFab";
@@ -337,6 +339,14 @@ const App = () => {
               }
             />
             <Route
+              path="/dashboard-campaigns"
+              element={
+                <SellerProtectedRoute>
+                  <VendorCampaignsPage />
+                </SellerProtectedRoute>
+              }
+            />
+            <Route
               path="/dashboard-coupouns"
               element={
                 <SellerProtectedRoute>
@@ -413,6 +423,14 @@ const App = () => {
               element={
                 <ProtectedAdminRoute>
                   <AdminDashboardWithdraw />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/growth-commerce"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminGrowthCommercePage />
                 </ProtectedAdminRoute>
               }
             />

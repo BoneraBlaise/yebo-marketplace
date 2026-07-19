@@ -121,6 +121,15 @@ const HomeProductCard = ({ data, isEvent, compact = false, fluid = false }) => {
           <span className="ypc__sold-out">Sold out</span>
         )}
 
+        {(data.growthCommerce?.promotionBadges || []).slice(0, 1).map((badge) => (
+          <span
+            key={badge}
+            className="absolute top-2 left-2 z-[2] px-2 py-1 rounded-md text-[10px] font-semibold bg-red-500 text-white"
+          >
+            {badge}
+          </span>
+        ))}
+
         <button
           type="button"
           onClick={handleWishlistToggle}

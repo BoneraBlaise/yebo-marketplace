@@ -1,5 +1,5 @@
 import axios from "axios";
-import { server } from "../../config/serverConfig";
+import { server } from "../config/serverConfig";
 
 const BASE = `${server}/marketplace/delivery`;
 

@@ -18,6 +18,7 @@ const HomeVerifiedVendors = lazy(() => import("../components/Home/HomeVerifiedVe
 const HomeReviews = lazy(() => import("../components/Home/HomeReviews"));
 const HomeRecentlyViewed = lazy(() => import("../components/Home/HomeRecentlyViewed"));
 const HomeNewsletter = lazy(() => import("../components/Home/HomeNewsletter"));
+const HomeGrowthCommerce = lazy(() => import("../components/Home/HomeGrowthCommerce"));
 
 const SectionFallback = () => (
   <div className="home-section home-section-enter">
@@ -58,6 +59,10 @@ const HomePage = () => {
         <div className="scroll-smooth flex-1">
           <HomeHero />
           <HomeFeatureStrip />
+
+          <Suspense fallback={<SectionFallback />}>
+            <HomeGrowthCommerce />
+          </Suspense>
 
           <Suspense fallback={<SectionFallback />}>
             <HomeCategories />
