@@ -15,7 +15,11 @@ import { FaShare } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { generateShareLink, trackCommissionClick } from "../../redux/actions/order";
 import { RxCross1 } from "react-icons/rx";
-import { useReferral } from '../../context/ReferralContext';
+import { useReferral } from "../../context/ReferralContext";
+import {
+  createReferralAttribution,
+  trackReferralClickApi,
+} from "../../services/growthConfigurationService";
 import "./product-details.css";
 import { Container, Button } from "../ui";
 import ProductGallery from "./ProductGallery";
@@ -88,31 +92,39 @@ const ProductDetails = ({ data }) => {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const refCode = params.get('ref');
+    const refCode = params.get("ref");
+    const attToken = params.get("att");
 
-    if (refCode && data?._id) {
-      console.log(`Tracking referral: Product ${data._id} with code ${refCode}`);
-      
-      // Store referral code for this specific product
-      addReferralProduct(data._id, refCode);
-      
-      // Track the click
-      dispatch(trackCommissionClick(refCode));
-      
-      // Store in localStorage as well for redundancy
-      const referralProducts = JSON.parse(localStorage.getItem('referralProducts') || '{}');
-      referralProducts[data._id] = refCode;
-      localStorage.setItem('referralProducts', JSON.stringify(referralProducts));
-      
-      // Remove ref parameter from URL to prevent tracking on page refresh
-      // but keep the rest of the URL intact
-      const newUrl = window.location.pathname + 
-        (window.location.search ? 
-          window.location.search.replace(/(\?|&)ref=[^&]*(&|$)/, '$1').replace(/\?$/, '') : 
-          '');
-      
-      window.history.replaceState({}, '', newUrl);
-    }
+    if (!refCode || !data?._id) return;
+
+    const applyReferral = async () => {
+      let attributionToken = attToken;
+      try {
+        if (!attributionToken) {
+          const response = await createReferralAttribution({
+            referralCode: refCode,
+            productId: data._id,
+            shopId: data.shop?._id,
+          });
+          attributionToken = response?.data?.attributionToken;
+        }
+        addReferralProduct(data._id, refCode, attributionToken);
+        await trackReferralClickApi(refCode);
+        dispatch(trackCommissionClick(refCode));
+      } catch (error) {
+        addReferralProduct(data._id, refCode, attributionToken);
+        dispatch(trackCommissionClick(refCode));
+      }
+
+      const newUrl =
+        window.location.pathname +
+        (window.location.search
+          ? window.location.search.replace(/(\?|&)ref=[^&]*(&|$)/, "$1").replace(/(\?|&)att=[^&]*(&|$)/, "$1").replace(/\?$|&$/, "")
+          : "");
+      window.history.replaceState({}, "", newUrl);
+    };
+
+    applyReferral();
   }, [location, data, addReferralProduct, dispatch]);
 
   const incrementCount = () => setCount((prev) => prev + 1);

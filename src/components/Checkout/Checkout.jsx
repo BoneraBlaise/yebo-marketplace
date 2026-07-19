@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { trackCommissionClick } from "../../redux/actions/order";
 import { addTocart, removeFromCart } from "../../redux/actions/cart";
 import { useReferral } from "../../context/ReferralContext";
+import { validateGrowthCoupon } from "../../services/growthConfigurationService";
 import { Container, Button } from "../ui";
 import { typography } from "../../design-system/typography";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
@@ -33,24 +34,18 @@ const Checkout = () => {
   const [deliveryMethod, setDeliveryMethod] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { referralProducts } = useReferral();
+  const { referralProducts, getReferralPayload } = useReferral();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    const handleReferralCode = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const refCode = urlParams.get("ref");
-
-      if (refCode) {
-        localStorage.setItem("referralCode", refCode);
-        dispatch(trackCommissionClick(refCode));
-      }
-    };
-
-    handleReferralCode();
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get("ref");
+    if (refCode) {
+      dispatch(trackCommissionClick(refCode));
+    }
   }, [dispatch]);
 
   const subTotalPrice = cart.reduce(
@@ -66,6 +61,38 @@ const Checkout = () => {
   };
 
   const shipping = calculateShipping(subTotalPrice);
+
+  const handleCouponSubmit = async (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) {
+      toast.error("Enter a coupon code");
+      return;
+    }
+
+    try {
+      const result = await validateGrowthCoupon({
+        code: couponCode.trim(),
+        cartTotal: subTotalPrice,
+        shopId: cart[0]?.shopId || cart[0]?.shop?._id,
+      });
+
+      if (result.valid) {
+        setCouponCodeData(result.coupon);
+        setDiscountPrice(result.coupon.discountAmount);
+        toast.success("Coupon applied");
+      } else {
+        setCouponCodeData(null);
+        setDiscountPrice(null);
+        toast.error(result.reason || "Invalid coupon");
+      }
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.data?.reason ||
+          error?.response?.data?.message ||
+          "Unable to validate coupon"
+      );
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,6 +112,8 @@ const Checkout = () => {
       return referralCode ? { ...item, referralCode } : item;
     });
 
+    const { attributionTokens } = getReferralPayload();
+
     let orderData = {
       shippingAddress: {
         address1,
@@ -102,6 +131,8 @@ const Checkout = () => {
       shipping,
       deliveryMethod,
       discountPrice: discountPrice || 0,
+      attributionTokens,
+      couponCode: couponCodeData?.code || null,
     };
 
     if (location.state?.wonBid) {
@@ -136,14 +167,9 @@ const Checkout = () => {
     navigate("/payment");
   };
 
-  const discountPercentenge = couponCodeData ? discountPrice : "";
+  const discountAmount = couponCodeData ? Number(discountPrice || 0) : 0;
 
-  const totalPrice =
-    cart.length > 0
-      ? (parseFloat(subTotalPrice) + shipping).toFixed(2)
-      : couponCodeData
-      ? (subTotalPrice + shipping - discountPercentenge).toFixed(2)
-      : (subTotalPrice + shipping).toFixed(2);
+  const totalPrice = (parseFloat(subTotalPrice) + shipping - discountAmount).toFixed(2);
 
   const quantityChangeHandler = (data) => {
     dispatch(addTocart(data));
@@ -215,9 +241,10 @@ const Checkout = () => {
             subTotalPrice={subTotalPrice}
             shipping={shipping}
             totalPrice={totalPrice}
-            discountAmount={discountPercentenge}
+            discountAmount={discountAmount}
             couponCode={couponCode}
             setCouponCode={setCouponCode}
+            handleCouponSubmit={handleCouponSubmit}
             handleSubmit={handleSubmit}
             isWonBid={!!wonBid}
             wonBid={wonBid}

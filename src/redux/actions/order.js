@@ -77,23 +77,11 @@ export const createWonBidOrder = (orderData) => async (dispatch) => {
   try {
     dispatch({ type: "createWonBidOrderRequest" });
 
-    // Get referral code from localStorage
-    const referralCode = localStorage.getItem('referralCode');
-
-    // Add referral code to order data
-    const enrichedOrderData = {
-      ...orderData,
-      referralCode
-    };
-
     const { data } = await axios.post(
-      `${server}/order/create-won-bid-order`, 
-      enrichedOrderData,
+      `${server}/order/create-won-bid-order`,
+      orderData,
       { withCredentials: true }
     );
-
-    // Clear referral code after successful order
-    localStorage.removeItem('referralCode');
 
     dispatch({ type: "createWonBidOrderSuccess", payload: data.order });
   } catch (error) {
@@ -109,33 +97,11 @@ export const createOrder = (orderData) => async (dispatch) => {
   try {
     dispatch({ type: "createOrderRequest" });
 
-    const globalReferralCode = localStorage.getItem("referralCode");
-    const referralProducts = JSON.parse(localStorage.getItem("referralProducts") || "{}");
-
-    const enrichedCart = orderData.cart.map((item) => {
-      if (referralProducts[item._id]) {
-        return { ...item, referralCode: referralProducts[item._id] };
-      }
-      if (globalReferralCode) {
-        return { ...item, referralCode: globalReferralCode };
-      }
-      return item;
-    });
-
-    const enrichedOrderData = {
-      ...orderData,
-      cart: enrichedCart,
-      referralCode: globalReferralCode,
-    };
-
     const { data } = await axios.post(
       `${server}/order/create-order`,
-      enrichedOrderData,
+      orderData,
       { withCredentials: true }
     );
-
-    localStorage.removeItem("referralCode");
-    localStorage.removeItem("referralProducts");
 
     dispatch({ type: "createOrderSuccess", payload: data.orders || data.order });
     return data.orders || data.order;

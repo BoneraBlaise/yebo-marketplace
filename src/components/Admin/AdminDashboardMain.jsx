@@ -35,6 +35,7 @@ import AdminReferralPanel from "../Dashboard/admin/AdminReferralPanel";
 import AdminAICenter from "../Dashboard/admin/AdminAICenter";
 import AdminSystemSettings from "../Dashboard/admin/AdminSystemSettings";
 import AdminDeliverySettings from "../Dashboard/admin/AdminDeliverySettings";
+import AdminGrowthSettings from "../Dashboard/admin/AdminGrowthSettings";
 import AdminSupportCenter from "../Dashboard/admin/AdminSupportCenter";
 import AdminCategoriesPanel from "../Dashboard/admin/AdminCategoriesPanel";
 import VendorTableSection from "../Dashboard/vendor/VendorTableSection";
@@ -213,6 +214,7 @@ const AdminDashboardMain = () => {
       <AdminReferralPanel orders={adminOrders} />
       <AdminAICenter />
       <AdminDeliverySettings />
+      <AdminGrowthSettings />
       <AdminSystemSettings />
       <AdminSupportCenter />
     </div>

@@ -1,59 +1,64 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from "react";
 
 const ReferralContext = createContext();
 
 export const ReferralProvider = ({ children }) => {
-  // Initialize from localStorage if available
-  const [referralProducts, setReferralProducts] = useState(() => {
-    const saved = localStorage.getItem('referralProducts');
-    return saved ? new Map(Object.entries(JSON.parse(saved))) : new Map();
-  });
-  
-  // Save to localStorage whenever referralProducts changes
-  useEffect(() => {
-    const referralObj = Object.fromEntries(referralProducts);
-    localStorage.setItem('referralProducts', JSON.stringify(referralObj));
-  }, [referralProducts]);
-  
-  const addReferralProduct = (productId, referralCode) => {
-    setReferralProducts(prev => {
-      const newMap = new Map(prev);
-      newMap.set(productId, referralCode);
-      return newMap;
+  const [referralProducts, setReferralProducts] = useState(new Map());
+
+  const addReferralProduct = (productId, referralCode, attributionToken = null) => {
+    if (!productId || !referralCode) return;
+    setReferralProducts((prev) => {
+      const next = new Map(prev);
+      next.set(String(productId), { referralCode, attributionToken });
+      return next;
     });
-    
-    // Also log this action for debugging
-    console.log(`Added referral for product ${productId} with code ${referralCode}`);
   };
 
-  const getReferralCode = (productId) => {
-    return referralProducts.get(productId);
-  };
+  const getReferralCode = (productId) => referralProducts.get(String(productId))?.referralCode;
+
+  const getAttributionToken = (productId) =>
+    referralProducts.get(String(productId))?.attributionToken;
+
+  const getAttributionTokens = () =>
+    [...referralProducts.values()].map((entry) => entry.attributionToken).filter(Boolean);
+
+  const getReferralPayload = () => ({
+    referralProducts: new Map(
+      [...referralProducts.entries()].map(([productId, entry]) => [productId, entry.referralCode])
+    ),
+    attributionTokens: getAttributionTokens(),
+  });
 
   const clearReferralProduct = (productId) => {
-    setReferralProducts(prev => {
-      const newMap = new Map(prev);
-      newMap.delete(productId);
-      return newMap;
+    setReferralProducts((prev) => {
+      const next = new Map(prev);
+      next.delete(String(productId));
+      return next;
     });
   };
 
   const clearAllReferrals = () => {
     setReferralProducts(new Map());
-    localStorage.removeItem('referralProducts');
   };
 
   return (
-    <ReferralContext.Provider value={{
-      referralProducts,
-      addReferralProduct,
-      getReferralCode,
-      clearReferralProduct,
-      clearAllReferrals
-    }}>
+    <ReferralContext.Provider
+      value={{
+        referralProducts: new Map(
+          [...referralProducts.entries()].map(([productId, entry]) => [productId, entry.referralCode])
+        ),
+        addReferralProduct,
+        getReferralCode,
+        getAttributionToken,
+        getAttributionTokens,
+        getReferralPayload,
+        clearReferralProduct,
+        clearAllReferrals,
+      }}
+    >
       {children}
     </ReferralContext.Provider>
   );
 };
 
-export const useReferral = () => useContext(ReferralContext); 
+export const useReferral = () => useContext(ReferralContext);
