@@ -270,7 +270,21 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       setPendingAction(null);
       syncMessages();
     } catch (err) {
-      setLastError(normalizeError(err));
+      const apiMessage = err?.response?.data?.message;
+      const reason = err?.response?.data?.reason;
+      setLastError(
+        normalizeError({
+          message: apiMessage || err?.message || "Confirmation failed.",
+        })
+      );
+      if (
+        reason === "PENDING_ACTION_EXPIRED" ||
+        reason === "REPLAY_DETECTED" ||
+        reason === "CHECKSUM_MISMATCH" ||
+        reason === "PENDING_ACTION_NOT_FOUND"
+      ) {
+        setPendingAction(null);
+      }
     } finally {
       setIsTyping(false);
     }
@@ -292,7 +306,21 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       setPendingAction(null);
       syncMessages();
     } catch (err) {
-      setLastError(normalizeError(err));
+      const apiMessage = err?.response?.data?.message;
+      const reason = err?.response?.data?.reason;
+      setLastError(
+        normalizeError({
+          message: apiMessage || err?.message || "Confirmation failed.",
+        })
+      );
+      if (
+        reason === "PENDING_ACTION_EXPIRED" ||
+        reason === "REPLAY_DETECTED" ||
+        reason === "CHECKSUM_MISMATCH" ||
+        reason === "PENDING_ACTION_NOT_FOUND"
+      ) {
+        setPendingAction(null);
+      }
     } finally {
       setIsTyping(false);
     }
