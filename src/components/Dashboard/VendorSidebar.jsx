@@ -17,6 +17,7 @@ import {
   HiOutlineCog,
   HiOutlineSupport,
   HiOutlineReceiptRefund,
+  HiOutlineHome,
 } from "react-icons/hi";
 import { FiMessageSquare } from "react-icons/fi";
 import { MdOutlineLocalOffer } from "react-icons/md";
@@ -40,6 +41,7 @@ export const VENDOR_NAV_PRIMARY = [
   { id: 9, label: "Coupons", to: "/dashboard-coupouns", icon: AiOutlineGift },
   { id: 22, label: "Campaigns", to: "/dashboard-campaigns", icon: FaSalesforce },
   { id: 23, label: "Seller Operations", to: "/dashboard-seller-operations", icon: HiOutlineArchive },
+  { id: 24, label: "Property & Mobility", to: "/dashboard-property-mobility", icon: HiOutlineHome },
   { id: 20, label: "Earnings", to: "/dashboard-withdraw-money", hash: "#vendor-earnings", icon: HiOutlineCurrencyDollar },
   { id: 7, label: "Withdrawals", to: "/dashboard-withdraw-money", icon: HiOutlineCash },
   { id: 11, label: "Store Settings", to: "/settings", icon: HiOutlineCog },
@@ -69,6 +71,7 @@ export const VENDOR_TITLES = {
   9: "Coupons",
   22: "Campaigns",
   23: "Seller Operations",
+  24: "Property & Mobility",
   10: "Refunds",
   11: "Store Settings",
   12: "Create Flash Sale",

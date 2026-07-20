@@ -20,6 +20,7 @@ import {
   HiOutlineClipboardList,
   HiOutlineTicket,
   HiOutlineArchive,
+  HiOutlineHome,
 } from "react-icons/hi";
 import { GrWorkshop } from "react-icons/gr";
 import { MdOutlineLocalOffer } from "react-icons/md";
@@ -55,6 +56,7 @@ export const ADMIN_NAV_PLATFORM = [
   { id: 30, label: "Coupon Monitor", to: "/admin/dashboard", hash: "#admin-coupon-monitor", icon: HiOutlineTicket },
   { id: 31, label: "Growth Commerce", to: "/admin/growth-commerce", icon: HiOutlineTrendingUp },
   { id: 32, label: "Seller Operations", to: "/admin/seller-operations", icon: HiOutlineArchive },
+  { id: 33, label: "Property & Mobility", to: "/admin/property-mobility", icon: HiOutlineHome },
   { id: 24, label: "System Settings", to: "/admin/dashboard", hash: "#admin-settings", icon: HiOutlineCog },
   { id: 26, label: "Support", to: "/admin/dashboard", hash: "#admin-support", icon: HiOutlineSupport },
 ];
@@ -78,6 +80,7 @@ export const ADMIN_TITLES = {
   30: "Coupon Monitor",
   31: "Growth Commerce",
   32: "Seller Operations",
+  33: "Property & Mobility",
   24: "System Settings",
   25: "Executive Reports",
   26: "Support Center",

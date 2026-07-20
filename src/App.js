@@ -94,8 +94,11 @@ import LoginSuccessHandler from "./components/Login/LoginSuccessHandler";
 import CommissionDashboard from "./components/Commission/CommissionDashboard";
 import AdminGrowthCommercePage from "./pages/AdminGrowthCommercePage";
 import AdminSellerOperationsPage from "./pages/AdminSellerOperationsPage";
+import AdminPropertyMobilityPage from "./pages/AdminPropertyMobilityPage";
 import VendorCampaignsPage from "./pages/VendorCampaignsPage";
 import VendorSellerOperationsPage from "./pages/VendorSellerOperationsPage";
+import OwnerPropertyMobilityPage from "./pages/OwnerPropertyMobilityPage";
+import PublicPropertyMobilityPage from "./pages/PublicPropertyMobilityPage";
 import { ReferralProvider } from './context/ReferralContext';
 import { AIProvider } from "./components/ai/core/AIContext";
 import GlobalAIFab from "./components/ai/GlobalAIFab";
@@ -194,6 +197,7 @@ const App = () => {
                 </ProtectedRoute>
               }
             />
+            <Route path="/property-mobility" element={<PublicPropertyMobilityPage />} />
             <Route
               path="/inbox"
               element={
@@ -357,6 +361,14 @@ const App = () => {
               }
             />
             <Route
+              path="/dashboard-property-mobility"
+              element={
+                <SellerProtectedRoute>
+                  <OwnerPropertyMobilityPage />
+                </SellerProtectedRoute>
+              }
+            />
+            <Route
               path="/dashboard-coupouns"
               element={
                 <SellerProtectedRoute>
@@ -449,6 +461,14 @@ const App = () => {
               element={
                 <ProtectedAdminRoute>
                   <AdminSellerOperationsPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/property-mobility"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminPropertyMobilityPage />
                 </ProtectedAdminRoute>
               }
             />
