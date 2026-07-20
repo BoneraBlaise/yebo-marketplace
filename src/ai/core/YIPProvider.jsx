@@ -117,6 +117,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const [partialResponse, setPartialResponse] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [lastError, setLastError] = useState(null);
+  const [pendingAction, setPendingAction] = useState(null);
   const [shoppingMode, setShoppingMode] = useState("chat");
   const [smartSearchResults, setSmartSearchResults] = useState(null);
   const [comparisonResult, setComparisonResult] = useState(null);
@@ -216,9 +217,16 @@ export const YIPProvider = ({ children, config: configOverride }) => {
             config,
             sessionId: sessionRef.current.id,
           });
+          if (response.metadata?.confirmationRequired && response.metadata?.pendingAction) {
+            setPendingAction(response.metadata.pendingAction);
+          } else {
+            setPendingAction(null);
+          }
           conversationRef.current.add("assistant", response.content, {
             placeholder: response.placeholder,
             recommendations: response.metadata?.recommendations || [],
+            pendingAction: response.metadata?.pendingAction || null,
+            confirmationRequired: Boolean(response.metadata?.confirmationRequired),
           });
           YIPEvents.emit(YIP_EVENT.MESSAGE_RECEIVED, { content: response.content });
         }
@@ -244,6 +252,51 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     },
     [inputValue, config, syncMessages]
   );
+
+  const confirmPendingAction = useCallback(async () => {
+    if (!pendingAction?.pendingActionId) return;
+    setLastError(null);
+    setIsTyping(true);
+    try {
+      const response = await YIPGatewayClient.confirmAction({
+        confirmActionId: pendingAction.pendingActionId,
+        sessionId: pendingAction.sessionId || sessionRef.current.id,
+        actionChecksum: pendingAction.actionChecksum,
+      });
+      const payload = response?.data || {};
+      conversationRef.current.add("assistant", payload.message || "Action confirmed.", {
+        confirmed: true,
+      });
+      setPendingAction(null);
+      syncMessages();
+    } catch (err) {
+      setLastError(normalizeError(err));
+    } finally {
+      setIsTyping(false);
+    }
+  }, [pendingAction, syncMessages]);
+
+  const cancelPendingAction = useCallback(async () => {
+    if (!pendingAction?.pendingActionId) return;
+    setLastError(null);
+    setIsTyping(true);
+    try {
+      const response = await YIPGatewayClient.cancelAction({
+        cancelActionId: pendingAction.pendingActionId,
+        sessionId: pendingAction.sessionId || sessionRef.current.id,
+      });
+      const payload = response?.data || {};
+      conversationRef.current.add("assistant", payload.message || "Action cancelled.", {
+        cancelled: true,
+      });
+      setPendingAction(null);
+      syncMessages();
+    } catch (err) {
+      setLastError(normalizeError(err));
+    } finally {
+      setIsTyping(false);
+    }
+  }, [pendingAction, syncMessages]);
 
   const setActiveContext = useCallback((scope, data) => {
     shoppingContextRef.current.activate(scope, data);
@@ -489,6 +542,9 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       setInputValue,
       sendMessage,
       lastError,
+      pendingAction,
+      confirmPendingAction,
+      cancelPendingAction,
       assistantProviderIndicator,
       // Adapter data
       suggestedPrompts: adapterRef.current.getSuggestedPrompts?.() || [],
@@ -587,6 +643,9 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       inputValue,
       sendMessage,
       lastError,
+      pendingAction,
+      confirmPendingAction,
+      cancelPendingAction,
       setActiveContext,
       shoppingMode,
       smartSearchResults,

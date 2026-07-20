@@ -41,6 +41,40 @@ export class GatewayAssistantAdapter extends BaseAdapter {
       language: options.language,
     });
     const payload = response?.data || {};
+    if (payload.type === "confirmation_required") {
+      return {
+        content: payload.message,
+        placeholder: false,
+        metadata: {
+          provider: payload.provider?.id || "gateway",
+          requestId: payload.requestId,
+          toolId: payload.toolId,
+          intent: payload.intent,
+          confirmationRequired: true,
+          pendingAction: payload.pendingAction,
+        },
+      };
+    }
+    if (payload.type === "confirmation_executed") {
+      return {
+        content: payload.message,
+        placeholder: payload.provider?.mock !== false,
+        metadata: {
+          provider: payload.provider?.id || "gateway",
+          requestId: payload.requestId,
+          toolId: payload.toolId,
+          intent: payload.intent,
+          confirmed: true,
+        },
+      };
+    }
+    if (payload.type === "confirmation_cancelled") {
+      return {
+        content: payload.message,
+        placeholder: false,
+        metadata: { cancelled: true },
+      };
+    }
     const recommendations = Array.isArray(payload.recommendations)
       ? payload.recommendations.map((entry) => ({
           _id: entry.searchPreview?.id || entry.product?._id,

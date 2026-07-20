@@ -9,7 +9,7 @@ const buildHeaders = () => {
   return headers;
 };
 
-/** Backend AI gateway client — sole transport for YEBO AI (Phase 7.1) */
+/** Backend AI gateway client — sole transport for YEBO AI (Phase 7.1 + Phase 13 Commerce Agent) */
 export const YIPGatewayClient = {
   async chat(message, options = {}) {
     const { data } = await axios.post(
@@ -21,10 +21,21 @@ export const YIPGatewayClient = {
         stream: options.stream === true,
         region: options.region,
         language: options.language,
+        confirmActionId: options.confirmActionId || null,
+        cancelActionId: options.cancelActionId || null,
+        actionChecksum: options.actionChecksum || null,
       },
       { headers: buildHeaders(), withCredentials: true }
     );
     return data;
+  },
+
+  async confirmAction({ confirmActionId, sessionId, actionChecksum, message = "confirm" } = {}) {
+    return this.chat(message, { sessionId, confirmActionId, actionChecksum });
+  },
+
+  async cancelAction({ cancelActionId, sessionId, message = "cancel" } = {}) {
+    return this.chat(message, { sessionId, cancelActionId });
   },
 
   async search(query, options = {}) {

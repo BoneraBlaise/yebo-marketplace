@@ -23,6 +23,9 @@ const AIPanel = () => {
     isTyping,
     isStreaming,
     lastError,
+    pendingAction,
+    confirmPendingAction,
+    cancelPendingAction,
     assistantProviderIndicator,
   } = useAI();
 
@@ -84,6 +87,34 @@ const AIPanel = () => {
         <div className="flex-1 flex flex-col min-h-0 px-4 py-3 gap-3">
           {lastError && (
             <YEBOErrorState error={lastError} onRetry={() => sendMessage(inputValue)} className="mb-3" />
+          )}
+          {pendingAction && (
+            <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 p-3 mb-3">
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-100 mb-1">
+                Confirmation required
+              </p>
+              <p className="text-xs text-amber-800 dark:text-amber-200 mb-3">
+                {pendingAction.summary}
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={confirmPendingAction}
+                  disabled={isTyping}
+                  className="px-3 py-1.5 rounded-lg bg-yebone-primary text-white text-xs font-medium disabled:opacity-50"
+                >
+                  Confirm
+                </button>
+                <button
+                  type="button"
+                  onClick={cancelPendingAction}
+                  disabled={isTyping}
+                  className="px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-xs font-medium disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           )}
           <YEBOWelcomeBack className="mb-3" />
           <YEBOProviderStatus compact className="mb-3" />
