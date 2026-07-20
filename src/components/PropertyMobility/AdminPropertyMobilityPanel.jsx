@@ -19,6 +19,18 @@ import {
   updatePropertyMobilityConfiguration,
 } from "../../services/propertyMobilityService";
 
+const PRICING_FIELDS = [
+  ["verifiedBadgePrice", "Verified Badge Price"],
+  ["verificationDurationDays", "Verification Duration (days)"],
+  ["featuredPrice", "Featured Price"],
+  ["homepagePromotionPrice", "Homepage Promotion"],
+  ["searchBoostPrice", "Search Boost Price"],
+  ["sponsoredPrice", "Sponsored Listing Price"],
+  ["promotionDurationDays", "Promotion Duration (days)"],
+  ["agencySubscriptionPrice", "Agency Subscription Price"],
+  ["agencySubscriptionDurationDays", "Agency Subscription Duration (days)"],
+];
+
 const AdminPropertyMobilityPanel = () => {
   const [loading, setLoading] = useState(true);
   const [featureDisabled, setFeatureDisabled] = useState(false);
@@ -27,6 +39,7 @@ const AdminPropertyMobilityPanel = () => {
   const [listings, setListings] = useState([]);
   const [reports, setReports] = useState([]);
   const [pricing, setPricing] = useState(null);
+  const [settings, setSettings] = useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -48,7 +61,10 @@ const AdminPropertyMobilityPanel = () => {
       if (results[0].status === "fulfilled") setDashboard(results[0].value?.data || null);
       if (results[1].status === "fulfilled") setListings(results[1].value?.data || []);
       if (results[2].status === "fulfilled") setReports(results[2].value?.data || []);
-      if (results[3].status === "fulfilled") setPricing(results[3].value?.data?.pricing || null);
+      if (results[3].status === "fulfilled") {
+        setPricing(results[3].value?.data?.pricing || null);
+        setSettings(results[3].value?.data?.settings || null);
+      }
     } catch (error) {
       setLoadError(resolvePropertyMobilityErrorMessage(error));
     } finally {
@@ -76,10 +92,25 @@ const AdminPropertyMobilityPanel = () => {
     await updatePropertyMobilityConfiguration({
       pricing: {
         verifiedBadgePrice: Number(form.get("verifiedBadgePrice")),
+        verificationDurationDays: Number(form.get("verificationDurationDays")),
         featuredPrice: Number(form.get("featuredPrice")),
         homepagePromotionPrice: Number(form.get("homepagePromotionPrice")),
         searchBoostPrice: Number(form.get("searchBoostPrice")),
+        sponsoredPrice: Number(form.get("sponsoredPrice")),
+        promotionDurationDays: Number(form.get("promotionDurationDays")),
         agencySubscriptionPrice: Number(form.get("agencySubscriptionPrice")),
+        agencySubscriptionDurationDays: Number(form.get("agencySubscriptionDurationDays")),
+      },
+      settings: {
+        promotions: {
+          enabled: settings?.promotions?.enabled !== false,
+          homepagePromotionLimit: Number(form.get("homepagePromotionLimit")),
+        },
+        agencies: {
+          enabled: settings?.agencies?.enabled !== false,
+          unlimitedListings: form.get("agencyUnlimitedListings") === "on",
+          maxListings: Number(form.get("agencyMaxListings")),
+        },
       },
     });
     loadData();
@@ -113,15 +144,9 @@ const AdminPropertyMobilityPanel = () => {
         </div>
       ) : null}
 
-      {pricing ? (
+      {pricing && settings ? (
         <form onSubmit={handlePricingSave} className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {[
-            ["verifiedBadgePrice", "Verified Badge Price"],
-            ["featuredPrice", "Featured Price"],
-            ["homepagePromotionPrice", "Homepage Promotion"],
-            ["searchBoostPrice", "Search Boost Price"],
-            ["agencySubscriptionPrice", "Agency Subscription"],
-          ].map(([name, label]) => (
+          {PRICING_FIELDS.map(([name, label]) => (
             <label key={name} className="text-sm">
               <span className="block mb-1 text-gray-600 dark:text-gray-300">{label}</span>
               <input
@@ -132,9 +157,36 @@ const AdminPropertyMobilityPanel = () => {
               />
             </label>
           ))}
+          <label className="text-sm">
+            <span className="block mb-1 text-gray-600 dark:text-gray-300">Homepage Promotion Limit</span>
+            <input
+              name="homepagePromotionLimit"
+              type="number"
+              defaultValue={settings.promotions?.homepagePromotionLimit ?? 12}
+              className="h-11 w-full px-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-gray-900"
+            />
+          </label>
+          <label className="text-sm flex items-end gap-2 min-h-[44px]">
+            <input
+              name="agencyUnlimitedListings"
+              type="checkbox"
+              defaultChecked={settings.agencies?.unlimitedListings !== false}
+              className="h-5 w-5"
+            />
+            <span className="text-gray-600 dark:text-gray-300">Agency Unlimited Listings</span>
+          </label>
+          <label className="text-sm">
+            <span className="block mb-1 text-gray-600 dark:text-gray-300">Agency Maximum Listings</span>
+            <input
+              name="agencyMaxListings"
+              type="number"
+              defaultValue={settings.agencies?.maxListings ?? 100}
+              className="h-11 w-full px-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-gray-900"
+            />
+          </label>
           <div className="md:col-span-3">
             <button type="submit" className="h-11 px-5 rounded-xl bg-blue-600 text-white font-medium">
-              Save Pricing
+              Save Configuration
             </button>
           </div>
         </form>
