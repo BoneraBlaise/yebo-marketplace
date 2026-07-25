@@ -95,6 +95,7 @@ import CommissionDashboard from "./components/Commission/CommissionDashboard";
 import AdminGrowthCommercePage from "./pages/AdminGrowthCommercePage";
 import AdminSellerOperationsPage from "./pages/AdminSellerOperationsPage";
 import AdminPropertyMobilityPage from "./pages/AdminPropertyMobilityPage";
+import AdminTrustBuyerProtectionPage from "./pages/AdminTrustBuyerProtectionPage";
 import VendorCampaignsPage from "./pages/VendorCampaignsPage";
 import VendorSellerOperationsPage from "./pages/VendorSellerOperationsPage";
 import OwnerPropertyMobilityPage from "./pages/OwnerPropertyMobilityPage";
@@ -469,6 +470,14 @@ const App = () => {
               element={
                 <ProtectedAdminRoute>
                   <AdminPropertyMobilityPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/trust"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminTrustBuyerProtectionPage />
                 </ProtectedAdminRoute>
               }
             />
