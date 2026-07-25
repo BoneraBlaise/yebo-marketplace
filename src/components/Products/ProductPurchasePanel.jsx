@@ -18,6 +18,8 @@ import {
 import { MdVerified, MdLocalShipping, MdLock, MdReplay } from "react-icons/md";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { Button, Badge } from "../ui";
+import ShopStatusBadge from "../Shop/storefront/ShopStatusBadge";
+import "../Shop/storefront/shopStorefront.css";
 import { typography } from "../../design-system/typography";
 import Ratings from "./Ratings";
 import verified from "../verify/verified.png";
@@ -64,6 +66,7 @@ const ProductPurchasePanel = ({
   click,
   toggleWishlist,
   shopVerify,
+  shopBusinessStatus,
   handleMessageSubmit,
   handleGenerateShareLink,
   formatPrice,
@@ -256,6 +259,9 @@ const ProductPurchasePanel = ({
                 </span>
                 {shopVerify && (
                   <img src={verified} alt="Verified" className="w-4 h-4 shrink-0" />
+                )}
+                {shopBusinessStatus && shopBusinessStatus !== "open" && (
+                  <ShopStatusBadge status={shopBusinessStatus} className="!text-[10px] !py-0.5 !px-1.5" />
                 )}
               </Link>
               <Link

@@ -64,6 +64,7 @@ const ProductDetails = ({ data }) => {
   const [click, setClick] = useState(false);
   const [select, setSelect] = useState(0);
   const [shopVerify, setShopVerify] = useState(false);
+  const [shopBusinessStatus, setShopBusinessStatus] = useState("open");
   const [loading, setLoading] = useState(true); // To track loading state
   const [error, setError] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -178,10 +179,7 @@ const ProductDetails = ({ data }) => {
         .get(`${server}/shop/get-shop-info/${data.shop._id}`)
         .then((response) => {
           setShopVerify(response.data.shop.isVerified);
-          if (response.data.isVerified !== undefined) {
-          } else {
-            setError("Shop verification status not available");
-          }
+          setShopBusinessStatus(response.data.shop.businessStatus || "open");
           setLoading(false);
         })
         .catch((error) => {
@@ -514,6 +512,7 @@ const ProductDetails = ({ data }) => {
                 click={click}
                 toggleWishlist={toggleWishlist}
                 shopVerify={shopVerify}
+                shopBusinessStatus={shopBusinessStatus}
                 handleMessageSubmit={handleMessageSubmit}
                 handleGenerateShareLink={handleGenerateShareLink}
                 formatPrice={formatPrice}

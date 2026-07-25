@@ -103,6 +103,7 @@ import PublicPropertyMobilityPage from "./pages/PublicPropertyMobilityPage";
 import PropertyMobilityListingDetailPage from "./pages/PropertyMobilityListingDetailPage";
 import SellerOnboardingPage from "./pages/SellerOnboardingPage";
 import { ReferralProvider } from './context/ReferralContext';
+import { MarketplaceModeProvider } from "./context/MarketplaceModeContext";
 import { AIProvider } from "./components/ai/core/AIContext";
 import GlobalAIFab from "./components/ai/GlobalAIFab";
 import AppLayout from "./components/Layout/AppLayout";
@@ -143,6 +144,7 @@ const routerBasename =
   return (
     <BrowserRouter basename={routerBasename}>
       <ReferralProvider>
+        <MarketplaceModeProvider>
         <AIProvider>
         <ErrorBoundary>
         <GoogleAnalytics />
@@ -519,6 +521,7 @@ const routerBasename =
         </Suspense>
         </ErrorBoundary>
         </AIProvider>
+        </MarketplaceModeProvider>
       </ReferralProvider>
     </BrowserRouter>
   );

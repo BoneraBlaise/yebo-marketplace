@@ -2,11 +2,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { RxAvatar } from "react-icons/rx";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { server } from "../../server";
 import { SELLER_DASHBOARD_PATH } from "../../utils/sellerNav";
+import { establishSellerSession } from "../../utils/sellerSession";
+import { useMarketplaceMode } from "../../context/MarketplaceModeContext";
 
 const STEPS = [
   { id: "identity", label: "Identity" },
@@ -19,13 +21,15 @@ const STEPS = [
 
 const SellerOnboardingWizard = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { setMode } = useMarketplaceMode();
   const { user, isAuthenticated, loading: userLoading } = useSelector((state) => state.user);
   const { isSeller } = useSelector((state) => state.seller);
 
   const [stepIndex, setStepIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [activationUrl, setActivationUrl] = useState("");
+  const [devAutoActivated, setDevAutoActivated] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -89,6 +93,11 @@ const SellerOnboardingWizard = () => {
 
   const goBack = () => setStepIndex((i) => Math.max(i - 1, 0));
 
+  const goToSellerDashboard = () => {
+    setMode("seller");
+    navigate(SELLER_DASHBOARD_PATH);
+  };
+
   const handleCreateShop = async () => {
     setSubmitting(true);
     const paymentInfo = `${paymentMethod}:${paymentValue}`;
@@ -103,14 +112,24 @@ const SellerOnboardingWizard = () => {
         phoneNumber,
         paymentInfo,
       });
-      toast.success(res.data.message);
-      if (res.data.activationUrl) {
-        setActivationUrl(res.data.activationUrl);
+
+      if (res.data?.autoActivated && res.data?.token) {
+        await establishSellerSession(dispatch, res.data.token);
+        setMode("seller");
+        setDevAutoActivated(true);
+        setCompleted(true);
+        setStepIndex(STEPS.length - 1);
+        toast.success("Shop created successfully!");
+        navigate(SELLER_DASHBOARD_PATH, { replace: true });
+        return;
       }
+
       setCompleted(true);
       setStepIndex(STEPS.length - 1);
+      toast.success("Shop created! Check your email to activate your seller account.");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Unable to create shop.");
+      const raw = error.response?.data?.message || "Unable to create shop.";
+      toast.error(typeof raw === "string" ? raw : "Unable to create shop.");
     } finally {
       setSubmitting(false);
     }
@@ -258,24 +277,35 @@ const SellerOnboardingWizard = () => {
 
         {currentStep.id === "create" && (
           <>
-            <h2 className="text-xl font-semibold">{completed ? "Shop created" : "Create Shop"}</h2>
-            {completed ? (
-              <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                {activationUrl ? (
-                  <>
-                    <p>SMTP is not configured in this environment. Activate your shop using this link:</p>
-                    <a href={activationUrl} className="block break-all text-[#29625d] font-medium underline">{activationUrl}</a>
-                  </>
-                ) : (
-                  <p>We sent an activation link to <strong>{email}</strong>. Open it to activate your shop — you will be signed in automatically.</p>
-                )}
-                <p>Already activated? Go straight to your seller dashboard.</p>
-                <Link to={SELLER_DASHBOARD_PATH} className="inline-flex min-h-[44px] items-center px-5 rounded-xl bg-[#29625d] text-white font-medium">
-                  Seller Dashboard
-                </Link>
+            {completed && devAutoActivated ? (
+              <div className="rounded-2xl border border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-800 p-6 text-center space-y-4">
+                <p className="text-2xl font-semibold text-green-800 dark:text-green-200">✅ Shop created successfully!</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Your seller account has been created successfully.
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Development mode automatically activated your shop.
+                </p>
+                <button
+                  type="button"
+                  onClick={goToSellerDashboard}
+                  className="inline-flex min-h-[44px] items-center px-6 rounded-xl bg-[#29625d] text-white font-medium"
+                >
+                  Go to Seller Dashboard
+                </button>
+              </div>
+            ) : completed ? (
+              <div className="rounded-2xl border border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-800 p-6 text-center space-y-4">
+                <p className="text-2xl font-semibold text-green-800 dark:text-green-200">✅ Shop created successfully!</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Your seller account has been created. Check your email to activate your shop.
+                </p>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">Submit your shop for creation. You will receive an email to activate your seller account.</p>
+              <>
+                <h2 className="text-xl font-semibold">Create Shop</h2>
+                <p className="text-sm text-gray-500">Submit your shop for creation. You will receive an email to activate your seller account.</p>
+              </>
             )}
           </>
         )}

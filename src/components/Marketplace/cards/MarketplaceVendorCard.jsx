@@ -2,6 +2,8 @@ import React, { memo } from "react";
 import { Link } from "react-router-dom";
 import { MdVerified } from "react-icons/md";
 import classNames from "classnames";
+import ShopStatusBadge from "../../Shop/storefront/ShopStatusBadge";
+import "../../Shop/storefront/shopStorefront.css";
 
 const PLACEHOLDER_LOGO = "https://via.placeholder.com/80";
 
@@ -23,9 +25,9 @@ const MarketplaceVendorCard = memo(({ shop, featured = false, responsiveRich = t
     >
       {responsiveRich && (
         <div className="mpc-vendor-card__cover relative" aria-hidden="true">
-          {shop.avatar?.url ? (
+          {(shop.cover?.url || shop.avatar?.url) ? (
             <>
-              <img src={shop.avatar.url} alt="" loading="lazy" decoding="async" />
+              <img src={shop.cover?.url || shop.avatar.url} alt="" loading="lazy" decoding="async" />
               <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent" />
             </>
           ) : (
@@ -50,10 +52,14 @@ const MarketplaceVendorCard = memo(({ shop, featured = false, responsiveRich = t
           <div className="mpc-vendor-card__info">
             <h3 className="mpc-vendor-card__name">{shop.name}</h3>
             <div className="mpc-vendor-card__badge-row">
-              <span className="home-chip home-chip--verified !text-[10px] !py-0.5 !px-1.5">
-                <MdVerified size={10} />
-                Verified
-              </span>
+              {shop.businessStatus && shop.businessStatus !== "open" ? (
+                <ShopStatusBadge status={shop.businessStatus} className="!text-[10px] !py-0.5 !px-1.5" />
+              ) : (
+                <span className="home-chip home-chip--verified !text-[10px] !py-0.5 !px-1.5">
+                  <MdVerified size={10} />
+                  Verified
+                </span>
+              )}
             </div>
           </div>
         </div>

@@ -3,7 +3,18 @@ import { getAuthToken, getSellerToken } from "./authStorage";
 
 const isSellerApiPath = (url = "") => {
   const path = String(url);
-  return path.includes("/shop/") && !path.includes("/shop/login-shop");
+  if (!path.includes("/shop/")) return false;
+  const userAuthPaths = [
+    "/shop/login-shop",
+    "/shop/create-shop",
+    "/shop/resume-session",
+    "/shop/activation/",
+    "/shop/get-shop-info/",
+    "/shop/get-shop-info",
+    "/follow",
+    "/favorite",
+  ];
+  return !userAuthPaths.some((segment) => path.includes(segment));
 };
 
 export const setupApiClient = () => {

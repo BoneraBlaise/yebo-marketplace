@@ -30,7 +30,7 @@ const shouldAttemptSellerResume = () => {
 };
 
 /** Re-establish seller session for logged-in customers who own a shop (same email). */
-export const tryResumeSellerSession = () => async (dispatch) => {
+export const tryResumeSellerSession = () => async (dispatch, getState) => {
   if (!shouldAttemptSellerResume()) {
     return false;
   }
@@ -42,7 +42,7 @@ export const tryResumeSellerSession = () => async (dispatch) => {
       setSellerToken(data.token);
     }
     await dispatch(loadSeller());
-    return true;
+    return getState().seller?.isSeller === true;
   } catch {
     return false;
   }

@@ -25,7 +25,9 @@ import { buildMobileNavCategories } from "./mainCategoryHierarchy";
 import useSiteSearch from "../../hooks/useSiteSearch";
 import { Container } from "../ui";
 import { resolveSellerNavAction } from "../../utils/sellerNav";
+import { useMarketplaceMode } from "../../context/MarketplaceModeContext";
 import YeboneLogo from "./YeboneLogo";
+import MarketplaceModeSwitch from "../Layout/MarketplaceModeSwitch";
 import SkipToContent from "../Layout/SkipToContent";
 import "./home.css";
 
@@ -35,6 +37,7 @@ const NOTIFICATION_UNREAD_MOCK = 2;
 const HomeHeader = ({ activeHeading: _activeHeading }) => {
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { isSeller } = useSelector((state) => state.seller);
+  const { setMode } = useMarketplaceMode();
   const { wishlist } = useSelector((state) => state.wishlist);
   const { cart } = useSelector((state) => state.cart);
   const [dropDown, setDropDown] = useState(false);
@@ -115,6 +118,13 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
               <span className="home-header__utility-divider" aria-hidden="true" />
 
               <LanguageSwitcher />
+
+              {isAuthenticated && isSeller ? (
+                <>
+                  <span className="home-header__utility-divider" aria-hidden="true" />
+                  <MarketplaceModeSwitch />
+                </>
+              ) : null}
 
               {!isAuthenticated && (
                 <>
@@ -269,6 +279,9 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
             <div className="home-header__actions shrink-0">
               <Link
                 to={sellerAction.to}
+                onClick={() => {
+                  if (isSeller) setMode("seller");
+                }}
                 className="home-header__seller-link hidden lg:inline-flex"
               >
                 {sellerAction.label}

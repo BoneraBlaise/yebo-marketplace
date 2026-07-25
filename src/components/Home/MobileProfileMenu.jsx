@@ -17,6 +17,8 @@ import {
 } from "react-icons/hi";
 import { AiOutlineLogin } from "react-icons/ai";
 import { resolveSellerNavAction, SELLER_ONBOARDING_PATH } from "../../utils/sellerNav";
+import { useMarketplaceMode } from "../../context/MarketplaceModeContext";
+import MarketplaceModeSwitch from "../Layout/MarketplaceModeSwitch";
 import { logoutUser } from "../../config/authService";
 
 const MobileProfileMenu = ({ open, onClose }) => {
@@ -24,6 +26,7 @@ const MobileProfileMenu = ({ open, onClose }) => {
   const panelRef = useRef(null);
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { isSeller } = useSelector((state) => state.seller);
+  const { setMode } = useMarketplaceMode();
 
   useEffect(() => {
     if (!open) return undefined;
@@ -125,8 +128,20 @@ const MobileProfileMenu = ({ open, onClose }) => {
                 <HiOutlineCreditCard size={20} />
                 Payment Methods
               </Link>
+              {isAuthenticated && isSeller ? (
+                <div className="px-4 py-3">
+                  <MarketplaceModeSwitch className="w-full justify-center" />
+                </div>
+              ) : null}
               {isSeller ? (
-                <Link to={sellerNav.to} className={menuItemClass} onClick={onClose}>
+                <Link
+                  to={sellerNav.to}
+                  className={menuItemClass}
+                  onClick={() => {
+                    setMode("seller");
+                    onClose();
+                  }}
+                >
                   <HiOutlineViewGrid size={20} />
                   {sellerNav.label}
                 </Link>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { server } from "../../server";
 import { AiOutlineCamera } from "react-icons/ai";
@@ -6,171 +6,274 @@ import styles from "../../styles/styles";
 import axios from "axios";
 import { loadSeller } from "../../redux/actions/user";
 import { toast } from "react-toastify";
+import { emitShopStatusUpdate } from "../../hooks/useShopStorefront";
+
+const STATUS_OPTIONS = [
+  { value: "open", label: "Open" },
+  { value: "closed", label: "Closed" },
+  { value: "busy", label: "Busy" },
+  { value: "vacation", label: "Vacation" },
+];
+
+const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+const readFile = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 const ShopSettings = () => {
   const { seller } = useSelector((state) => state.seller);
-  const [avatar, setAvatar] = useState();
-  const [name, setName] = useState(seller?.name || "");
-  const [description, setDescription] = useState(seller?.description || "");
-  const [address, setAddress] = useState(seller?.address || "");
-  const [phoneNumber, setPhoneNumber] = useState(seller?.phoneNumber || "");
-  const [zipCode, setZipcode] = useState(seller?.zipCode || "");
-  const [paymentInfo, setPaymentInfo] = useState(seller?.paymentInfo || "");
   const dispatch = useDispatch();
 
-  const handleImage = async (e) => {
-    const reader = new FileReader();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [bio, setBio] = useState("");
+  const [address, setAddress] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [zipCode, setZipcode] = useState("");
+  const [paymentInfo, setPaymentInfo] = useState("");
+  const [website, setWebsite] = useState("");
+  const [businessStatus, setBusinessStatus] = useState("open");
+  const [themeAccent, setThemeAccent] = useState("#29625d");
+  const [businessHours, setBusinessHours] = useState({});
+  const [socialLinks, setSocialLinks] = useState({});
+  const [policies, setPolicies] = useState({});
+  const [gallery, setGallery] = useState([]);
+  const [saving, setSaving] = useState(false);
 
-    reader.onload = () => {
-      if (reader.readyState === 2) {
-        setAvatar(reader.result);
-        axios
-          .put(
-            `${server}/shop/update-shop-avatar`,
-            { avatar: reader.result },
-            { withCredentials: true }
-          )
-          .then((res) => {
-            dispatch(loadSeller());
-            toast.success("Avatar updated successfully!");
-          })
-          .catch((error) => {
-            toast.error(error.response.data.message);
-          });
-      }
-    };
+  useEffect(() => {
+    if (!seller) return;
+    setName(seller.name || "");
+    setDescription(seller.description || "");
+    setBio(seller.bio || "");
+    setAddress(seller.address || "");
+    setPhoneNumber(seller.phoneNumber || "");
+    setZipcode(seller.zipCode || "");
+    setPaymentInfo(seller.paymentInfo || "");
+    setWebsite(seller.website || "");
+    setBusinessStatus(seller.businessStatus || "open");
+    setThemeAccent(seller.themeAccent || "#29625d");
+    setBusinessHours(seller.businessHours || {});
+    setSocialLinks(seller.socialLinks || {});
+    setPolicies(seller.policies || {});
+    setGallery(seller.gallery || []);
+  }, [seller]);
 
-    reader.readAsDataURL(e.target.files[0]);
+  const uploadAvatar = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const dataUrl = await readFile(file);
+    await axios.put(`${server}/shop/update-shop-avatar`, { avatar: dataUrl }, { withCredentials: true });
+    dispatch(loadSeller());
+    toast.success("Logo updated");
+  };
+
+  const uploadCover = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const dataUrl = await readFile(file);
+    await axios.put(`${server}/shop/update-shop-cover`, { cover: dataUrl }, { withCredentials: true });
+    dispatch(loadSeller());
+    toast.success("Cover image updated");
+  };
+
+  const uploadGallery = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const items = await Promise.all(
+      files.map(async (file) => ({
+        image: await readFile(file),
+        caption: "",
+        type: "storefront",
+      }))
+    );
+    const merged = [...gallery, ...items.map((i) => ({ ...i, url: null }))];
+    await axios.put(`${server}/shop/update-shop-gallery`, { gallery: merged }, { withCredentials: true });
+    dispatch(loadSeller());
+    toast.success("Gallery updated");
+  };
+
+  const updateStatus = async (status) => {
+    setBusinessStatus(status);
+    const { data } = await axios.put(
+      `${server}/shop/update-shop-status`,
+      { businessStatus: status },
+      { withCredentials: true }
+    );
+    dispatch(loadSeller());
+    emitShopStatusUpdate(seller._id, data.businessStatus);
+    toast.success(`Shop is now ${status}`);
   };
 
   const updateHandler = async (e) => {
     e.preventDefault();
-
-    await axios
-      .put(
+    setSaving(true);
+    try {
+      await axios.put(
         `${server}/shop/update-seller-info`,
         {
           name,
+          description,
+          bio,
           address,
           zipCode,
           phoneNumber,
-          description,
           paymentInfo,
+          website,
+          businessHours,
+          socialLinks,
+          policies,
+          themeAccent,
         },
         { withCredentials: true }
-      )
-      .then((res) => {
-        toast.success("Shop info updated successfully!");
-        dispatch(loadSeller());
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-      });
+      );
+      dispatch(loadSeller());
+      toast.success("Storefront updated");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Update failed");
+    } finally {
+      setSaving(false);
+    }
   };
 
-  return (
-    <div className="yebone-fade-up space-y-6 p-1">
-      <div className="dashboard-section yebone-surface max-w-3xl mx-auto">
-        <h2 className="font-Poppins text-xl font-semibold mb-6 dark:text-white text-center">
-          Store settings
-        </h2>
+  const setHour = (day, field, value) => {
+    setBusinessHours((prev) => ({
+      ...prev,
+      [day]: { ...prev[day], [field]: value },
+    }));
+  };
 
-        <div className="relative flex items-center justify-center mb-8">
-          <img
-            src={avatar || seller.avatar?.url}
-            alt="Shop Avatar"
-            className="w-32 h-32 rounded-full object-cover border-4 border-yebone-primary/20"
-          />
-          <div className="absolute bottom-0 right-1/2 translate-x-16 bg-yebone-primary rounded-full p-2.5 cursor-pointer shadow-lg">
-            <input type="file" id="image" className="hidden" onChange={handleImage} />
-            <label htmlFor="image">
-              <AiOutlineCamera className="text-white" />
-            </label>
+  if (!seller) {
+    return <p className="text-center py-8 text-gray-500">Loading store settings…</p>;
+  }
+
+  return (
+    <div className="yebone-fade-up space-y-6 p-1 max-w-3xl mx-auto">
+      <div className="dashboard-section yebone-surface">
+        <h2 className="font-Poppins text-xl font-semibold mb-2 dark:text-white">Storefront customization</h2>
+        <p className="text-sm text-gray-500 mb-6">Changes appear instantly on your public shop profile.</p>
+
+        {/* Business status */}
+        <div className="vendor-form-section yebone-surface mb-6">
+          <h3 className="font-semibold mb-3 dark:text-white">Business Status</h3>
+          <div className="flex flex-wrap gap-2">
+            {STATUS_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => updateStatus(opt.value)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium border transition ${
+                  businessStatus === opt.value
+                    ? "bg-yebone-primary text-white border-yebone-primary"
+                    : "border-gray-200 dark:border-gray-700 dark:text-gray-200"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        <form className="w-full space-y-6" onSubmit={updateHandler}>
-          <div className="vendor-form-section yebone-surface">
-            <h3 className="font-Poppins font-semibold mb-4 dark:text-white">Store profile</h3>
-            <div className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Name</label>
-                <input
-                  type="text"
-                  placeholder="Enter shop name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
-                  required
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Description</label>
-                <input
-                  type="text"
-                  placeholder="Enter shop description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Manual Payment</label>
-                <input
-                  type="text"
-                  placeholder="Enter Manual Payment"
-                  value={paymentInfo}
-                  onChange={(e) => setPaymentInfo(e.target.value)}
-                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
-                />
-              </div>
-            </div>
+        {/* Cover + logo */}
+        <div className="relative mb-8 rounded-2xl overflow-hidden border dark:border-gray-700">
+          <div className="aspect-[16/9] bg-gradient-to-br from-yebone-primary to-yebone-primary-dark relative">
+            {seller.cover?.url && (
+              <img src={seller.cover.url} alt="" className="w-full h-full object-cover" />
+            )}
+            <label className="absolute bottom-3 right-3 px-3 py-1.5 rounded-lg bg-black/50 text-white text-xs cursor-pointer">
+              Change cover
+              <input type="file" accept="image/*" className="hidden" onChange={uploadCover} />
+            </label>
+          </div>
+          <div className="absolute left-6 -bottom-10">
+            <img
+              src={seller.avatar?.url}
+              alt="Shop logo"
+              className="w-20 h-20 rounded-full border-4 border-white dark:border-gray-900 object-cover shadow-lg"
+            />
+            <label className="absolute bottom-0 right-0 bg-yebone-primary rounded-full p-2 cursor-pointer shadow">
+              <input type="file" accept="image/*" className="hidden" onChange={uploadAvatar} />
+              <AiOutlineCamera className="text-white" size={16} />
+            </label>
+          </div>
+        </div>
+        <div className="h-12" aria-hidden="true" />
+
+        <form className="space-y-6" onSubmit={updateHandler}>
+          <div className="vendor-form-section yebone-surface space-y-4">
+            <h3 className="font-semibold dark:text-white">Brand</h3>
+            <label className="block text-sm font-medium">Shop name</label>
+            <input className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} value={name} onChange={(e) => setName(e.target.value)} required />
+            <label className="block text-sm font-medium">Short bio</label>
+            <textarea className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f] min-h-[80px]`} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="A brief tagline for your storefront hero" />
+            <label className="block text-sm font-medium">Full description</label>
+            <textarea className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f] min-h-[100px]`} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <label className="block text-sm font-medium">Theme accent</label>
+            <input type="color" value={themeAccent} onChange={(e) => setThemeAccent(e.target.value)} className="h-10 w-20 rounded cursor-pointer" aria-label="Theme accent color" />
           </div>
 
-          <div className="vendor-form-section yebone-surface">
-            <h3 className="font-Poppins font-semibold mb-4 dark:text-white">Contact & address</h3>
-            <div className="space-y-4">
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Address</label>
-                <input
-                  type="text"
-                  placeholder="Enter shop address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
-                  required
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Phone Number</label>
-                <input
-                  type="tel"
-                  placeholder="Enter shop phone number"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
-                  required
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">Shop Zip Code</label>
-                <input
-                  type="text"
-                  placeholder="Enter shop zip code"
-                  value={zipCode}
-                  onChange={(e) => setZipcode(e.target.value)}
-                  className={`${styles.input} dark:bg-[#1f1f1f] w-full rounded-xl`}
-                  required
-                />
-              </div>
-            </div>
+          <div className="vendor-form-section yebone-surface space-y-4">
+            <h3 className="font-semibold dark:text-white">Contact</h3>
+            <input className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} placeholder="Phone" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} required />
+            <input className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} required />
+            <input className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} placeholder="Zip code" value={zipCode} onChange={(e) => setZipcode(e.target.value)} required />
+            <input className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} placeholder="Website URL" value={website} onChange={(e) => setWebsite(e.target.value)} />
+            <input className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} placeholder="Payment info" value={paymentInfo} onChange={(e) => setPaymentInfo(e.target.value)} />
           </div>
 
-          <button
-            type="submit"
-            className="w-full py-3 bg-yebone-primary hover:opacity-90 text-white font-semibold rounded-xl transition-opacity yebone-btn-lift"
-          >
-            Update Shop
+          <div className="vendor-form-section yebone-surface space-y-4">
+            <h3 className="font-semibold dark:text-white">Opening hours</h3>
+            {DAY_KEYS.map((day, i) => (
+              <div key={day} className="grid grid-cols-3 gap-2 items-center text-sm">
+                <span>{DAY_LABELS[i]}</span>
+                <input type="time" className={`${styles.input} rounded-lg dark:bg-[#1f1f1f]`} value={businessHours[day]?.open || ""} onChange={(e) => setHour(day, "open", e.target.value)} />
+                <input type="time" className={`${styles.input} rounded-lg dark:bg-[#1f1f1f]`} value={businessHours[day]?.close || ""} onChange={(e) => setHour(day, "close", e.target.value)} />
+              </div>
+            ))}
+          </div>
+
+          <div className="vendor-form-section yebone-surface space-y-4">
+            <h3 className="font-semibold dark:text-white">Policies</h3>
+            <textarea className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} placeholder="Return policy" value={policies.returns || ""} onChange={(e) => setPolicies((p) => ({ ...p, returns: e.target.value }))} />
+            <textarea className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} placeholder="Shipping policy" value={policies.shipping || ""} onChange={(e) => setPolicies((p) => ({ ...p, shipping: e.target.value }))} />
+            <input className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`} placeholder="Support hours" value={policies.supportHours || ""} onChange={(e) => setPolicies((p) => ({ ...p, supportHours: e.target.value }))} />
+          </div>
+
+          <div className="vendor-form-section yebone-surface space-y-4">
+            <h3 className="font-semibold dark:text-white">Social links</h3>
+            {["instagram", "facebook", "twitter", "tiktok", "whatsapp"].map((key) => (
+              <input
+                key={key}
+                className={`${styles.input} w-full rounded-xl dark:bg-[#1f1f1f]`}
+                placeholder={key.charAt(0).toUpperCase() + key.slice(1)}
+                value={socialLinks[key] || ""}
+                onChange={(e) => setSocialLinks((s) => ({ ...s, [key]: e.target.value }))}
+              />
+            ))}
+          </div>
+
+          <div className="vendor-form-section yebone-surface space-y-4">
+            <h3 className="font-semibold dark:text-white">Gallery</h3>
+            <label className="inline-flex px-4 py-2 rounded-xl border cursor-pointer text-sm font-medium">
+              Upload photos
+              <input type="file" accept="image/*" multiple className="hidden" onChange={uploadGallery} />
+            </label>
+            {gallery.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto">
+                {gallery.map((item, i) => (
+                  <img key={i} src={item.url} alt="" className="w-20 h-20 rounded-lg object-cover shrink-0" />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button type="submit" disabled={saving} className="w-full py-3 bg-yebone-primary text-white font-semibold rounded-xl disabled:opacity-50">
+            {saving ? "Saving…" : "Save storefront"}
           </button>
         </form>
       </div>
