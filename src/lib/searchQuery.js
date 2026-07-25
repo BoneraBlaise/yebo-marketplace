@@ -1,13 +1,20 @@
 import axios from "axios";
 import { server } from "../config/serverConfig";
+import {
+  buildSearchParams,
+  buildSearchQueryFromParams,
+  mapSortToApi,
+  shouldUseServerSearch,
+  SERVER_SEARCH_KEYS,
+} from "./searchQueryUtils.mjs";
 
-const searchQueryUtils = require("./searchQueryUtils.cjs");
-
-export const buildSearchParams = searchQueryUtils.buildSearchParams;
-export const buildSearchQueryFromParams = searchQueryUtils.buildSearchQueryFromParams;
-export const mapSortToApi = searchQueryUtils.mapSortToApi;
-export const shouldUseServerSearch = searchQueryUtils.shouldUseServerSearch;
-export const SERVER_SEARCH_KEYS = searchQueryUtils.SERVER_SEARCH_KEYS;
+export {
+  buildSearchParams,
+  buildSearchQueryFromParams,
+  mapSortToApi,
+  shouldUseServerSearch,
+  SERVER_SEARCH_KEYS,
+};
 
 export const requestSearchProducts = async (query = {}) => {
   const queryString = buildSearchParams(query);

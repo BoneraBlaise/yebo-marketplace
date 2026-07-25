@@ -3,6 +3,13 @@ import { server } from "../../server";
 import { toast } from "react-toastify";
 import { loadUser } from "./user";
 
+/** Admin list may be a plain array (legacy) or paginated `{ orders, total, page, limit }`. */
+export const normalizeAdminOrdersPayload = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (payload && Array.isArray(payload.orders)) return payload.orders;
+  return [];
+};
+
 // get all orders of user
 export const getAllOrdersOfUser = (userId) => async (dispatch) => {
   try {
@@ -62,7 +69,7 @@ export const getAllOrdersOfAdmin = () => async (dispatch) => {
 
     dispatch({
       type: "adminAllOrdersSuccess",
-      payload: data.orders,
+      payload: normalizeAdminOrdersPayload(data.orders),
     });
   } catch (error) {
     dispatch({

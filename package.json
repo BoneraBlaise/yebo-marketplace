@@ -66,10 +66,12 @@
     "deploy": "gh-pages -d build",
     "deploy:gh-pages": "powershell -ExecutionPolicy Bypass -File scripts/deploy-gh-pages.ps1",
     "smoke:production": "powershell -ExecutionPolicy Bypass -File scripts/smoke-production.ps1",
+    "local": "npm run local --prefix ../../..",
+    "verify:local": "npm run verify:local --prefix ../../..",
     "build": "set NODE_OPTIONS=--max-old-space-size=8192 && react-scripts build",
     "lint": "eslint src --ext .js,.jsx",
     "test": "react-scripts test",
-    "test:search-smoke": "node --test src/lib/__tests__/searchQuery.test.js",
+    "test:search-smoke": "node --test src/lib/__tests__/searchQuery.test.mjs",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

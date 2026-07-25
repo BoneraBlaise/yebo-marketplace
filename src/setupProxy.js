@@ -1,8 +1,22 @@
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
+const LOCAL_BACKEND_DEFAULT = "http://localhost:5000";
+const FORBIDDEN_DEV_HOST_PATTERN = /onrender\.com|github\.io/i;
+
 const API_TARGET =
   process.env.REACT_APP_PROXY_TARGET ||
-  "https://yebone-backend.onrender.com";
+  LOCAL_BACKEND_DEFAULT;
+
+if (
+  process.env.NODE_ENV === "development" &&
+  FORBIDDEN_DEV_HOST_PATTERN.test(API_TARGET)
+) {
+  throw new Error(
+    `[setupProxy] Development must use the local backend (${LOCAL_BACKEND_DEFAULT}). ` +
+      `Current REACT_APP_PROXY_TARGET=${API_TARGET}. ` +
+      "Update .env.development or .env.development.local."
+  );
+}
 
 console.info("[setupProxy] loaded by react-scripts");
 console.info("[setupProxy] browser -> /api/* ->", API_TARGET);
@@ -13,22 +27,18 @@ module.exports = function setupProxy(app) {
     createProxyMiddleware({
       target: API_TARGET,
       changeOrigin: true,
-      secure: true,
+      secure: API_TARGET.startsWith("https"),
       logLevel: "info",
       onProxyReq: (proxyReq, req) => {
-        // Render backend only allows Origin http://localhost:3000.
-        // Rewrite outbound Origin so LAN dev traffic is accepted.
-        proxyReq.setHeader("origin", "http://localhost:3000");
-        proxyReq.removeHeader("referer");
-
         if (process.env.NODE_ENV === "development") {
+          proxyReq.setHeader("origin", "http://localhost:3000");
+          proxyReq.removeHeader("referer");
           console.info(
             "[setupProxy] forwarding",
             req.method,
             req.url,
             "->",
-            API_TARGET + req.url,
-            "(origin rewritten to http://localhost:3000)"
+            API_TARGET + req.url
           );
         }
       },

@@ -50,8 +50,10 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const orchestratorRef = useRef(null);
   const providerFactoryRef = useRef(null);
   if (!providerFactoryRef.current) {
+    // SDK registry (Phase 8A.1): mock is the active SDK provider.
+    // Assistant traffic uses yipConfig.provider "gateway" via GatewayAssistantAdapter (Phase 7.1).
     providerFactoryRef.current = createProviderFactory({
-      preferredProvider: "gateway",
+      preferredProvider: "mock",
       streamingEnabled: true,
       offlineMode: false,
       mockMode: true,
@@ -62,7 +64,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       memoryEngine: memoryRef.current,
       decisionEngine: decisionEngineRef.current,
       intelligenceEngine: intelligenceEngineRef.current,
-      config: { preferredProvider: "gateway", streamingEnabled: true },
+      config: { preferredProvider: "mock", streamingEnabled: true },
     });
     connectOrchestrationToSDK(orchestratorRef.current);
     providerFactoryRef.current.initialize();

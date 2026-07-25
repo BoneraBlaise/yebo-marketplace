@@ -1,4 +1,4 @@
-const SERVER_SEARCH_KEYS = [
+export const SERVER_SEARCH_KEYS = [
   "search",
   "q",
   "category",
@@ -18,13 +18,13 @@ const SERVER_SEARCH_KEYS = [
   "discounted",
 ];
 
-const shouldUseServerSearch = (searchParams) =>
+export const shouldUseServerSearch = (searchParams) =>
   SERVER_SEARCH_KEYS.some((key) => {
     const value = searchParams.get(key);
     return value !== null && value !== "";
   });
 
-const mapSortToApi = (sortBy) => {
+export const mapSortToApi = (sortBy) => {
   switch (sortBy) {
     case "almostGone":
       return "almostGone";
@@ -42,7 +42,7 @@ const mapSortToApi = (sortBy) => {
   }
 };
 
-const buildSearchQueryFromParams = ({
+export const buildSearchQueryFromParams = ({
   searchParams,
   sortBy = "",
   selectedRating = 0,
@@ -64,7 +64,7 @@ const buildSearchQueryFromParams = ({
   limit: searchParams.get("limit") || 20,
 });
 
-const buildSearchParams = (query = {}) => {
+export const buildSearchParams = (query = {}) => {
   const params = new URLSearchParams();
   Object.entries(query).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
@@ -72,12 +72,4 @@ const buildSearchParams = (query = {}) => {
     }
   });
   return params.toString();
-};
-
-module.exports = {
-  SERVER_SEARCH_KEYS,
-  shouldUseServerSearch,
-  mapSortToApi,
-  buildSearchQueryFromParams,
-  buildSearchParams,
 };

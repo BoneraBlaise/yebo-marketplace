@@ -1,11 +1,11 @@
-const { describe, it } = require("node:test");
-const assert = require("node:assert/strict");
-const {
+import { describe, it } from "node:test";
+import assert from "node:assert/strict";
+import {
   shouldUseServerSearch,
   mapSortToApi,
   buildSearchQueryFromParams,
   buildSearchParams,
-} = require("../searchQueryUtils.cjs");
+} from "../searchQueryUtils.mjs";
 
 describe("searchQuery helpers", () => {
   it("detects server search params", () => {

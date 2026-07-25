@@ -2,6 +2,8 @@ import { createReducer } from "@reduxjs/toolkit";
 
 const initialState = {
   isLoading: true,
+  adminOrderLoading: false,
+  adminOrders: [],
   commissionLoading: false,
   commissionStats: null,
   error: null,
