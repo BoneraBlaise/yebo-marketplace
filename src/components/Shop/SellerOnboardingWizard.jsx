@@ -25,6 +25,7 @@ const SellerOnboardingWizard = () => {
   const [stepIndex, setStepIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [activationUrl, setActivationUrl] = useState("");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -103,6 +104,9 @@ const SellerOnboardingWizard = () => {
         paymentInfo,
       });
       toast.success(res.data.message);
+      if (res.data.activationUrl) {
+        setActivationUrl(res.data.activationUrl);
+      }
       setCompleted(true);
       setStepIndex(STEPS.length - 1);
     } catch (error) {
@@ -257,7 +261,14 @@ const SellerOnboardingWizard = () => {
             <h2 className="text-xl font-semibold">{completed ? "Shop created" : "Create Shop"}</h2>
             {completed ? (
               <div className="space-y-3 text-sm text-gray-600 dark:text-gray-300">
-                <p>We sent an activation link to <strong>{email}</strong>. Open it to activate your shop — you will be signed in automatically.</p>
+                {activationUrl ? (
+                  <>
+                    <p>SMTP is not configured in this environment. Activate your shop using this link:</p>
+                    <a href={activationUrl} className="block break-all text-[#29625d] font-medium underline">{activationUrl}</a>
+                  </>
+                ) : (
+                  <p>We sent an activation link to <strong>{email}</strong>. Open it to activate your shop — you will be signed in automatically.</p>
+                )}
                 <p>Already activated? Go straight to your seller dashboard.</p>
                 <Link to={SELLER_DASHBOARD_PATH} className="inline-flex min-h-[44px] items-center px-5 rounded-xl bg-[#29625d] text-white font-medium">
                   Seller Dashboard
