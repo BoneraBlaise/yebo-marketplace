@@ -4,27 +4,40 @@ import {
   ControlCenterCard,
   ControlCenterShell,
   ControlCenterSkeleton,
+  DraftPublishBar,
   MetricCard,
+  PreviewPanel,
   SimpleBarChart,
-  StickySaveBar,
   ToggleSwitch,
+  WorkflowStatusBar,
 } from "../shell/ControlCenterShell";
 import { AI_PRODUCT_CATALOG, formatCurrency } from "../constants/platformCatalog";
-import { fetchAiAdminProducts, updateAiAdminProducts } from "../../../services/platformConfigurationService";
+import { simulateAiPreview } from "../utils/configurationSimulators";
+import {
+  fetchAiAdminProducts,
+  fetchConfigurationWorkflow,
+  publishPlatformConfiguration,
+  updateAiAdminProducts,
+} from "../../../services/platformConfigurationService";
 
 const AIControlCenter = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
   const [reason, setReason] = useState("");
   const [products, setProducts] = useState({});
   const [initialProducts, setInitialProducts] = useState({});
   const [metrics, setMetrics] = useState(null);
   const [health, setHealth] = useState(null);
+  const [workflow, setWorkflow] = useState(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetchAiAdminProducts();
+      const [response, workflowRes] = await Promise.all([
+        fetchAiAdminProducts(),
+        fetchConfigurationWorkflow(),
+      ]);
       const catalog = response?.data?.products || [];
       const mapped = {};
       catalog.forEach((item) => {
@@ -49,6 +62,7 @@ const AIControlCenter = () => {
       setInitialProducts(JSON.parse(JSON.stringify(mapped)));
       setMetrics(response?.data?.metrics);
       setHealth(response?.data?.health);
+      setWorkflow(workflowRes?.data || response?.data?.workflow || null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to load AI control center");
     } finally {
@@ -72,27 +86,45 @@ const AIControlCenter = () => {
     }));
   };
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
     setSaving(true);
     try {
       await updateAiAdminProducts(products, reason.trim());
-      toast.success("AI product configuration saved");
+      toast.success("AI product draft saved");
       setReason("");
       await loadData();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to save AI settings");
+      toast.error(error?.response?.data?.message || "Unable to save draft");
     } finally {
       setSaving(false);
     }
   };
 
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      if (dirty) await updateAiAdminProducts(products, reason.trim());
+      await publishPlatformConfiguration(reason.trim());
+      toast.success("AI configuration published");
+      setReason("");
+      await loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to publish");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const enabledCount = Object.values(products).filter((item) => item.enabled !== false).length;
+  const preview = simulateAiPreview(products);
 
   return (
     <ControlCenterShell
       title="AI Control Center"
       subtitle="AI Marketplace Admin — pricing, credits, eligibility, and vendor dashboard integration."
     >
+      <WorkflowStatusBar workflow={workflow} />
+
       {loading ? (
         <ControlCenterSkeleton rows={4} />
       ) : (
@@ -209,10 +241,21 @@ const AIControlCenter = () => {
         </>
       )}
 
-      <StickySaveBar
+      <PreviewPanel
+        title="Revenue preview (120 active vendors · 35% adoption)"
+        items={[
+          { label: "Expected monthly revenue", value: formatCurrency(preview.expectedMonthlyRevenue) },
+          { label: "Expected yearly revenue", value: formatCurrency(preview.expectedYearlyRevenue) },
+          { label: "Vendor adoption estimate", value: preview.vendorAdoptionEstimate },
+        ]}
+      />
+
+      <DraftPublishBar
         dirty={dirty}
         saving={saving}
-        onSave={handleSave}
+        publishing={publishing}
+        onSaveDraft={handleSaveDraft}
+        onPublish={handlePublish}
         onDiscard={() => setProducts(JSON.parse(JSON.stringify(initialProducts)))}
         reason={reason}
         onReasonChange={setReason}

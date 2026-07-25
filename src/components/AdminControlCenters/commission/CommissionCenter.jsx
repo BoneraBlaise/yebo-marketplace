@@ -7,19 +7,24 @@ import {
   ControlCenterSkeleton,
   ControlCenterTabs,
   DataTable,
+  DraftPublishBar,
   MetricCard,
+  PreviewPanel,
   SimpleBarChart,
-  StickySaveBar,
   ToggleSwitch,
+  WorkflowStatusBar,
 } from "../shell/ControlCenterShell";
 import { PLATFORM_CATEGORIES, formatCategoryLabel, formatCurrency } from "../constants/platformCatalog";
+import { simulateCommissionPreview } from "../utils/configurationSimulators";
 import {
   fetchCommissionAnalytics,
   fetchCommissionRules,
 } from "../../../services/growthConfigurationService";
 import {
   fetchCommissionHistory,
+  fetchConfigurationWorkflow,
   fetchPlatformConfiguration,
+  publishPlatformConfiguration,
   updatePlatformConfigurationSection,
 } from "../../../services/platformConfigurationService";
 
@@ -34,6 +39,8 @@ const CommissionCenter = () => {
   const [activeTab, setActiveTab] = useState("platform");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [workflow, setWorkflow] = useState(null);
   const [reason, setReason] = useState("");
   const [categoryCommissions, setCategoryCommissions] = useState({});
   const [initialCommissions, setInitialCommissions] = useState({});
@@ -44,15 +51,21 @@ const CommissionCenter = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [configRes, historyRes, analyticsRes, rulesRes] = await Promise.all([
+      const [configRes, historyRes, analyticsRes, rulesRes, workflowRes] = await Promise.all([
         fetchPlatformConfiguration(),
         fetchCommissionHistory(100),
         fetchCommissionAnalytics(),
         fetchCommissionRules({ strategy: "CATEGORY", limit: 100 }),
+        fetchConfigurationWorkflow(),
       ]);
-      const commissions = configRes?.data?.platform?.businessValues?.categoryCommissions || {};
+      const commissions =
+        configRes?.data?.workflow?.draft?.businessValues?.categoryCommissions ||
+        configRes?.data?.platform?.draftBusinessValues?.categoryCommissions ||
+        configRes?.data?.platform?.businessValues?.categoryCommissions ||
+        {};
       setCategoryCommissions(commissions);
       setInitialCommissions(JSON.parse(JSON.stringify(commissions)));
+      setWorkflow(workflowRes?.data || configRes?.data?.workflow || null);
       setHistory(historyRes?.data || []);
       setAnalytics(analyticsRes?.data || null);
       setRules(rulesRes?.data?.items || []);
@@ -82,19 +95,38 @@ const CommissionCenter = () => {
     }));
   };
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
     setSaving(true);
     try {
       await updatePlatformConfigurationSection("categoryCommissions", categoryCommissions, reason.trim());
-      toast.success("Commission settings saved — future orders will use updated rates");
+      toast.success("Commission draft saved");
       setReason("");
       await loadData();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to save commission settings");
+      toast.error(error?.response?.data?.message || "Unable to save draft");
     } finally {
       setSaving(false);
     }
   };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      if (dirty) {
+        await updatePlatformConfigurationSection("categoryCommissions", categoryCommissions, reason.trim());
+      }
+      await publishPlatformConfiguration(reason.trim());
+      toast.success("Commission configuration published — future orders will use updated rates");
+      setReason("");
+      await loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to publish");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const preview = simulateCommissionPreview(100000, "phones", categoryCommissions);
 
   const historical = analytics?.historical || {};
   const runtime = analytics?.runtime || {};
@@ -102,8 +134,9 @@ const CommissionCenter = () => {
   return (
     <ControlCenterShell
       title="Commission Center"
-      subtitle="Configure platform and category commissions. Changes apply to future orders immediately."
+      subtitle="Configure platform and category commissions. Save draft, review, then publish to production."
     >
+      <WorkflowStatusBar workflow={workflow} />
       <ControlCenterTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
       {loading ? (
@@ -262,10 +295,21 @@ const CommissionCenter = () => {
         </>
       )}
 
-      <StickySaveBar
+      <PreviewPanel
+        title="Revenue preview (sample order RWF 100,000 · Phones)"
+        items={[
+          { label: "Platform revenue", value: formatCurrency(preview.platformRevenue) },
+          { label: "Vendor revenue", value: formatCurrency(preview.vendorRevenue) },
+          { label: "Referral revenue", value: formatCurrency(preview.referralRevenue) },
+        ]}
+      />
+
+      <DraftPublishBar
         dirty={dirty && (activeTab === "platform" || activeTab === "categories")}
         saving={saving}
-        onSave={handleSave}
+        publishing={publishing}
+        onSaveDraft={handleSaveDraft}
+        onPublish={handlePublish}
         onDiscard={() => setCategoryCommissions(JSON.parse(JSON.stringify(initialCommissions)))}
         reason={reason}
         onReasonChange={setReason}

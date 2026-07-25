@@ -5,12 +5,15 @@ import {
   ControlCenterShell,
   ControlCenterSkeleton,
   ControlCenterTabs,
-  StickySaveBar,
+  DraftPublishBar,
+  WorkflowStatusBar,
 } from "../shell/ControlCenterShell";
 import { formatCurrency } from "../constants/platformCatalog";
 import {
+  fetchConfigurationWorkflow,
   fetchPlatformConfiguration,
   fetchPlatformConfigurationAudit,
+  publishPlatformConfiguration,
   updatePlatformConfigurationSection,
 } from "../../../services/platformConfigurationService";
 
@@ -28,6 +31,8 @@ const PlatformConfigurationCenter = () => {
   const [activeTab, setActiveTab] = useState("pricing");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [workflow, setWorkflow] = useState(null);
   const [reason, setReason] = useState("");
   const [aggregate, setAggregate] = useState(null);
   const [pricing, setPricing] = useState(null);
@@ -37,15 +42,21 @@ const PlatformConfigurationCenter = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [configRes, auditRes] = await Promise.all([
+      const [configRes, auditRes, workflowRes] = await Promise.all([
         fetchPlatformConfiguration(),
         fetchPlatformConfigurationAudit(30),
+        fetchConfigurationWorkflow(),
       ]);
       setAggregate(configRes?.data || null);
-      const values = configRes?.data?.platform?.businessValues?.pricing || {};
+      const values =
+        configRes?.data?.platform?.draftBusinessValues?.pricing ||
+        configRes?.data?.workflow?.draft?.businessValues?.pricing ||
+        configRes?.data?.platform?.businessValues?.pricing ||
+        {};
       setPricing(values);
       setInitialPricing(JSON.parse(JSON.stringify(values)));
       setAuditLog(auditRes?.data || []);
+      setWorkflow(workflowRes?.data || configRes?.data?.workflow || null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to load platform configuration");
     } finally {
@@ -62,17 +73,32 @@ const PlatformConfigurationCenter = () => {
     [pricing, initialPricing]
   );
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
     setSaving(true);
     try {
       await updatePlatformConfigurationSection("pricing", pricing, reason.trim());
-      toast.success("Platform pricing saved");
+      toast.success("Platform pricing draft saved");
       setReason("");
       await loadData();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to save platform configuration");
+      toast.error(error?.response?.data?.message || "Unable to save draft");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      if (dirty) await updatePlatformConfigurationSection("pricing", pricing, reason.trim());
+      await publishPlatformConfiguration(reason.trim());
+      toast.success("Platform configuration published");
+      setReason("");
+      await loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to publish");
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -82,8 +108,9 @@ const PlatformConfigurationCenter = () => {
   return (
     <ControlCenterShell
       title="Platform Configuration"
-      subtitle={`Version ${aggregate?.platform?.version || 1} — all business values stored in database, read dynamically by backend and frontend.`}
+      subtitle={`Version ${aggregate?.platform?.version || 1} — save draft, review, then publish to production.`}
     >
+      <WorkflowStatusBar workflow={workflow} />
       <ControlCenterTabs tabs={SECTIONS} active={activeTab} onChange={setActiveTab} />
 
       {loading ? (
@@ -189,10 +216,12 @@ const PlatformConfigurationCenter = () => {
         </>
       )}
 
-      <StickySaveBar
+      <DraftPublishBar
         dirty={dirty && activeTab === "pricing"}
         saving={saving}
-        onSave={handleSave}
+        publishing={publishing}
+        onSaveDraft={handleSaveDraft}
+        onPublish={handlePublish}
         onDiscard={() => setPricing(JSON.parse(JSON.stringify(initialPricing)))}
         reason={reason}
         onReasonChange={setReason}

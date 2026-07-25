@@ -24,6 +24,8 @@ import {
   HiOutlinePhotograph,
   HiOutlineAdjustments,
   HiOutlineShieldCheck,
+  HiOutlineClock,
+  HiOutlineFlag,
 } from "react-icons/hi";
 import { GrWorkshop } from "react-icons/gr";
 import { MdOutlineLocalOffer } from "react-icons/md";
@@ -59,6 +61,8 @@ export const ADMIN_NAV_PLATFORM = [
   { id: 29, label: "Commission Rules", to: "/admin/commission-rules", icon: HiOutlineClipboardList },
   { id: 30, label: "Coupons", to: "/admin/coupons", icon: HiOutlineTicket },
   { id: 35, label: "Banners", to: "/admin/banners", icon: HiOutlinePhotograph },
+  { id: 37, label: "Config History", to: "/admin/history", icon: HiOutlineClock },
+  { id: 38, label: "Feature Flags", to: "/admin/feature-flags", icon: HiOutlineFlag },
   { id: 31, label: "Growth Commerce", to: "/admin/growth-commerce", icon: HiOutlineTrendingUp },
   { id: 32, label: "Seller Operations", to: "/admin/seller-operations", icon: HiOutlineArchive },
   { id: 33, label: "Property & Mobility", to: "/admin/property-mobility", icon: HiOutlineHome },
@@ -90,6 +94,8 @@ export const ADMIN_TITLES = {
   34: "Trust & Buyer Protection",
   35: "Banner Management",
   36: "Platform Configuration",
+  37: "Configuration History",
+  38: "Feature Flags",
   24: "System Settings",
   25: "Executive Reports",
   26: "Support Center",

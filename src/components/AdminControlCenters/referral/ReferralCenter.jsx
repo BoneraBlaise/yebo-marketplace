@@ -6,14 +6,18 @@ import {
   ControlCenterSkeleton,
   ControlCenterTabs,
   DataTable,
+  DraftPublishBar,
   MetricCard,
-  StickySaveBar,
-  ToggleSwitch,
+  PreviewPanel,
+  WorkflowStatusBar,
 } from "../shell/ControlCenterShell";
 import { PLATFORM_CATEGORIES, formatCurrency } from "../constants/platformCatalog";
+import { simulateReferralPreview } from "../utils/configurationSimulators";
 import {
+  fetchConfigurationWorkflow,
   fetchPlatformConfiguration,
   fetchReferralAdminDashboard,
+  publishPlatformConfiguration,
   updatePlatformConfigurationSection,
   updateReferralCodeAction,
 } from "../../../services/platformConfigurationService";
@@ -30,6 +34,8 @@ const ReferralCenter = () => {
   const [activeTab, setActiveTab] = useState("general");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [workflow, setWorkflow] = useState(null);
   const [reason, setReason] = useState("");
   const [referral, setReferral] = useState(null);
   const [initialReferral, setInitialReferral] = useState(null);
@@ -38,14 +44,20 @@ const ReferralCenter = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [configRes, dashRes] = await Promise.all([
+      const [configRes, dashRes, workflowRes] = await Promise.all([
         fetchPlatformConfiguration(),
         fetchReferralAdminDashboard(),
+        fetchConfigurationWorkflow(),
       ]);
-      const settings = configRes?.data?.platform?.businessValues?.referral || {};
+      const settings =
+        configRes?.data?.workflow?.draft?.businessValues?.referral ||
+        configRes?.data?.platform?.draftBusinessValues?.referral ||
+        configRes?.data?.platform?.businessValues?.referral ||
+        {};
       setReferral(settings);
       setInitialReferral(JSON.parse(JSON.stringify(settings)));
       setDashboard(dashRes?.data || null);
+      setWorkflow(workflowRes?.data || null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to load referral center");
     } finally {
@@ -73,19 +85,36 @@ const ReferralCenter = () => {
     }));
   };
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
     setSaving(true);
     try {
       await updatePlatformConfigurationSection("referral", referral, reason.trim());
-      toast.success("Referral settings saved");
+      toast.success("Referral draft saved");
       setReason("");
       await loadData();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to save referral settings");
+      toast.error(error?.response?.data?.message || "Unable to save draft");
     } finally {
       setSaving(false);
     }
   };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      if (dirty) await updatePlatformConfigurationSection("referral", referral, reason.trim());
+      await publishPlatformConfiguration(reason.trim());
+      toast.success("Referral configuration published");
+      setReason("");
+      await loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to publish");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const payoutPreview = simulateReferralPreview(100000, referral || {}, "phones");
 
   const handleCodeAction = async (id, action) => {
     try {
@@ -104,6 +133,7 @@ const ReferralCenter = () => {
       title="Referral Center"
       subtitle="Manage referral commissions, codes, payouts, and fraud signals."
     >
+      <WorkflowStatusBar workflow={workflow} />
       <ControlCenterTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
       {loading ? (
@@ -243,10 +273,21 @@ const ReferralCenter = () => {
         </>
       )}
 
-      <StickySaveBar
+      <PreviewPanel
+        title="Payout preview (sample order RWF 100,000)"
+        items={[
+          { label: "Commission payout", value: formatCurrency(payoutPreview.commissionPayout) },
+          { label: "Vendor payout", value: formatCurrency(payoutPreview.vendorPayout) },
+          { label: "Platform payout", value: formatCurrency(payoutPreview.platformPayout) },
+        ]}
+      />
+
+      <DraftPublishBar
         dirty={dirty && (activeTab === "general" || activeTab === "category")}
         saving={saving}
-        onSave={handleSave}
+        publishing={publishing}
+        onSaveDraft={handleSaveDraft}
+        onPublish={handlePublish}
         onDiscard={() => setReferral(JSON.parse(JSON.stringify(initialReferral)))}
         reason={reason}
         onReasonChange={setReason}

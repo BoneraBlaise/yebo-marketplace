@@ -6,16 +6,18 @@ import {
   ControlCenterSkeleton,
   ControlCenterTabs,
   DataTable,
+  DraftPublishBar,
   MetricCard,
-  StickySaveBar,
+  WorkflowStatusBar,
 } from "../shell/ControlCenterShell";
-import { formatCurrency } from "../constants/platformCatalog";
 import {
   fetchCouponStatistics,
   fetchCouponUsage,
 } from "../../../services/growthConfigurationService";
 import {
+  fetchConfigurationWorkflow,
   fetchPlatformConfiguration,
+  publishPlatformConfiguration,
   updatePlatformConfigurationSection,
 } from "../../../services/platformConfigurationService";
 
@@ -32,6 +34,8 @@ const CouponCenter = () => {
   const [activeTab, setActiveTab] = useState("coupons");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [workflow, setWorkflow] = useState(null);
   const [reason, setReason] = useState("");
   const [stats, setStats] = useState(null);
   const [usage, setUsage] = useState([]);
@@ -42,16 +46,22 @@ const CouponCenter = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [statsRes, usageRes, configRes] = await Promise.all([
+      const [statsRes, usageRes, configRes, workflowRes] = await Promise.all([
         fetchCouponStatistics(),
         fetchCouponUsage(50),
         fetchPlatformConfiguration(),
+        fetchConfigurationWorkflow(),
       ]);
       setStats(statsRes?.data || null);
       setUsage(usageRes?.data || []);
-      const couponDefaults = configRes?.data?.platform?.businessValues?.couponDefaults || {};
+      const couponDefaults =
+        configRes?.data?.platform?.draftBusinessValues?.couponDefaults ||
+        configRes?.data?.workflow?.draft?.businessValues?.couponDefaults ||
+        configRes?.data?.platform?.businessValues?.couponDefaults ||
+        {};
       setDefaults(couponDefaults);
       setInitialDefaults(JSON.parse(JSON.stringify(couponDefaults)));
+      setWorkflow(workflowRes?.data || configRes?.data?.workflow || null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to load coupon center");
     } finally {
@@ -70,17 +80,32 @@ const CouponCenter = () => {
 
   const summary = stats?.summary || {};
 
-  const handleSaveDefaults = async () => {
+  const handleSaveDraft = async () => {
     setSaving(true);
     try {
       await updatePlatformConfigurationSection("couponDefaults", defaults, reason.trim());
-      toast.success("Coupon defaults saved");
+      toast.success("Coupon defaults draft saved");
       setReason("");
       await loadData();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to save coupon defaults");
+      toast.error(error?.response?.data?.message || "Unable to save draft");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      if (dirty) await updatePlatformConfigurationSection("couponDefaults", defaults, reason.trim());
+      await publishPlatformConfiguration(reason.trim());
+      toast.success("Coupon configuration published");
+      setReason("");
+      await loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to publish");
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -90,8 +115,9 @@ const CouponCenter = () => {
   return (
     <ControlCenterShell
       title="Coupon Center"
-      subtitle="Coupons, discount rules, analytics, fraud detection, expiry, and bulk import."
+      subtitle="Coupons, discount rules, analytics, fraud detection, expiry, and bulk import. Save draft, then publish."
     >
+      <WorkflowStatusBar workflow={workflow} />
       <ControlCenterTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
       {loading ? (
@@ -230,10 +256,12 @@ const CouponCenter = () => {
         </>
       )}
 
-      <StickySaveBar
+      <DraftPublishBar
         dirty={dirty && activeTab === "rules"}
         saving={saving}
-        onSave={handleSaveDefaults}
+        publishing={publishing}
+        onSaveDraft={handleSaveDraft}
+        onPublish={handlePublish}
         onDiscard={() => setDefaults(JSON.parse(JSON.stringify(initialDefaults)))}
         reason={reason}
         onReasonChange={setReason}

@@ -16,6 +16,8 @@ export const ASSISTANT_ADMIN_HIDDEN_IDS = [
   30, // Coupons
   35, // Banners
   36, // Platform Configuration
+  37, // Config History
+  38, // Feature Flags
 ];
 
 export const resolveAdminTier = (user) =>

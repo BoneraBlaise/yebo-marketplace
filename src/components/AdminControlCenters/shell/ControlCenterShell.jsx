@@ -50,6 +50,102 @@ export const ControlCenterEmpty = ({ title, description }) => (
   </div>
 );
 
+export const WorkflowStatusBar = ({ workflow }) => {
+  if (!workflow) return null;
+  const pending = workflow.pendingChanges?.length || 0;
+  return (
+    <div className="admin-cc-card mb-4 flex flex-wrap gap-3 items-center text-sm">
+      <span className="inline-flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
+        <span className="text-gray-600 dark:text-gray-300">Current Live · v{workflow.version || 1}</span>
+      </span>
+      <span className="inline-flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-amber-500" aria-hidden="true" />
+        <span className="text-gray-600 dark:text-gray-300">Draft saved</span>
+      </span>
+      {pending > 0 ? (
+        <span className="text-amber-700 dark:text-amber-300 font-medium">{pending} pending change(s)</span>
+      ) : (
+        <span className="text-gray-500">No pending changes</span>
+      )}
+    </div>
+  );
+};
+
+export const DraftPublishBar = ({
+  dirty,
+  saving,
+  publishing,
+  onSaveDraft,
+  onPublish,
+  onDiscard,
+  reason,
+  onReasonChange,
+  showPublish = true,
+}) => {
+  if (!dirty && !showPublish) return null;
+  return (
+    <div className="admin-cc-sticky-save" role="region" aria-label="Configuration workflow">
+      <div className="flex-1 min-w-[200px]">
+        <p className="text-sm font-medium dark:text-white">
+          {dirty ? "Unsaved draft changes" : "Review and publish when ready"}
+        </p>
+        {onReasonChange ? (
+          <input
+            type="text"
+            value={reason || ""}
+            onChange={(e) => onReasonChange(e.target.value)}
+            placeholder="Optional note for history"
+            className="mt-2 w-full max-w-md h-9 px-3 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-900 text-sm"
+            aria-label="Change note"
+          />
+        ) : null}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {onDiscard && dirty ? (
+          <button type="button" className="admin-cc-btn admin-cc-btn--ghost" onClick={onDiscard}>
+            Discard
+          </button>
+        ) : null}
+        {dirty && onSaveDraft ? (
+          <button
+            type="button"
+            className="admin-cc-btn admin-cc-btn--ghost"
+            disabled={saving}
+            onClick={onSaveDraft}
+          >
+            {saving ? "Saving draft…" : "Save draft"}
+          </button>
+        ) : null}
+        {showPublish ? (
+          <button
+            type="button"
+            className="admin-cc-btn admin-cc-btn--primary"
+            disabled={publishing}
+            onClick={onPublish}
+          >
+            {publishing ? "Publishing…" : "Publish"}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+export const PreviewPanel = ({ title, items = [] }) => (
+  <ControlCenterCard className="mt-4">
+    <h3 className="font-semibold mb-3 dark:text-white">{title}</h3>
+    <div className="admin-cc-grid admin-cc-grid--3 gap-2">
+      {items.map(({ label, value }) => (
+        <div key={label} className="rounded-xl bg-gray-50 dark:bg-gray-800/60 p-3">
+          <p className="text-xs text-gray-500">{label}</p>
+          <p className="font-semibold dark:text-white mt-1">{value}</p>
+        </div>
+      ))}
+    </div>
+  </ControlCenterCard>
+);
+
 export const StickySaveBar = ({ dirty, saving, onSave, onDiscard, reason, onReasonChange }) => {
   if (!dirty) return null;
   return (

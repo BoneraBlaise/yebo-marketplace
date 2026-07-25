@@ -106,6 +106,8 @@ import {
   AdminCouponCenterPage,
   AdminBannerManagementPage,
   AdminPlatformConfigurationPage,
+  AdminConfigurationHistoryPage,
+  AdminFeatureFlagsPage,
 } from "./pages/AdminControlCenterPages";
 import VendorCampaignsPage from "./pages/VendorCampaignsPage";
 import VendorSellerOperationsPage from "./pages/VendorSellerOperationsPage";
@@ -548,6 +550,22 @@ const routerBasename =
               element={
                 <ProtectedAdminRoute>
                   <AdminPlatformConfigurationPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/history"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminConfigurationHistoryPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/feature-flags"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminFeatureFlagsPage />
                 </ProtectedAdminRoute>
               }
             />

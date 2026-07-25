@@ -5,15 +5,22 @@ import {
   ControlCenterShell,
   ControlCenterSkeleton,
   ControlCenterTabs,
+  DraftPublishBar,
   MetricCard,
-  StickySaveBar,
+  PreviewPanel,
   ToggleSwitch,
+  WorkflowStatusBar,
 } from "../shell/ControlCenterShell";
 import { formatCurrency } from "../constants/platformCatalog";
+import { simulateDeliveryPreview } from "../utils/configurationSimulators";
+import {
+  fetchConfigurationWorkflow,
+  publishModuleConfiguration,
+  saveDeliveryDraft,
+} from "../../../services/platformConfigurationService";
 import {
   fetchDeliveryAuditHistory,
-  fetchDeliveryConfiguration,
-  updateDeliveryConfiguration,
+  fetchDeliveryConfiguration as fetchLiveDelivery,
 } from "../../../services/deliveryConfigurationService";
 
 const SHIPPING_MODES = [
@@ -33,6 +40,8 @@ const DeliveryControlCenter = () => {
   const [activeTab, setActiveTab] = useState("modes");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [workflow, setWorkflow] = useState(null);
   const [reason, setReason] = useState("");
   const [settings, setSettings] = useState(null);
   const [draft, setDraft] = useState(null);
@@ -41,14 +50,18 @@ const DeliveryControlCenter = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [configRes, auditRes] = await Promise.all([
-        fetchDeliveryConfiguration(),
+      const [liveRes, auditRes, workflowRes] = await Promise.all([
+        fetchLiveDelivery(),
         fetchDeliveryAuditHistory(20),
+        fetchConfigurationWorkflow(),
       ]);
-      const current = configRes?.data?.settings || {};
+      const live = liveRes?.data?.settings || {};
+      const draftFromWorkflow = workflowRes?.data?.moduleDrafts?.delivery;
+      const current = draftFromWorkflow || live;
       setSettings(current);
-      setDraft(JSON.parse(JSON.stringify(current)));
+      setDraft(JSON.parse(JSON.stringify(live)));
       setAuditLog(auditRes?.data || []);
+      setWorkflow(workflowRes?.data || null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to load delivery center");
     } finally {
@@ -76,25 +89,43 @@ const DeliveryControlCenter = () => {
     }));
   };
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
     setSaving(true);
     try {
-      await updateDeliveryConfiguration(settings, reason.trim());
-      toast.success("Delivery configuration saved");
+      await saveDeliveryDraft(settings, reason.trim());
+      toast.success("Delivery draft saved");
       setReason("");
       await loadData();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to save delivery settings");
+      toast.error(error?.response?.data?.message || "Unable to save draft");
     } finally {
       setSaving(false);
     }
   };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      if (dirty) await saveDeliveryDraft(settings, reason.trim());
+      await publishModuleConfiguration("delivery", reason.trim());
+      toast.success("Delivery configuration published");
+      setReason("");
+      await loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to publish");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const deliveryPreview = simulateDeliveryPreview(settings);
 
   return (
     <ControlCenterShell
       title="Delivery Control Center"
       subtitle="Shipping modes, pricing, zones, and partner network — Yebone Delivery activates the full network."
     >
+      <WorkflowStatusBar workflow={workflow} />
       <ControlCenterTabs tabs={TABS} active={activeTab} onChange={setActiveTab} />
 
       {loading ? (
@@ -225,10 +256,22 @@ const DeliveryControlCenter = () => {
         </>
       ) : null}
 
-      <StickySaveBar
+      <PreviewPanel
+        title="Delivery fee preview (5 km sample)"
+        items={[
+          { label: "Customer pays", value: formatCurrency(deliveryPreview.customerPays) },
+          { label: "Vendor receives", value: formatCurrency(deliveryPreview.vendorReceives) },
+          { label: "Platform fee", value: formatCurrency(deliveryPreview.platformFee) },
+          { label: "ETA estimate", value: deliveryPreview.etaEstimate },
+        ]}
+      />
+
+      <DraftPublishBar
         dirty={dirty}
         saving={saving}
-        onSave={handleSave}
+        publishing={publishing}
+        onSaveDraft={handleSaveDraft}
+        onPublish={handlePublish}
         onDiscard={() => setSettings(JSON.parse(JSON.stringify(draft)))}
         reason={reason}
         onReasonChange={setReason}

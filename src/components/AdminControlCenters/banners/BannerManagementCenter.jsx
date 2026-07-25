@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
 import {
@@ -7,13 +7,16 @@ import {
   ControlCenterShell,
   ControlCenterSkeleton,
   DataTable,
-  StickySaveBar,
+  DraftPublishBar,
   ToggleSwitch,
+  WorkflowStatusBar,
 } from "../shell/ControlCenterShell";
 import { BANNER_TYPES } from "../constants/platformCatalog";
 import {
   deletePlatformBanner,
+  fetchConfigurationWorkflow,
   fetchPlatformConfiguration,
+  publishPlatformConfiguration,
   upsertPlatformBanner,
 } from "../../../services/platformConfigurationService";
 import { server } from "../../../config/serverConfig";
@@ -32,7 +35,11 @@ const emptyBanner = {
 const BannerManagementCenter = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [workflow, setWorkflow] = useState(null);
+  const [reason, setReason] = useState("");
   const [banners, setBanners] = useState([]);
+  const [liveBanners, setLiveBanners] = useState([]);
   const [draft, setDraft] = useState(emptyBanner);
   const [editingId, setEditingId] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -40,8 +47,18 @@ const BannerManagementCenter = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetchPlatformConfiguration();
-      setBanners(response?.data?.platform?.businessValues?.banners || []);
+      const [response, workflowRes] = await Promise.all([
+        fetchPlatformConfiguration(),
+        fetchConfigurationWorkflow(),
+      ]);
+      const draft =
+        response?.data?.platform?.draftBusinessValues?.banners ||
+        response?.data?.workflow?.draft?.businessValues?.banners ||
+        [];
+      const live = response?.data?.platform?.businessValues?.banners || [];
+      setBanners(draft);
+      setLiveBanners(live);
+      setWorkflow(workflowRes?.data || response?.data?.workflow || null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to load banners");
     } finally {
@@ -80,11 +97,30 @@ const BannerManagementCenter = () => {
     }
   };
 
+  const pendingBannerChanges = useMemo(
+    () => JSON.stringify(banners) !== JSON.stringify(liveBanners),
+    [banners, liveBanners]
+  );
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      await publishPlatformConfiguration(reason.trim());
+      toast.success("Banner configuration published");
+      setReason("");
+      await loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to publish banners");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      await upsertPlatformBanner({ ...draft, id: editingId || draft.id });
-      toast.success(editingId ? "Banner updated" : "Banner created");
+      await upsertPlatformBanner({ ...draft, id: editingId || draft.id }, reason.trim());
+      toast.success(editingId ? "Banner draft updated" : "Banner draft created");
       setDraft(emptyBanner);
       setEditingId(null);
       await loadData();
@@ -121,6 +157,8 @@ const BannerManagementCenter = () => {
       title="Banner Management"
       subtitle="Homepage, property, events, flash sale, popup, category, and auction banners with scheduling."
     >
+      <WorkflowStatusBar workflow={workflow} />
+
       {loading ? (
         <ControlCenterSkeleton rows={4} />
       ) : (
@@ -240,6 +278,17 @@ const BannerManagementCenter = () => {
           </div>
         </div>
       )}
+
+      <DraftPublishBar
+        dirty={pendingBannerChanges}
+        saving={false}
+        publishing={publishing}
+        onSaveDraft={null}
+        onPublish={handlePublish}
+        reason={reason}
+        onReasonChange={setReason}
+        showPublish
+      />
     </ControlCenterShell>
   );
 };

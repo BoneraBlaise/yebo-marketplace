@@ -10,6 +10,8 @@ import CouponCenter from "../components/AdminControlCenters/coupon/CouponCenter"
 import BannerManagementCenter from "../components/AdminControlCenters/banners/BannerManagementCenter";
 import PlatformConfigurationCenter from "../components/AdminControlCenters/platform/PlatformConfigurationCenter";
 import PropertyMobilityControlCenter from "../components/AdminControlCenters/propertyMobility/PropertyMobilityControlCenter";
+import ConfigurationHistoryCenter from "../components/AdminControlCenters/history/ConfigurationHistoryCenter";
+import FeatureFlagsCenter from "../components/AdminControlCenters/featureFlags/FeatureFlagsCenter";
 
 export const AdminCommissionCenterPage = () => (
   <AdminDashboardLayout active={21} bare fullWidth>
@@ -68,5 +70,17 @@ export const AdminPlatformConfigurationPage = () => (
 export const AdminPropertyMobilityControlCenterPage = () => (
   <AdminDashboardLayout active={33} bare fullWidth>
     <PropertyMobilityControlCenter />
+  </AdminDashboardLayout>
+);
+
+export const AdminConfigurationHistoryPage = () => (
+  <AdminDashboardLayout active={37} bare fullWidth>
+    <ConfigurationHistoryCenter />
+  </AdminDashboardLayout>
+);
+
+export const AdminFeatureFlagsPage = () => (
+  <AdminDashboardLayout active={38} bare fullWidth>
+    <FeatureFlagsCenter />
   </AdminDashboardLayout>
 );

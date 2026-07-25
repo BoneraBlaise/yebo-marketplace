@@ -4,18 +4,23 @@ import {
   ControlCenterCard,
   ControlCenterShell,
   ControlCenterSkeleton,
-  StickySaveBar,
+  DraftPublishBar,
   ToggleSwitch,
+  WorkflowStatusBar,
 } from "../shell/ControlCenterShell";
 import AdminCommissionRules from "../../Dashboard/admin/AdminCommissionRules";
 import {
+  fetchConfigurationWorkflow,
   fetchPlatformConfiguration,
+  publishPlatformConfiguration,
   updatePlatformConfigurationSection,
 } from "../../../services/platformConfigurationService";
 
 const CommissionRulesCenter = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [workflow, setWorkflow] = useState(null);
   const [reason, setReason] = useState("");
   const [ruleEngine, setRuleEngine] = useState(null);
   const [initialRuleEngine, setInitialRuleEngine] = useState(null);
@@ -23,10 +28,18 @@ const CommissionRulesCenter = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetchPlatformConfiguration();
-      const engine = response?.data?.platform?.businessValues?.ruleEngine || {};
+      const [response, workflowRes] = await Promise.all([
+        fetchPlatformConfiguration(),
+        fetchConfigurationWorkflow(),
+      ]);
+      const engine =
+        response?.data?.platform?.draftBusinessValues?.ruleEngine ||
+        response?.data?.workflow?.draft?.businessValues?.ruleEngine ||
+        response?.data?.platform?.businessValues?.ruleEngine ||
+        {};
       setRuleEngine(engine);
       setInitialRuleEngine(JSON.parse(JSON.stringify(engine)));
+      setWorkflow(workflowRes?.data || response?.data?.workflow || null);
     } catch (error) {
       toast.error(error?.response?.data?.message || "Unable to load rule engine settings");
     } finally {
@@ -47,17 +60,32 @@ const CommissionRulesCenter = () => {
     setRuleEngine((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
     setSaving(true);
     try {
       await updatePlatformConfigurationSection("ruleEngine", ruleEngine, reason.trim());
-      toast.success("Rule engine settings saved");
+      toast.success("Rule engine draft saved");
       setReason("");
       await loadData();
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Unable to save rule engine");
+      toast.error(error?.response?.data?.message || "Unable to save draft");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePublish = async () => {
+    setPublishing(true);
+    try {
+      if (dirty) await updatePlatformConfigurationSection("ruleEngine", ruleEngine, reason.trim());
+      await publishPlatformConfiguration(reason.trim());
+      toast.success("Commission rules published");
+      setReason("");
+      await loadData();
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Unable to publish");
+    } finally {
+      setPublishing(false);
     }
   };
 
@@ -66,6 +94,8 @@ const CommissionRulesCenter = () => {
       title="Commission Rules"
       subtitle="Business rule engine — priority, stacking, exceptions, and seasonal overrides."
     >
+      <WorkflowStatusBar workflow={workflow} />
+
       {loading ? (
         <ControlCenterSkeleton rows={2} />
       ) : ruleEngine ? (
@@ -144,10 +174,12 @@ const CommissionRulesCenter = () => {
 
       <AdminCommissionRules />
 
-      <StickySaveBar
+      <DraftPublishBar
         dirty={dirty}
         saving={saving}
-        onSave={handleSave}
+        publishing={publishing}
+        onSaveDraft={handleSaveDraft}
+        onPublish={handlePublish}
         onDiscard={() => setRuleEngine(JSON.parse(JSON.stringify(initialRuleEngine)))}
         reason={reason}
         onReasonChange={setReason}
