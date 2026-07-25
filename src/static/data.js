@@ -1,5 +1,20 @@
 export const navItems = [
   {
+    id: 100,
+    title: "Shopping",
+    url: "/products",
+  },
+  {
+    id: 101,
+    title: "Property",
+    url: "/property-mobility?listingType=property",
+  },
+  {
+    id: 102,
+    title: "Mobility",
+    url: "/property-mobility?listingType=vehicle",
+  },
+  {
     id: 1,
     title: "Computers",
     url: "/products?search=Computers",

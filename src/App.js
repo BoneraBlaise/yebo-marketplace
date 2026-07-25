@@ -100,6 +100,8 @@ import VendorCampaignsPage from "./pages/VendorCampaignsPage";
 import VendorSellerOperationsPage from "./pages/VendorSellerOperationsPage";
 import OwnerPropertyMobilityPage from "./pages/OwnerPropertyMobilityPage";
 import PublicPropertyMobilityPage from "./pages/PublicPropertyMobilityPage";
+import PropertyMobilityListingDetailPage from "./pages/PropertyMobilityListingDetailPage";
+import SellerOnboardingPage from "./pages/SellerOnboardingPage";
 import { ReferralProvider } from './context/ReferralContext';
 import { AIProvider } from "./components/ai/core/AIContext";
 import GlobalAIFab from "./components/ai/GlobalAIFab";
@@ -133,8 +135,13 @@ const App = () => {
     Store.dispatch(getActiveBids());
   }, []);
 
+const routerBasename =
+  !process.env.PUBLIC_URL || process.env.PUBLIC_URL === "/"
+    ? ""
+    : process.env.PUBLIC_URL;
+
   return (
-    <BrowserRouter basename={process.env.PUBLIC_URL || ""}>
+    <BrowserRouter basename={routerBasename}>
       <ReferralProvider>
         <AIProvider>
         <ErrorBoundary>
@@ -199,6 +206,8 @@ const App = () => {
               }
             />
             <Route path="/property-mobility" element={<PublicPropertyMobilityPage />} />
+            <Route path="/property-mobility/listing/:listingId" element={<PropertyMobilityListingDetailPage />} />
+            <Route path="/seller/onboarding" element={<SellerOnboardingPage />} />
             <Route
               path="/inbox"
               element={

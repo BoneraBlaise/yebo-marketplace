@@ -31,11 +31,13 @@ import {
   DashboardEmptyState,
 } from "../Dashboard";
 import CommissionDashboard from "../Commission/CommissionDashboard";
+import { resolveSellerNavAction } from "../../utils/sellerNav";
 import { Button, Badge } from "../ui";
 
 const ProfileContent = ({ active, setActive }) => {
   const { user, error, successMessage, loading } = useSelector((state) => state.user);
   const { isSeller } = useSelector((state) => state.seller);
+  const sellerNav = resolveSellerNavAction({ isAuthenticated: Boolean(user), isSeller });
   const [name, setName] = useState(user && user.name);
   const [email, setEmail] = useState(user && user.email);
   const [phoneNumber, setPhoneNumber] = useState(user && user.phoneNumber);
@@ -107,13 +109,13 @@ const ProfileContent = ({ active, setActive }) => {
       {active === 1 && (
         <>
           <div className="rounded-xl border border-yebone-primary/15 m-2 px-4 py-3 text-sm font-medium yebone-surface">
-            {isSeller ? "Check your" : "Start Selling"}
+            {isSeller ? "Manage your shop" : "Start selling on Yebone"}
             <Link
               className="w-[50px]"
-              to={`${isSeller ? "/dashboard" : "/shop-login"}`}
+              to={sellerNav.to}
             >
               <span className="text-[#29625d] m-1 flex items-center">
-                {isSeller ? "Seller Dashboard" : "Start Selling"}{" "}
+                {sellerNav.label}{" "}
                 <IoIosArrowForward className="ml-1" />
               </span>
             </Link>

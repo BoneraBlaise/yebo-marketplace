@@ -11,13 +11,20 @@ export const resolvePropertyMobilityErrorMessage = (error, fallback = "Something
   return error?.response?.data?.message || fallback;
 };
 
-export const LISTING_CATEGORIES = [
+export const PROPERTY_CATEGORIES = [
   { value: "apartments", label: "Apartments" },
   { value: "houses", label: "Houses" },
   { value: "land", label: "Land" },
-  { value: "cars", label: "Cars" },
   { value: "commercial_property", label: "Commercial Property" },
 ];
+
+export const MOBILITY_CATEGORIES = [
+  { value: "cars", label: "Cars" },
+  { value: "motorcycles", label: "Motorcycles" },
+  { value: "trucks", label: "Trucks" },
+];
+
+export const LISTING_CATEGORIES = [...PROPERTY_CATEGORIES, ...MOBILITY_CATEGORIES];
 
 export const formatCategory = (value) =>
   LISTING_CATEGORIES.find((item) => item.value === value)?.label || value;

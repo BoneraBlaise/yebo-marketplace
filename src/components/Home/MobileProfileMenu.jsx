@@ -16,6 +16,7 @@ import {
   HiOutlineSparkles,
 } from "react-icons/hi";
 import { AiOutlineLogin } from "react-icons/ai";
+import { resolveSellerNavAction, SELLER_ONBOARDING_PATH } from "../../utils/sellerNav";
 import { logoutUser } from "../../config/authService";
 
 const MobileProfileMenu = ({ open, onClose }) => {
@@ -49,6 +50,8 @@ const MobileProfileMenu = ({ open, onClose }) => {
     navigate("/login");
     window.location.reload();
   };
+
+  const sellerNav = resolveSellerNavAction({ isAuthenticated, isSeller });
 
   if (!open) return null;
 
@@ -87,7 +90,7 @@ const MobileProfileMenu = ({ open, onClose }) => {
                 <HiOutlineUser size={20} />
                 Sign Up
               </Link>
-              <Link to="/shop-create" className={menuItemClass} onClick={onClose}>
+              <Link to={SELLER_ONBOARDING_PATH} className={menuItemClass} onClick={onClose}>
                 <HiOutlineSparkles size={20} />
                 Sell with Us
               </Link>
@@ -123,14 +126,14 @@ const MobileProfileMenu = ({ open, onClose }) => {
                 Payment Methods
               </Link>
               {isSeller ? (
-                <Link to="/dashboard" className={menuItemClass} onClick={onClose}>
+                <Link to={sellerNav.to} className={menuItemClass} onClick={onClose}>
                   <HiOutlineViewGrid size={20} />
-                  Vendor Dashboard
+                  {sellerNav.label}
                 </Link>
               ) : (
-                <Link to="/shop-create" className={menuItemClass} onClick={onClose}>
+                <Link to={sellerNav.to} className={menuItemClass} onClick={onClose}>
                   <HiOutlineSparkles size={20} />
-                  Become a Seller
+                  {sellerNav.label}
                 </Link>
               )}
               <button type="button" className={menuItemClass} onClick={() => goToProfile(13)}>

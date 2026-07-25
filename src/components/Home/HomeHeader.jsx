@@ -24,6 +24,7 @@ import useHeaderDropdown from "../Layout/overlays/useHeaderDropdown";
 import { buildMobileNavCategories } from "./mainCategoryHierarchy";
 import useSiteSearch from "../../hooks/useSiteSearch";
 import { Container } from "../ui";
+import { resolveSellerNavAction } from "../../utils/sellerNav";
 import YeboneLogo from "./YeboneLogo";
 import SkipToContent from "../Layout/SkipToContent";
 import "./home.css";
@@ -55,11 +56,7 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
 
   const marketplaceNavCategories = useMemo(() => buildMobileNavCategories(), []);
 
-  const sellerAction = isSeller
-    ? { label: "Vendor Dashboard", to: "/dashboard" }
-    : isAuthenticated
-      ? { label: "Become a Seller", to: "/shop-create" }
-      : { label: "Sell with Us", to: "/shop-create" };
+  const sellerAction = resolveSellerNavAction({ isAuthenticated, isSeller });
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 12);

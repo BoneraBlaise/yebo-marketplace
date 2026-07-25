@@ -28,7 +28,10 @@
     "beauty": "Beauty",
     "fashion": "Fashion",
     "flashsale": "Flash Sale",
-    "earwithus": "Earn With Us"
+    "earwithus": "Earn With Us",
+    "shopping": "Shopping",
+    "property": "Property",
+    "mobility": "Mobility"
   },
   "categories": {
     "all": "All Categories",
