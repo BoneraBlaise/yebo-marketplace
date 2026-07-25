@@ -96,6 +96,17 @@ import AdminGrowthCommercePage from "./pages/AdminGrowthCommercePage";
 import AdminSellerOperationsPage from "./pages/AdminSellerOperationsPage";
 import AdminPropertyMobilityPage from "./pages/AdminPropertyMobilityPage";
 import AdminTrustBuyerProtectionPage from "./pages/AdminTrustBuyerProtectionPage";
+import {
+  AdminCommissionCenterPage,
+  AdminReferralCenterPage,
+  AdminAIControlCenterPage,
+  AdminDeliveryControlCenterPage,
+  AdminGrowthControlCenterPage,
+  AdminCommissionRulesPage,
+  AdminCouponCenterPage,
+  AdminBannerManagementPage,
+  AdminPlatformConfigurationPage,
+} from "./pages/AdminControlCenterPages";
 import VendorCampaignsPage from "./pages/VendorCampaignsPage";
 import VendorSellerOperationsPage from "./pages/VendorSellerOperationsPage";
 import OwnerPropertyMobilityPage from "./pages/OwnerPropertyMobilityPage";
@@ -465,6 +476,78 @@ const routerBasename =
               element={
                 <ProtectedAdminRoute>
                   <AdminGrowthCommercePage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/commission"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminCommissionCenterPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/referrals"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminReferralCenterPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/ai"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminAIControlCenterPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/delivery"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminDeliveryControlCenterPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/growth"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminGrowthControlCenterPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/commission-rules"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminCommissionRulesPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/coupons"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminCouponCenterPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/banners"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminBannerManagementPage />
+                </ProtectedAdminRoute>
+              }
+            />
+            <Route
+              path="/admin/platform-configuration"
+              element={
+                <ProtectedAdminRoute>
+                  <AdminPlatformConfigurationPage />
                 </ProtectedAdminRoute>
               }
             />

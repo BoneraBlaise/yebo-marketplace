@@ -1,11 +1,6 @@
 import React from "react";
-import AdminDashboardLayout from "../components/Dashboard/AdminDashboardLayout";
-import AdminPropertyMobilityPanel from "../components/PropertyMobility/AdminPropertyMobilityPanel";
+import { AdminPropertyMobilityControlCenterPage } from "./AdminControlCenterPages";
 
-const AdminPropertyMobilityPage = () => (
-  <AdminDashboardLayout active={33} bare>
-    <AdminPropertyMobilityPanel />
-  </AdminDashboardLayout>
-);
+const AdminPropertyMobilityPage = () => <AdminPropertyMobilityControlCenterPage />;
 
 export default AdminPropertyMobilityPage;

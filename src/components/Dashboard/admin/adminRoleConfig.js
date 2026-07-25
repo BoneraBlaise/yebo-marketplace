@@ -10,7 +10,12 @@ export const ASSISTANT_ADMIN_HIDDEN_IDS = [
   23, // AI Control
   24, // System Settings
   25, // Reports (executive)
-  27, // Delivery Settings
+  27, // Delivery
+  28, // Growth
+  29, // Commission Rules
+  30, // Coupons
+  35, // Banners
+  36, // Platform Configuration
 ];
 
 export const resolveAdminTier = (user) =>
