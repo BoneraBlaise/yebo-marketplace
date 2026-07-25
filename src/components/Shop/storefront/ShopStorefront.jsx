@@ -39,6 +39,12 @@ const ShopStorefront = ({ isOwner = false }) => {
     toggleFavorite,
   } = useShopStorefront(id);
 
+  const [businessStatus, setBusinessStatus] = useState(null);
+
+  const displayShop = shop
+    ? { ...shop, businessStatus: businessStatus ?? shop.businessStatus }
+    : null;
+
   const requireAuth = () => {
     toast.info("Please sign in to continue");
     navigate("/login", { state: { from: window.location.pathname } });
@@ -80,15 +86,15 @@ const ShopStorefront = ({ isOwner = false }) => {
 
   if (loading) {
     return (
-      <div className="marketplace-page yebone-premium-screen min-h-screen dark:bg-gray-950 bg-yebone-light-gray">
-        <Container className="py-6 lg:py-10">
+      <div className="shop-storefront marketplace-page yebone-premium-screen min-h-screen dark:bg-gray-950 bg-yebone-light-gray">
+        <Container className="py-6 lg:py-8">
           <ShopSkeleton />
         </Container>
       </div>
     );
   }
 
-  if (error || !shop) {
+  if (error || !displayShop) {
     return (
       <div className="marketplace-page yebone-premium-screen min-h-screen flex items-center justify-center px-4">
         <p className="text-gray-600 dark:text-gray-400">{error || "Shop not found"}</p>
@@ -96,69 +102,71 @@ const ShopStorefront = ({ isOwner = false }) => {
     );
   }
 
-  const accent = shop.themeAccent || "#29625d";
+  const accent = displayShop.themeAccent || "#29625d";
 
   return (
     <div
       className="shop-storefront marketplace-page yebone-premium-screen min-h-screen dark:bg-gray-950 bg-yebone-light-gray"
       style={{ "--shop-accent": accent }}
     >
-      <Container className="py-6 lg:py-10 space-y-8">
-        <ShopHero
-          shop={shop}
-          stats={stats}
-          followState={followState}
-          isOwner={isOwner}
-          onFollow={handleFollow}
-          onFavorite={handleFavorite}
-          onChat={handleChat}
-          onShare={handleShare}
-          accent={accent}
-        />
+      <Container className="py-6 lg:py-8">
+        <div className="shop-main">
+          <ShopHero
+            shop={displayShop}
+            isOwner={isOwner}
+            followState={followState}
+            onFollow={handleFollow}
+            onFavorite={handleFavorite}
+            onChat={handleChat}
+            onShare={handleShare}
+            onStatusChange={setBusinessStatus}
+            accent={accent}
+          />
 
-        <ShopStatsBar stats={stats} shop={shop} />
+          <ShopStatsBar stats={stats} shop={displayShop} products={products || []} />
 
-        {achievements.length > 0 && <ShopAchievements achievements={achievements} />}
+          {achievements.length > 0 && <ShopAchievements achievements={achievements} />}
 
-        <nav className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-800 pb-3" aria-label="Shop sections">
-          {SECTION_TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
-                activeSection === tab.id
-                  ? "bg-[var(--shop-accent)] text-white"
-                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}
-              onClick={() => setActiveSection(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </nav>
+          <nav className="shop-section-tabs" aria-label="Shop sections">
+            {SECTION_TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                aria-selected={activeSection === tab.id}
+                className={`shop-section-tab ${activeSection === tab.id ? "is-active" : ""}`}
+                onClick={() => setActiveSection(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
 
-        {activeSection === "products" && (
-          <ShopProductGrid products={products || []} isOwner={isOwner} shopId={id} />
-        )}
+          <div role="tabpanel" aria-label={SECTION_TABS.find((t) => t.id === activeSection)?.label}>
+            {activeSection === "products" && (
+              <ShopProductGrid products={products || []} isOwner={isOwner} shopId={id} />
+            )}
 
-        {activeSection === "about" && <ShopAboutSection shop={shop} />}
+            {activeSection === "about" && <ShopAboutSection shop={displayShop} />}
 
-        {activeSection === "reviews" && (
-          <Suspense fallback={<div className="shop-skeleton h-48" aria-hidden="true" />}>
-            <ShopReviewsSection products={products || []} stats={stats} />
-          </Suspense>
-        )}
+            {activeSection === "reviews" && (
+              <Suspense fallback={<div className="shop-skeleton h-40" aria-hidden="true" aria-label="Loading reviews" />}>
+                <ShopReviewsSection products={products || []} stats={stats} />
+              </Suspense>
+            )}
 
-        {activeSection === "gallery" && (
-          <Suspense fallback={<div className="shop-skeleton h-48" aria-hidden="true" />}>
-            <ShopGallery gallery={shop.gallery || []} />
-          </Suspense>
-        )}
+            {activeSection === "gallery" && (
+              <Suspense fallback={<div className="shop-skeleton h-40" aria-hidden="true" aria-label="Loading gallery" />}>
+                <ShopGallery gallery={displayShop.gallery || []} />
+              </Suspense>
+            )}
+          </div>
+        </div>
       </Container>
 
       {!isOwner && (
         <ShopFloatingActions
-          shop={shop}
+          shop={displayShop}
           followState={followState}
           onChat={handleChat}
           onFollow={handleFollow}

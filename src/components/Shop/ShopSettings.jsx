@@ -6,14 +6,7 @@ import styles from "../../styles/styles";
 import axios from "axios";
 import { loadSeller } from "../../redux/actions/user";
 import { toast } from "react-toastify";
-import { emitShopStatusUpdate } from "../../hooks/useShopStorefront";
-
-const STATUS_OPTIONS = [
-  { value: "open", label: "Open" },
-  { value: "closed", label: "Closed" },
-  { value: "busy", label: "Busy" },
-  { value: "vacation", label: "Vacation" },
-];
+import ShopStatusToggle from "./storefront/ShopStatusToggle";
 
 const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -98,16 +91,9 @@ const ShopSettings = () => {
     toast.success("Gallery updated");
   };
 
-  const updateStatus = async (status) => {
+  const updateStatus = (status) => {
     setBusinessStatus(status);
-    const { data } = await axios.put(
-      `${server}/shop/update-shop-status`,
-      { businessStatus: status },
-      { withCredentials: true }
-    );
     dispatch(loadSeller());
-    emitShopStatusUpdate(seller._id, data.businessStatus);
-    toast.success(`Shop is now ${status}`);
   };
 
   const updateHandler = async (e) => {
@@ -160,23 +146,13 @@ const ShopSettings = () => {
 
         {/* Business status */}
         <div className="vendor-form-section yebone-surface mb-6">
-          <h3 className="font-semibold mb-3 dark:text-white">Business Status</h3>
-          <div className="flex flex-wrap gap-2">
-            {STATUS_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => updateStatus(opt.value)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium border transition ${
-                  businessStatus === opt.value
-                    ? "bg-yebone-primary text-white border-yebone-primary"
-                    : "border-gray-200 dark:border-gray-700 dark:text-gray-200"
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          <h3 className="font-semibold mb-2 dark:text-white">Business Status</h3>
+          <p className="text-xs text-gray-500 mb-3">Updates instantly on your storefront and product pages.</p>
+          <ShopStatusToggle
+            shopId={seller._id}
+            value={businessStatus}
+            onChange={updateStatus}
+          />
         </div>
 
         {/* Cover + logo */}
