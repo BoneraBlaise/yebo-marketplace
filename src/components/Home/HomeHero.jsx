@@ -27,13 +27,18 @@ const HomeHero = () => (
           </h1>
 
           <p className="home-hero__lead mb-4 max-w-md">
-            Discover millions of products across Africa with AI-powered virtual try-on.
+            Discover products, real estate, and vehicles across Africa with AI-powered shopping.
           </p>
-          <p className="home-hero__tagline mb-8">Yebone. Everything in one place.</p>
+          <p className="home-hero__tagline mb-8">Shopping · Property · Mobility — everything in one place.</p>
 
           <div className="flex flex-wrap gap-4">
             <Link to="/products">
               <Button size="lg" className="home-btn-lift">Start Shopping</Button>
+            </Link>
+            <Link to="/property-mobility?listingType=property">
+              <Button variant="outline" size="lg" className="home-btn-lift home-hero__outline-btn">
+                Browse Property
+              </Button>
             </Link>
             <Link to="#ai-experience">
               <Button variant="outline" size="lg" className="home-btn-lift home-hero__outline-btn">

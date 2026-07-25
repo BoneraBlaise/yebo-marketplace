@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setAuthToken } from "../../config/authStorage";
 import { loadUser } from "../../redux/actions/user";
+import { clearSellerSessionSkip, tryResumeSellerSession } from "../../utils/sellerSession";
 import { toast } from 'react-toastify';
 
 const LoginSuccessHandler = () => {
@@ -25,7 +26,8 @@ const LoginSuccessHandler = () => {
 
     if (token) {
       setAuthToken(token);
-      dispatch(loadUser());
+      clearSellerSessionSkip();
+      dispatch(loadUser()).then(() => dispatch(tryResumeSellerSession()));
       toast.success('Login Successful!');
       
       const redirectUrl = searchParams.get('redirect') || '/profile';

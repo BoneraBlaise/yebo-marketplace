@@ -28,6 +28,7 @@ import { IoMoonOutline } from "react-icons/io5";
 import { useSelector } from "react-redux";
 import { useTheme } from "../../context/ThemeContext";
 import { server } from "../../server";
+import { markSellerSessionSkipped } from "../../utils/sellerSession";
 
 export const VENDOR_NAV_PRIMARY = [
   { id: 1, label: "Dashboard", to: "/dashboard", icon: HiOutlineViewGrid },
@@ -108,9 +109,10 @@ const VendorSidebar = ({ active, onNavigate, className = "" }) => {
     try {
       await axios.get(`${server}/shop/logout`, { withCredentials: true });
       Cookies.remove("seller_token");
-      toast.success("Logged out successfully");
+      markSellerSessionSkipped();
+      toast.success("Seller session ended");
+      navigate("/");
       window.location.reload();
-      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }

@@ -23,6 +23,7 @@ import {
   formatAxiosErrorDetails,
 } from "../../config/authService";
 import { getRuntimeApiDiagnostics } from "../../config/serverConfig";
+import { clearSellerSessionSkip, tryResumeSellerSession } from "../../utils/sellerSession";
 
 const Login = () => {
   const { t } = useTranslation();
@@ -68,6 +69,8 @@ const Login = () => {
         type: "LoadUserSuccess",
         payload: res.data.user,
       });
+      clearSellerSessionSkip();
+      await dispatch(tryResumeSellerSession());
 
       toast.success(t("auth.loginSuccess"));
       navigate("/profile");

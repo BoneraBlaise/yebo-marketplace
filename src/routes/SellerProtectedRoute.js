@@ -1,14 +1,36 @@
-import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Navigate, useLocation } from "react-router-dom";
 import Loader from "../components/Layout/Loader";
-import { LEGACY_SHOP_LOGIN_PATH, SELLER_ONBOARDING_PATH } from "../utils/sellerNav";
+import { tryResumeSellerSession } from "../utils/sellerSession";
+import { SELLER_ONBOARDING_PATH } from "../utils/sellerNav";
 
 const SellerProtectedRoute = ({ children }) => {
   const location = useLocation();
+  const dispatch = useDispatch();
   const { isLoading, isSeller } = useSelector((state) => state.seller);
   const { isAuthenticated } = useSelector((state) => state.user);
+  const [resumeChecked, setResumeChecked] = useState(false);
 
-  if (isLoading === true) {
+  useEffect(() => {
+    let cancelled = false;
+
+    const attemptResume = async () => {
+      if (isSeller || !isAuthenticated || isLoading) {
+        if (!cancelled) setResumeChecked(true);
+        return;
+      }
+      await dispatch(tryResumeSellerSession());
+      if (!cancelled) setResumeChecked(true);
+    };
+
+    attemptResume();
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, isAuthenticated, isLoading, isSeller]);
+
+  if (isLoading || (isAuthenticated && !isSeller && !resumeChecked)) {
     return <Loader />;
   }
 
@@ -21,7 +43,5 @@ const SellerProtectedRoute = ({ children }) => {
 
   return children;
 };
-
-export { LEGACY_SHOP_LOGIN_PATH };
 
 export default SellerProtectedRoute;

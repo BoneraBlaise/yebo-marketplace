@@ -5,8 +5,8 @@ $work = "C:\yebo-ghp"
 $remote = "https://github.com/BoneraBlaise/yebo-marketplace.git"
 
 Set-Location $repoRoot
-Write-Host "Building production bundle..."
-npm run build
+Write-Host "Building GitHub Pages bundle (PUBLIC_URL=/yebo-marketplace)..."
+npm run build:gh-pages
 if ($LASTEXITCODE -ne 0) { throw "Build failed" }
 
 Copy-Item -Path "$repoRoot\build\index.html" -Destination "$repoRoot\build\404.html" -Force

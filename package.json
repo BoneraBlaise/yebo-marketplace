@@ -2,7 +2,7 @@
   "name": "yebone",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://bonerablaise.github.io/yebo-marketplace",
+  "homepage": "https://www.yebone.com",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
@@ -69,6 +69,7 @@
     "local": "npm run local --prefix ../../..",
     "verify:local": "npm run verify:local --prefix ../../..",
     "build": "set NODE_OPTIONS=--max-old-space-size=8192 && react-scripts build",
+    "build:gh-pages": "set NODE_OPTIONS=--max-old-space-size=8192 && set PUBLIC_URL=/yebo-marketplace&& set REACT_APP_APP_URL=https://bonerablaise.github.io/yebo-marketplace&& react-scripts build",
     "lint": "eslint src --ext .js,.jsx",
     "test": "react-scripts test",
     "test:search-smoke": "node --test src/lib/__tests__/searchQuery.test.mjs",
