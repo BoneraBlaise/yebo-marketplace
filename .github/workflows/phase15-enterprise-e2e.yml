@@ -1,0 +1,28 @@
+name: Phase 15 Enterprise E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
+      - run: npx playwright install chromium --with-deps
+      - name: Serve production build for page regression
+        run: npx --yes serve -s build -l 3000 &
+      - name: Run Playwright regression suite
+        env:
+          E2E_FRONTEND_URL: http://127.0.0.1:3000
+        run: npm run test:e2e:regression

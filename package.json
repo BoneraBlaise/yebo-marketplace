@@ -73,6 +73,9 @@
     "lint": "eslint src --ext .js,.jsx",
     "test": "react-scripts test",
     "test:search-smoke": "node --test src/lib/__tests__/searchQuery.test.mjs",
+    "test:e2e": "playwright test --config e2e/playwright.config.js",
+    "test:e2e:regression": "playwright test --config e2e/playwright.config.js e2e/tests/07-regression.spec.js",
+    "test:e2e:report": "playwright show-report e2e/playwright-report",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -94,6 +97,7 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
     "autoprefixer": "^10.4.13",
     "gh-pages": "^6.1.1",
     "patch-package": "^8.0.0",

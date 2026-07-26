@@ -1,7 +1,7 @@
 # Yebone / Guriraline — Project Status
 
-**Last updated:** 2026-07-26 (Phase 15 production acceptance)  
-**Acceptance tag:** `phase15-production-acceptance-v1`  
+**Last updated:** 2026-07-26 (Phase 15 enterprise certification)  
+**Enterprise tag:** `phase15-enterprise-certification-v1`  
 **Authoritative snapshot for resuming work**
 
 ---
@@ -11,7 +11,7 @@
 | Item | Value |
 |------|-------|
 | **Completed milestone** | **Phase 15 — Marketplace Communication & Commerce Engine** |
-| **Status** | **Frozen** |
+| **Status** | **Enterprise Certified & Frozen** |
 | **Next task** | Phase 16 (TBD — see product roadmap) |
 
 ---
@@ -27,6 +27,7 @@
 - Socket.IO on main server (`:5000`)
 - Order status hooks → buyer/seller notifications
 - Buyer delivery confirmation endpoint
+- **Redis-backed distributed rate limiting** with in-memory fallback
 
 ### Frontend
 
@@ -36,6 +37,7 @@
 - Product contact → communication API
 - Checkout from accepted offer (`/checkout?offerId=&token=`)
 - Buyer “Confirm delivery received” on order details
+- **Playwright E2E suite** (`e2e/` — 7 test suites)
 
 ### API base
 
@@ -49,6 +51,8 @@
 |---|----------|---------|
 | **Repo** | `guriraline_app-main` | `guriraline_server-main` |
 | **Phase 15 tag** | `phase15-marketplace-communication-v1` | `phase15-marketplace-communication-v1` |
+| **Acceptance tag** | `phase15-production-acceptance-v1` | `phase15-production-acceptance-v1` |
+| **Enterprise tag** | `phase15-enterprise-certification-v1` | `phase15-enterprise-certification-v1` |
 
 ---
 
@@ -61,15 +65,42 @@
 
 ---
 
-## Production Acceptance
+## Certification
 
-See `docs/PHASE_15_PRODUCTION_ACCEPTANCE.md` — **9.4/10**, production-ready after security hardening.
+| Report | Score |
+|--------|-------|
+| Production acceptance | **9.4/10** — `docs/PHASE_15_PRODUCTION_ACCEPTANCE.md` |
+| Enterprise certification | **9.7/10** — `docs/PHASE_15_ENTERPRISE_CERTIFICATION.md` |
+
+---
+
+## Enterprise Configuration
+
+```env
+COMMUNICATION_RATE_LIMIT_ENABLED=true
+REDIS_URL=redis://...
+COMMUNICATION_RATE_LIMIT_WINDOW_MS=60000
+COMMUNICATION_RATE_LIMIT_MAX=30
+COMMUNICATION_CRON_SECRET=your-strong-secret
+```
+
+## E2E Testing
+
+```bash
+npm run test:e2e              # full suite (requires credentials + stack)
+npm run test:e2e:regression   # health + page smoke (CI default)
+```
+
+See `e2e/.env.e2e.example` for required credentials.
+
+---
 
 ## Known Limitations
 
-- Web Push requires `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` in backend env
-- Offer expiry sweep: `POST /communication/offers/expire-due` (cron not bundled)
-- Legacy `/conversation` REST routes remain for backward compatibility; new UI uses v2 communication API
+- Full communication E2E requires buyer/seller test accounts and running stack
+- Web Push requires VAPID keys in backend env
+- Offer expiry sweep: cron endpoint (not bundled)
+- Legacy `/conversation` REST routes remain for backward compatibility
 
 ---
 
