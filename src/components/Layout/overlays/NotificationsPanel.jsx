@@ -1,52 +1,88 @@
-import React, { memo, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   IoBagOutline,
+  IoChatbubbleOutline,
   IoNotificationsOutline,
   IoPricetagOutline,
-  IoSparklesOutline,
 } from "react-icons/io5";
+import { format } from "timeago.js";
 import HeaderDropdownPanel from "./HeaderDropdownPanel";
+import {
+  fetchNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+} from "../../../services/communicationService";
 
-const MOCK_NOTIFICATIONS = [
-  {
-    id: "1",
-    title: "Order shipped",
-    body: "Your order #4821 is on the way to Kigali.",
-    time: "2 hours ago",
-    unread: true,
-    icon: IoBagOutline,
-  },
-  {
-    id: "2",
-    title: "Price drop alert",
-    body: "An item in your wishlist is now 15% off.",
-    time: "Yesterday",
-    unread: true,
-    icon: IoPricetagOutline,
-  },
-  {
-    id: "3",
-    title: "YEBO picked for you",
-    body: "New AI recommendations based on your recent browsing.",
-    time: "3 days ago",
-    unread: false,
-    icon: IoSparklesOutline,
-  },
-];
+const iconForType = (type) => {
+  if (type?.includes("offer") || type?.includes("message")) return IoChatbubbleOutline;
+  if (type?.includes("order") || type?.includes("delivery")) return IoBagOutline;
+  return IoPricetagOutline;
+};
 
 const NotificationsPanel = memo(({ onClose, isAuthenticated }) => {
-  const [items, setItems] = useState(MOCK_NOTIFICATIONS);
+  const navigate = useNavigate();
+  const [items, setItems] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
 
-  const unreadCount = useMemo(
-    () => items.filter((item) => item.unread).length,
+  const loadNotifications = useCallback(async () => {
+    if (!isAuthenticated) return;
+    setLoading(true);
+    try {
+      const data = await fetchNotifications({ limit: 20 });
+      setItems(data.items || []);
+      setUnreadCount(data.unreadCount || 0);
+    } catch (_error) {
+      setItems([]);
+      setUnreadCount(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
+
+  const displayItems = useMemo(
+    () =>
+      items.map((item) => ({
+        id: item._id,
+        title: item.title,
+        body: item.body,
+        time: item.createdAt ? format(item.createdAt) : "",
+        unread: !item.read,
+        icon: iconForType(item.type),
+        link: item.link,
+      })),
     [items]
   );
 
-  const markRead = (id) => {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, unread: false } : item))
-    );
+  const handleOpen = async (item) => {
+    if (item.unread) {
+      try {
+        await markNotificationRead(item.id);
+        setItems((prev) =>
+          prev.map((n) => (n._id === item.id ? { ...n, read: true } : n))
+        );
+        setUnreadCount((c) => Math.max(0, c - 1));
+      } catch (_error) {
+        // non-blocking
+      }
+    }
+    onClose?.();
+    if (item.link) navigate(item.link);
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsRead();
+      setItems((prev) => prev.map((n) => ({ ...n, read: true })));
+      setUnreadCount(0);
+    } catch (_error) {
+      // non-blocking
+    }
   };
 
   return (
@@ -64,7 +100,11 @@ const NotificationsPanel = memo(({ onClose, isAuthenticated }) => {
         )}
       </div>
 
-      {items.length === 0 ? (
+      {loading ? (
+        <div className="yebone-header-notifications__empty">
+          <p className="yebone-header-notifications__empty-text">Loading...</p>
+        </div>
+      ) : displayItems.length === 0 ? (
         <div className="yebone-header-notifications__empty">
           <IoNotificationsOutline
             size={28}
@@ -78,7 +118,7 @@ const NotificationsPanel = memo(({ onClose, isAuthenticated }) => {
         </div>
       ) : (
         <div className="yebone-header-notifications__list" role="list">
-          {items.map((item) => {
+          {displayItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
@@ -88,7 +128,7 @@ const NotificationsPanel = memo(({ onClose, isAuthenticated }) => {
                 className={`yebone-header-notifications__item${
                   item.unread ? " is-unread" : " is-read"
                 }`}
-                onClick={() => markRead(item.id)}
+                onClick={() => handleOpen(item)}
               >
                 <span className="yebone-header-notifications__icon" aria-hidden="true">
                   <Icon size={18} />
@@ -108,12 +148,21 @@ const NotificationsPanel = memo(({ onClose, isAuthenticated }) => {
       )}
 
       <div className="yebone-header-notifications__footer">
+        {unreadCount > 0 && (
+          <button
+            type="button"
+            className="yebone-header-notifications__view-all mr-3"
+            onClick={handleMarkAllRead}
+          >
+            Mark all read
+          </button>
+        )}
         <Link
-          to={isAuthenticated ? "/profile" : "/login"}
+          to={isAuthenticated ? "/inbox" : "/login"}
           className="yebone-header-notifications__view-all"
           onClick={onClose}
         >
-          View all notifications
+          Open messages
         </Link>
       </div>
     </HeaderDropdownPanel>

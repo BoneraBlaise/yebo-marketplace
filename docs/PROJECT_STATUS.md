@@ -1,6 +1,6 @@
 # Yebone / Guriraline — Project Status
 
-**Last updated:** 2026-07-26 (end-of-day freeze · pre-Phase 15 push)  
+**Last updated:** 2026-07-17 (Phase 15 complete)  
 **Authoritative snapshot for resuming work**
 
 ---
@@ -9,10 +9,36 @@
 
 | Item | Value |
 |------|-------|
-| **Completed milestone** | PRE-PHASE 15 + PRE-PHASE 15.1 |
+| **Completed milestone** | **Phase 15 — Marketplace Communication & Commerce Engine** |
 | **Status** | **Frozen** |
-| **Phase 15** | **NOT STARTED** |
-| **Next task** | Phase 15 — Marketplace Communication & Commerce Engine |
+| **Next task** | Phase 16 (TBD — see product roadmap) |
+
+---
+
+## Phase 15 Deliverables
+
+### Backend (`marketplace/communication/`)
+
+- Product-scoped conversations (extend `Conversation` / `Messages` models)
+- Offers: create, counter, accept, reject, expire
+- Negotiated checkout bridge → `OrderPricingService.repriceFromOffer()` + `OrderService.createOrders({ negotiatedOffer })`
+- In-app notifications + Web Push (VAPID when configured)
+- Socket.IO on main server (`:5000`)
+- Order status hooks → buyer/seller notifications
+- Buyer delivery confirmation endpoint
+
+### Frontend
+
+- `communicationService.js` — unified API client
+- `MessagingCenter` — responsive buyer/seller inbox (mobile / tablet / desktop)
+- Real `NotificationsPanel` (replaces mocks)
+- Product contact → communication API
+- Checkout from accepted offer (`/checkout?offerId=&token=`)
+- Buyer “Confirm delivery received” on order details
+
+### API base
+
+`/api/v2/marketplace/communication/*`
 
 ---
 
@@ -21,119 +47,29 @@
 | | Frontend | Backend |
 |---|----------|---------|
 | **Repo** | `guriraline_app-main` | `guriraline_server-main` |
-| **Branch** | `main` | `main` |
-| **Latest commit** | `3dc2967` | `c44255b` |
-| **Latest tag** | `pre-phase15-final-polish-v1` | `pre-phase15-final-polish-v1` |
-| **Ahead of origin** | 5 commits | 4 commits |
-| **Working tree** | Clean (tracked) | Clean (tracked) |
-| **End-of-day tag** | `end-of-day-pre-phase15` (pending push) | `end-of-day-pre-phase15` (pending push) |
-| **Production build** | ✅ Pass (2026-07-26 verification) | Module load ✅ |
+| **Phase 15 tag** | `phase15-marketplace-communication-v1` | `phase15-marketplace-communication-v1` |
 
 ---
 
-## Frozen Tags
-
-```
-pre-phase15-control-centers-v1    ← 10 control centers baseline
-pre-phase15-final-polish-v1       ← history, rollback, draft/publish, simulators, flags
-```
-
-Checkout either tag to restore a known-good admin state.
-
----
-
-## What Is Complete
-
-### PRE-PHASE 15 — Super Admin Control Centers
-
-- 10 production control centers with shared shell and design system
-- Platform configuration bridge (backend) with versioned business values
-- Admin routes, sidebar, role-based nav visibility
-- Docs: admin guide + developer notes
-
-### PRE-PHASE 15.1 — Final Excellence Pass
-
-- **Configuration History** — `/admin/history`, immutable audit, search/filters
-- **Rollback** — restore published config from history (creates new audit entry)
-- **Draft → Publish** — changes not live until published; Live / Draft / Pending UI
-- **Simulators** — preview panels on Commission, Referral, AI, Delivery centers
-- **Feature Flags** — `/admin/feature-flags`, runtime enable/disable/beta/coming_soon/internal
-
----
-
-## Frozen Modules (Do Not Modify Business Logic)
+## Frozen Modules (Do Not Rewrite)
 
 - Payment Foundation
-- Marketplace Core
-- Vendor · Orders · Search
-- Growth Commerce engine
-- Seller Operations
-- Property & Mobility core
-- YEBO AI runtime
-- Trust & Buyer Protection
-- Existing control center UIs (extend only, do not rebuild)
+- Marketplace Core (extended via communication module only)
+- Orders core (extended: negotiated offer path, hooks)
+- Property & Mobility, YEBO AI, Trust & Buyer Protection, Control Centers
 
 ---
 
-## Architecture Summary
+## Known Limitations
 
-```
-Admin UI (React)
-  └─ AdminControlCenters/* + platformConfigurationService.js
-       └─ API: /api/v2/marketplace/integration/*
-            ├─ PlatformConfigurationStore (live + draft)
-            ├─ ConfigurationHistoryService (immutable audit)
-            ├─ ConfigurationWorkflowService (workflow + simulators)
-            └─ Domain bridges (delivery, growth, AI) — read published config
-```
-
-**Config workflow:** Edit → Save Draft → Review → Publish → Live
+- Web Push requires `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` in backend env
+- Offer expiry sweep: `POST /communication/offers/expire-due` (cron not bundled)
+- Legacy `/conversation` REST routes remain for backward compatibility; new UI uses v2 communication API
 
 ---
 
-## Admin Routes (Super Admin)
+## Local Dev
 
-| Route | Purpose |
-|-------|---------|
-| `/admin/platform-configuration` | Central pricing & domain config viewer |
-| `/admin/commission` | Category commissions + analytics |
-| `/admin/referrals` | Referral settings + fraud |
-| `/admin/ai` | AI product pricing & eligibility |
-| `/admin/delivery` | Shipping modes, pricing, zones |
-| `/admin/growth` | Growth commerce panel |
-| `/admin/commission-rules` | Rule engine + CRUD |
-| `/admin/coupons` | Coupon monitor + defaults |
-| `/admin/banners` | Banner management |
-| `/admin/property-mobility` | Property & mobility admin |
-| `/admin/history` | Configuration history + rollback |
-| `/admin/feature-flags` | Runtime feature flags |
-
----
-
-## Known Untracked Files (Not Committed)
-
-- `build-output.log` (frontend build artifact)
-- `docs/LOCAL_DEVELOPMENT.md`, phase closure reports (frontend)
-- `data/` (backend local dev config files)
-
-These do not affect the frozen commit state.
-
----
-
-## Roadmap (High Level)
-
-| Phase | Status |
-|-------|--------|
-| Phases 1–14 | Closed per prior reports |
-| PRE-PHASE 15 | ✅ Frozen |
-| PRE-PHASE 15.1 | ✅ Frozen |
-| **Phase 15 — Marketplace Communication & Commerce Engine** | **Next** |
-| Phase 15+ (enterprise scale, CI/CD, domain) | Future |
-
----
-
-## Resume Instructions
-
-1. Read `docs/NEXT_SESSION_HANDOFF.md`
-2. Confirm both repos at tag `pre-phase15-final-polish-v1` or latest commits above
-3. Begin Phase 15 only — do not revisit PRE-PHASE 15 control centers
+- Frontend: `http://localhost:3000`
+- Backend + Socket: `http://localhost:5000`
+- Set `REACT_APP_SOCKET_URL=http://localhost:5000` if proxy/socket mismatch

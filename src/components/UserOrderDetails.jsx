@@ -14,6 +14,7 @@ import { typography } from "../design-system/typography";
 import OrderItemsList, { OrderStatusBadge } from "./Orders/OrderItemsList";
 import { OrderLoadingState, OrderErrorState } from "./Orders/OrderStateViews";
 import { canCancelOrder, canRequestRefund } from "./Orders/orderStatus";
+import { confirmOrderDelivery } from "../services/communicationService";
 
 const UserOrderDetails = () => {
   const { orders, isLoading, error } = useSelector((state) => state.order);
@@ -82,6 +83,23 @@ const UserOrderDetails = () => {
       setActionLoading(false);
     }
   };
+
+  const confirmDeliveryHandler = async () => {
+    setActionLoading(true);
+    try {
+      await confirmOrderDelivery(id);
+      toast.success("Delivery confirmed");
+      dispatch(getAllOrdersOfUser(user._id));
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not confirm delivery");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const canConfirmDelivery = ["Shipping", "Received", "On the way", "Transferred to delivery partner"].includes(
+    data?.status
+  );
 
   if (isLoading && !data) {
     return <OrderLoadingState label="Loading order details..." />;
@@ -169,6 +187,15 @@ const UserOrderDetails = () => {
                 Total: RWF {data.totalPrice}
               </p>
               <div className="flex flex-col sm:flex-row gap-2 mt-4">
+                {canConfirmDelivery && (
+                  <Button
+                    onClick={confirmDeliveryHandler}
+                    disabled={actionLoading}
+                    className="yebone-btn-lift"
+                  >
+                    Confirm delivery received
+                  </Button>
+                )}
                 {canCancelOrder(data.status) && (
                   <Button
                     onClick={cancelHandler}

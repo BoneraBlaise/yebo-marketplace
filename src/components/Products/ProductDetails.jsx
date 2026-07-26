@@ -10,6 +10,7 @@ import {
 import { addTocart } from "../../redux/actions/cart";
 import { toast } from "react-toastify";
 import axios from "axios";
+import { startProductConversation } from "../../services/communicationService";
 import ReactQuill from "react-quill";
 import { FaShare } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
@@ -193,54 +194,36 @@ const ProductDetails = ({ data }) => {
     }
   }, [data]);
   const handleMessageSubmit = async () => {
-    if (isAuthenticated) {
-      const groupTitle = `${data._id}${user._id}`;
-      const userId = user._id;
-      const sellerId = data.shop._id;
-
-      try {
-        // First check if conversation exists
-        const existingConversations = await axios.get(
-          `${server}/conversation/get-all-conversation-user/${userId}`,
-          { withCredentials: true }
-        );
-
-        let conversationId;
-        const existingConversation = existingConversations.data.conversations.find(
-          conv => conv.members.includes(sellerId)
-        );
-
-        if (existingConversation) {
-          // Use existing conversation
-          conversationId = existingConversation._id;
-        } else {
-          // Create new conversation with product context
-          const newConversation = await axios.post(
-            `${server}/conversation/create-new-conversation`,
-            {
-              groupTitle,
-              userId,
-              sellerId,
-            }
-          );
-          conversationId = newConversation.data.conversation._id;
-        }
-
-        // Send initial message with product context
-        await axios.post(`${server}/message/create-new-message`, {
-          conversationId,
-          sender: userId,
-          // The message contains a clickable product name linking to the product details page
-          text: `Hi, I'm interested in ${data.name} with price ${data.discountPrice} RWF. Can you provide more details?`,
-        });
-
-
-        navigate(`/inbox?${conversationId}`);
-      } catch (error) {
-        toast.error(error.response?.data?.message || "Error creating conversation");
-      }
-    } else {
+    if (!isAuthenticated) {
       toast.error("Please login to create a conversation");
+      return;
+    }
+
+    const sellerId = data.shop?._id || data.shopId;
+    if (!sellerId) {
+      toast.error("Seller information unavailable");
+      return;
+    }
+
+    try {
+      const productSnapshot = {
+        productId: String(data._id),
+        name: data.name,
+        price: Number(data.discountPrice || data.originalPrice),
+        image: data.images?.[0]?.url || data.images?.url || null,
+        shopId: String(sellerId),
+      };
+
+      const conversation = await startProductConversation({
+        productId: String(data._id),
+        sellerId: String(sellerId),
+        productSnapshot,
+        initialMessage: `Hi, I'm interested in ${data.name} (${data.discountPrice} RWF). Can you share more details?`,
+      });
+
+      navigate(`/inbox?conversation=${conversation._id}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error creating conversation");
     }
   };
   const formatPrice = (price) =>

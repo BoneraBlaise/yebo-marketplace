@@ -8,6 +8,7 @@ import { trackCommissionClick } from "../../redux/actions/order";
 import { addTocart, removeFromCart } from "../../redux/actions/cart";
 import { useReferral } from "../../context/ReferralContext";
 import { validateGrowthCoupon } from "../../services/growthConfigurationService";
+import { fetchNegotiatedCheckout } from "../../services/communicationService";
 import { Container, Button } from "../ui";
 import { typography } from "../../design-system/typography";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
@@ -22,6 +23,12 @@ const Checkout = () => {
   const { cart } = useSelector((state) => state.cart);
   const location = useLocation();
   const wonBid = location.state?.wonBid;
+  const searchParams = new URLSearchParams(location.search);
+  const offerIdParam = searchParams.get("offerId");
+  const offerTokenParam = searchParams.get("token");
+  const [negotiatedOffer, setNegotiatedOffer] = useState(null);
+  const [negotiatedCartItem, setNegotiatedCartItem] = useState(null);
+  const [negotiatedLoading, setNegotiatedLoading] = useState(Boolean(offerIdParam && offerTokenParam));
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
   const [userInfo, setUserInfo] = useState(false);
@@ -41,6 +48,33 @@ const Checkout = () => {
   }, []);
 
   useEffect(() => {
+    if (!offerIdParam || !offerTokenParam) return;
+    let cancelled = false;
+    (async () => {
+      setNegotiatedLoading(true);
+      try {
+        const payload = await fetchNegotiatedCheckout({
+          offerId: offerIdParam,
+          token: offerTokenParam,
+        });
+        if (cancelled) return;
+        setNegotiatedOffer(payload.negotiatedOffer);
+        setNegotiatedCartItem(payload.cart?.[0] || null);
+      } catch (error) {
+        if (!cancelled) {
+          toast.error(error.response?.data?.message || "Negotiated offer unavailable");
+          navigate("/inbox");
+        }
+      } finally {
+        if (!cancelled) setNegotiatedLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [offerIdParam, offerTokenParam, navigate]);
+
+  useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const refCode = urlParams.get("ref");
     if (refCode) {
@@ -48,10 +82,9 @@ const Checkout = () => {
     }
   }, [dispatch]);
 
-  const subTotalPrice = cart.reduce(
-    (acc, item) => acc + item.qty * item.discountPrice,
-    0
-  );
+  const subTotalPrice = negotiatedCartItem
+    ? Number(negotiatedCartItem.discountPrice || negotiatedCartItem.price || 0)
+    : cart.reduce((acc, item) => acc + item.qty * item.discountPrice, 0);
 
   const calculateShipping = (price) => {
     if (price >= 500000) return 10000;
@@ -143,7 +176,16 @@ const Checkout = () => {
       couponCode: couponCodeData?.code || null,
     };
 
-    if (location.state?.wonBid) {
+    if (negotiatedOffer && negotiatedCartItem) {
+      orderData = {
+        ...orderData,
+        cart: [negotiatedCartItem],
+        totalPrice: Number(negotiatedCartItem.discountPrice || negotiatedCartItem.price) + shipping,
+        subTotalPrice: Number(negotiatedCartItem.discountPrice || negotiatedCartItem.price),
+        orderType: "negotiated_offer",
+        negotiatedOffer,
+      };
+    } else if (location.state?.wonBid) {
       const wonBidState = location.state.wonBid;
       orderData = {
         ...orderData,
@@ -187,7 +229,15 @@ const Checkout = () => {
     dispatch(removeFromCart(data));
   };
 
-  if (!wonBid && cart.length === 0) {
+  if (negotiatedLoading) {
+    return (
+      <Container className="py-12">
+        <p className="text-center text-gray-500">Loading negotiated checkout...</p>
+      </Container>
+    );
+  }
+
+  if (!wonBid && !negotiatedCartItem && cart.length === 0) {
     return <CheckoutEmptyCart />;
   }
 
@@ -203,7 +253,21 @@ const Checkout = () => {
 
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-10 items-start">
           <div className="lg:col-span-2 space-y-6 yebone-fade-up">
-            {!wonBid && cart.length > 0 && (
+            {negotiatedCartItem && (
+              <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
+                <h2 className={`${typography.subheading} mb-5`}>Negotiated offer</h2>
+                <CheckoutCartItem
+                  data={{ ...negotiatedCartItem, qty: 1 }}
+                  quantityChangeHandler={() => {}}
+                  removeFromCartHandler={() => {}}
+                  hasReferral={false}
+                  showMoveToWishlist={false}
+                  compact
+                />
+              </section>
+            )}
+
+            {!wonBid && !negotiatedCartItem && cart.length > 0 && (
               <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
                 <h2 className={`${typography.subheading} mb-5`}>
                   Cart ({cart.length} {cart.length === 1 ? "item" : "items"})

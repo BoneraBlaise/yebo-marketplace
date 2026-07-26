@@ -2,7 +2,7 @@ const trimSlash = (value = "") => String(value).replace(/\/$/, "");
 
 const LOCAL_API_SUFFIX = "/api/v2";
 const LOCAL_BACKEND_DEFAULT = "http://localhost:5000";
-const LOCAL_SOCKET_DEFAULT = "http://localhost:4000";
+const LOCAL_SOCKET_DEFAULT = "http://localhost:5000";
 const LOCAL_APP_ORIGIN_DEFAULT = "http://localhost:3000";
 
 const PRODUCTION_API_DEFAULT = "https://yebone-backend.onrender.com/api/v2";

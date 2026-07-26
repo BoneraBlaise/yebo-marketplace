@@ -78,6 +78,8 @@ const Payment = () => {
           orderData.cart?.find((item) => item.referralCode)?.referralCode || null,
         orderType: orderData.orderType,
         bidId: orderData.bidId,
+        negotiatedOffer: orderData.negotiatedOffer || null,
+        wonBid: orderData.wonBid || null,
       };
 
       const { data } = await axios.post(
