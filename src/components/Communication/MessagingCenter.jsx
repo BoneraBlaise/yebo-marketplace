@@ -24,7 +24,20 @@ import {
 } from "../../services/communicationService";
 import "./messaging-center.css";
 
-const socket = socketIO(socketUrl, { transports: ["websocket", "polling"], autoConnect: true });
+const readAuthCookie = () => {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(/(?:^|; )(?:token|seller_token)=([^;]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
+const createSocket = () =>
+  socketIO(socketUrl, {
+    transports: ["websocket", "polling"],
+    autoConnect: false,
+    auth: { token: readAuthCookie() },
+  });
+
+let socket = createSocket();
 
 const formatAmount = (amount, currency = "RWF") =>
   `${Number(amount || 0).toLocaleString()} ${currency}`;
@@ -141,19 +154,33 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
 
   useEffect(() => {
     if (!currentUserId) return;
-    socket.emit("addUser", currentUserId);
-    socket.on("getUsers", setOnlineUsers);
-    socket.on("getMessage", (data) => {
+    const token = readAuthCookie();
+    if (!token) return;
+    socket.auth = { token };
+    if (!socket.connected) socket.connect();
+
+    const onUsers = (data) => setOnlineUsers(data);
+    const onMessage = (data) => {
+      const incoming = data.message || data;
+      const incomingId = incoming?._id;
       if (currentChat && String(data.conversationId) === String(currentChat._id)) {
-        setMessages((prev) => [...prev, data.message || data]);
+        setMessages((prev) => {
+          if (incomingId && prev.some((m) => m._id === incomingId)) return prev;
+          return [...prev, incoming];
+        });
         loadConversations();
       }
-    });
-    socket.on("notification", () => loadConversations());
+    };
+    const onNotification = () => loadConversations();
+
+    socket.on("getUsers", onUsers);
+    socket.on("getMessage", onMessage);
+    socket.on("notification", onNotification);
+
     return () => {
-      socket.off("getUsers");
-      socket.off("getMessage");
-      socket.off("notification");
+      socket.off("getUsers", onUsers);
+      socket.off("getMessage", onMessage);
+      socket.off("notification", onNotification);
     };
   }, [currentUserId, currentChat, loadConversations]);
 
@@ -189,12 +216,9 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
     const otherId = (currentChat.members || []).find((m) => String(m) !== String(currentUserId));
     try {
       const message = await sendConversationMessage(currentChat._id, { text: newMessage.trim() });
-      setMessages((prev) => [...prev, message]);
-      socket.emit("sendMessage", {
-        senderId: currentUserId,
-        receiverId: otherId,
-        text: newMessage.trim(),
-        conversationId: currentChat._id,
+      setMessages((prev) => {
+        if (message?._id && prev.some((m) => m._id === message._id)) return prev;
+        return [...prev, message];
       });
       setNewMessage("");
       loadConversations();

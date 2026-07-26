@@ -1,6 +1,7 @@
 # Yebone / Guriraline — Project Status
 
-**Last updated:** 2026-07-17 (Phase 15 complete)  
+**Last updated:** 2026-07-26 (Phase 15 production acceptance)  
+**Acceptance tag:** `phase15-production-acceptance-v1`  
 **Authoritative snapshot for resuming work**
 
 ---
@@ -59,6 +60,10 @@
 - Property & Mobility, YEBO AI, Trust & Buyer Protection, Control Centers
 
 ---
+
+## Production Acceptance
+
+See `docs/PHASE_15_PRODUCTION_ACCEPTANCE.md` — **9.4/10**, production-ready after security hardening.
 
 ## Known Limitations
 
