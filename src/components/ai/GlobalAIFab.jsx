@@ -18,7 +18,7 @@ const GlobalAIFab = () => {
   if (isHidden) return null;
 
   const fabClass =
-    isDashboard || isCheckout ? "ai-fab ai-fab--offset-mobile" : "ai-fab ai-fab--default";
+    isDashboard || isCheckout ? "ai-fab ai-fab--offset-mobile ai-fab--desktop-only" : "ai-fab ai-fab--default ai-fab--desktop-only";
 
   return (
     <>

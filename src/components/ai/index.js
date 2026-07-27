@@ -24,7 +24,7 @@ export { default as AICard } from "./primitives/AICard";
 export { default as AISection } from "./primitives/AISection";
 export { default as AILoading } from "./primitives/AILoading";
 export { default as AIEmptyState } from "./primitives/AIEmptyState";
-export { default as AIResponseCard, AIInsightResponseCard } from "./primitives/AIResponseCard";
+export { default as AIResponseCard, default as AIInsightResponseCard } from "./primitives/AIResponseCard";
 export { default as AIConversation } from "./primitives/AIConversation";
 export { default as AIActionButton } from "./primitives/AIActionButton";
 export { default as AIInsightCard } from "./primitives/AIInsightCard";

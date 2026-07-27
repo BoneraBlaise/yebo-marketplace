@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import "./mobileCategoriesNav.css";
 
 const SCROLL_LOCK_CLASS = "mc-nav-open";
-const CLOSE_MS = 340;
+const CLOSE_MS = 220;
 
 const CategoryIcon = ({ imageUrl, title, size = "md" }) => {
   const sizeClass = size === "sm" ? "mc-nav__icon mc-nav__icon--sm" : "mc-nav__icon";
@@ -15,7 +15,7 @@ const CategoryIcon = ({ imageUrl, title, size = "md" }) => {
   if (imageUrl) {
     return (
       <span className={sizeClass} aria-hidden="true">
-        <img src={imageUrl} alt="" loading="lazy" />
+        <img src={imageUrl} alt="" loading="eager" decoding="async" />
       </span>
     );
   }
@@ -64,7 +64,6 @@ const MobileCategoriesPanel = ({ open, onClose, categoriesData = [] }) => {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState(null);
-  const [isMounted, setIsMounted] = useState(open);
   const [isPresented, setIsPresented] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const closeRef = useRef(null);
@@ -89,40 +88,26 @@ const MobileCategoriesPanel = ({ open, onClose, categoriesData = [] }) => {
 
   useEffect(() => {
     if (open) {
-      setIsMounted(true);
       setIsClosing(false);
+      setIsPresented(true);
       return undefined;
     }
 
-    if (!isMounted) return undefined;
+    if (!isPresented) return undefined;
 
     setIsClosing(true);
     setIsPresented(false);
     closeTimerRef.current = window.setTimeout(() => {
       setIsClosing(false);
-      setIsMounted(false);
     }, CLOSE_MS);
 
     return () => {
       if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current);
     };
-  }, [open, isMounted]);
+  }, [open, isPresented]);
 
   useEffect(() => {
-    if (!isMounted || isClosing) {
-      setIsPresented(false);
-      return undefined;
-    }
-
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setIsPresented(true));
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, [isMounted, isClosing]);
-
-  useEffect(() => {
-    if (!isMounted) return undefined;
+    if (!open && !isClosing) return undefined;
 
     const scrollY = window.scrollY;
     const root = document.getElementById("root");
@@ -149,10 +134,10 @@ const MobileCategoriesPanel = ({ open, onClose, categoriesData = [] }) => {
       if (root) root.inert = false;
       window.scrollTo(0, scrollY);
     };
-  }, [isMounted]);
+  }, [open, isClosing]);
 
   useEffect(() => {
-    if (!isMounted) return undefined;
+    if (!open && !isClosing) return undefined;
 
     const onKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -167,7 +152,7 @@ const MobileCategoriesPanel = ({ open, onClose, categoriesData = [] }) => {
     }
 
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isMounted, activeCategory, handleBack, handleClose]);
+  }, [open, isClosing, activeCategory, handleBack, handleClose]);
 
   useEffect(() => {
     if (!open) {
@@ -209,11 +194,8 @@ const MobileCategoriesPanel = ({ open, onClose, categoriesData = [] }) => {
     handleClose();
   };
 
-  if (!isMounted) return null;
-
   const shellClass = [
     "mc-nav",
-    "lg:hidden",
     isPresented && "is-open",
     isClosing && "is-closing",
   ]

@@ -1,10 +1,10 @@
 import React from "react";
 import VendorDashboardLayout from "../../components/Dashboard/VendorDashboardLayout";
-import CreateProduct from "../../components/Shop/CreateProduct";
+import CreateProductWizard from "../../components/seller-experience/CreateProductWizard";
 
 const ShopCreateProduct = () => (
-  <VendorDashboardLayout active={4}>
-    <CreateProduct />
+  <VendorDashboardLayout active={4} bare>
+    <CreateProductWizard />
   </VendorDashboardLayout>
 );
 

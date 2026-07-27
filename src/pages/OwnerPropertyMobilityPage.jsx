@@ -1,19 +1,19 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import VendorDashboardLayout from "../components/Dashboard/VendorDashboardLayout";
+import { useCreateExperience } from "../components/seller-experience/CreateExperienceContext";
 import {
   PropertyMobilityStatusBanner,
   ResponsiveDataTable,
 } from "../components/PropertyMobility/propertyMobilityUi";
 import {
-  LISTING_CATEGORIES,
   formatCategory,
   formatPrice,
   resolvePropertyMobilityErrorMessage,
 } from "../components/PropertyMobility/propertyMobilityHelpers";
 import {
   createOwnerAgency,
-  createOwnerListing,
   fetchOwnerAgencies,
   fetchOwnerListings,
   fetchOwnerOffers,
@@ -33,6 +33,8 @@ const inputClass =
   "h-11 px-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm dark:text-white w-full";
 
 const OwnerPropertyMobilityPage = () => {
+  const location = useLocation();
+  const { openCreate } = useCreateExperience();
   const [activeTab, setActiveTab] = useState("listings");
   const [loading, setLoading] = useState(true);
   const [featureDisabled, setFeatureDisabled] = useState(false);
@@ -40,15 +42,6 @@ const OwnerPropertyMobilityPage = () => {
   const [agencies, setAgencies] = useState([]);
   const [offers, setOffers] = useState([]);
   const [verification, setVerification] = useState(null);
-  const [form, setForm] = useState({
-    category: "apartments",
-    title: "",
-    description: "",
-    price: "",
-    city: "",
-    lat: "",
-    lng: "",
-  });
   const [agencyForm, setAgencyForm] = useState({ type: "real_estate_agency", name: "" });
 
   const loadData = useCallback(async () => {
@@ -80,30 +73,13 @@ const OwnerPropertyMobilityPage = () => {
     loadData();
   }, [loadData]);
 
-  const handleCreateListing = async (event) => {
-    event.preventDefault();
-    if (!form.title.trim()) {
-      toast.error("Title is required.");
-      return;
+  useEffect(() => {
+    if (location.state?.openCreateWizard) {
+      openCreate("property", loadData);
+      setActiveTab("listings");
+      window.history.replaceState({}, document.title);
     }
-    try {
-      await createOwnerListing({
-        category: form.category,
-        title: form.title,
-        description: form.description,
-        price: Number(form.price),
-        location: { city: form.city },
-        coordinates: { lat: Number(form.lat), lng: Number(form.lng) },
-        photos: [],
-        amenities: [],
-      });
-      toast.success("Listing created.");
-      setForm({ category: "apartments", title: "", description: "", price: "", city: "", lat: "", lng: "" });
-      loadData();
-    } catch (error) {
-      toast.error(resolvePropertyMobilityErrorMessage(error, "Unable to create listing"));
-    }
-  };
+  }, [location.state, openCreate, loadData]);
 
   return (
     <VendorDashboardLayout active={24} bare>
@@ -138,35 +114,16 @@ const OwnerPropertyMobilityPage = () => {
 
         {!loading && activeTab === "listings" ? (
           <div className="space-y-4">
-            <form onSubmit={handleCreateListing} className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <select
-                className={inputClass}
-                value={form.category}
-                onChange={(e) => setForm((prev) => ({ ...prev, category: e.target.value }))}
-                aria-label="Category"
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm text-gray-500">Create and manage your property listings.</p>
+              <button
+                type="button"
+                className="seller-xp-btn seller-xp-btn--primary"
+                onClick={() => openCreate("property", loadData)}
               >
-                {LISTING_CATEGORIES.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-              <input className={inputClass} placeholder="Title" value={form.title} onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))} aria-label="Title" />
-              <input className={inputClass} placeholder="Price (RWF)" type="number" value={form.price} onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))} aria-label="Price" />
-              <input className={inputClass} placeholder="City" value={form.city} onChange={(e) => setForm((p) => ({ ...p, city: e.target.value }))} aria-label="City" />
-              <input className={inputClass} placeholder="Latitude" value={form.lat} onChange={(e) => setForm((p) => ({ ...p, lat: e.target.value }))} aria-label="Latitude" />
-              <input className={inputClass} placeholder="Longitude" value={form.lng} onChange={(e) => setForm((p) => ({ ...p, lng: e.target.value }))} aria-label="Longitude" />
-              <textarea
-                className="md:col-span-2 min-h-[100px] px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 dark:bg-gray-900"
-                placeholder="Description"
-                value={form.description}
-                onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-                aria-label="Description"
-              />
-              <button type="submit" className="md:col-span-2 h-11 rounded-xl bg-blue-600 text-white font-medium">
-                Create Listing
+                New listing
               </button>
-            </form>
+            </div>
 
             <ResponsiveDataTable
               columns={[

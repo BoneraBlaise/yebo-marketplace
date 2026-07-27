@@ -1,20 +1,57 @@
 import React, { useEffect, useRef } from "react";
 import classNames from "classnames";
 import AIResponseCard from "./AIResponseCard";
+import { YEBO_WELCOME_MESSAGE } from "../../../navigation/yeboCapabilities";
 
-const AIConversation = ({ messages = [], isTyping = false, className, emptyState }) => {
+const SUGGESTIONS = [
+  "Find running shoes under 50K",
+  "Compare top phones",
+  "Best deals this week",
+];
+
+const AIConversation = ({
+  messages = [],
+  isTyping = false,
+  className,
+  emptyState,
+  premium = false,
+  onSuggestion,
+}) => {
   const endRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  if (!messages.length && emptyState) {
+  const showEmpty = !messages.length && !isTyping;
+
+  if (showEmpty && !emptyState && premium) {
+    return (
+      <div className="ai-chat-empty ai-chat-empty--welcome">
+        <div className="ai-chat-welcome">
+          {YEBO_WELCOME_MESSAGE.split("\n\n").map((block) => (
+            <p key={block.slice(0, 24)} className="ai-chat-welcome__block">
+              {block}
+            </p>
+          ))}
+        </div>
+        <div className="ai-chat-suggestions">
+          {SUGGESTIONS.map((s) => (
+            <button key={s} type="button" className="ai-chat-suggestion" onClick={() => onSuggestion?.(s)}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (showEmpty && emptyState) {
     return emptyState;
   }
 
   return (
-    <div className={classNames("flex flex-col gap-3 overflow-y-auto flex-1 min-h-0 px-1", className)}>
+    <div className={classNames("ai-chat-thread yebone-premium-scroll", className)}>
       {messages.map((msg) => (
         <AIResponseCard
           key={msg.id}
@@ -22,11 +59,13 @@ const AIConversation = ({ messages = [], isTyping = false, className, emptyState
           content={msg.content}
           placeholder={msg.placeholder || msg.isWelcome}
           recommendations={msg.recommendations || []}
+          premium={premium}
+          createdAt={msg.createdAt || msg.timestamp}
         />
       ))}
       {isTyping && (
-        <div className="ai-message-assistant self-start">
-          <div className="ai-typing-dots py-1">
+        <div className="ai-typing-bubble self-start">
+          <div className="ai-typing-dots">
             <span /><span /><span />
           </div>
         </div>

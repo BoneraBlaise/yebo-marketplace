@@ -9,3 +9,4 @@ export { default as SectionTitle } from "./SectionTitle";
 export { default as Container } from "./Container";
 export { default as PageMeta } from "./PageMeta";
 export { default as ErrorState } from "./ErrorState";
+export { default as PremiumSelect } from "./PremiumSelect";

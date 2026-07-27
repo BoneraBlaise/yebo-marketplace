@@ -176,7 +176,7 @@ const DashboardHero = () => {
     });
 
   return (
-    <div className="yebone-fade-up space-y-8 p-1">
+    <div className="yebone-fade-up space-y-10 p-1 lg:p-2">
       <SectionTitle
         title={`Welcome, ${seller?.name || "Seller"}`}
         subtitle="Your seller workspace at a glance"

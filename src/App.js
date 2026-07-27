@@ -119,6 +119,7 @@ import { ReferralProvider } from './context/ReferralContext';
 import { MarketplaceModeProvider } from "./context/MarketplaceModeContext";
 import { AIProvider } from "./components/ai/core/AIContext";
 import GlobalAIFab from "./components/ai/GlobalAIFab";
+import { CreateExperienceProvider } from "./components/seller-experience/CreateExperienceContext";
 import AppLayout from "./components/Layout/AppLayout";
 import "./components/ai/core/ai.css";
 
@@ -159,6 +160,7 @@ const routerBasename =
       <ReferralProvider>
         <MarketplaceModeProvider>
         <AIProvider>
+        <CreateExperienceProvider>
         <ErrorBoundary>
         <GoogleAnalytics />
         <Suspense fallback={<LoadingFallback />}>
@@ -621,6 +623,7 @@ const routerBasename =
         <GlobalAIFab />
         </Suspense>
         </ErrorBoundary>
+        </CreateExperienceProvider>
         </AIProvider>
         </MarketplaceModeProvider>
       </ReferralProvider>

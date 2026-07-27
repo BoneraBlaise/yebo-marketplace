@@ -13,6 +13,7 @@ import VendorSidebar, { VENDOR_TITLES } from "./VendorSidebar";
 import AdminSidebar, { ADMIN_TITLES } from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
 import PageMeta from "../ui/PageMeta";
+import SellerCreateTrigger from "../seller-experience/SellerCreateTrigger";
 
 const DashboardLayout = ({
   active,
@@ -44,7 +45,7 @@ const DashboardLayout = ({
   return (
     <>
       {(isAdmin || isVendor) && <PageMeta title={title} noIndex />}
-      <div className="dashboard-page yebone-premium-screen dark:text-gray-200 pb-10">
+      <div className={`dashboard-page yebone-premium-screen dark:text-gray-200 pb-10${isVendor ? " dashboard-page--vendor-premium" : ""}`}>
         <Container className="py-6 lg:py-8">
           <div className="dashboard-header yebone-fade-up">
             <div className="flex-1 min-w-0">
@@ -89,6 +90,7 @@ const DashboardLayout = ({
                 />
               ) : isVendor ? (
                 <>
+                  <SellerCreateTrigger className="hidden lg:flex" />
                   <Link
                     to="/dashboard-messages"
                     className="p-2.5 rounded-xl yebone-surface hidden sm:flex"

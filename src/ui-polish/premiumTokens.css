@@ -1,0 +1,65 @@
+/**
+ * YEBO Premium Design Tokens — typography, spacing, motion, elevation
+ * Presentation-only. Import once via App.css.
+ */
+
+:root {
+  --yebo-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --yebo-duration: 220ms;
+  --yebo-transition: var(--yebo-duration) var(--yebo-ease);
+
+  /* Typography scale */
+  --yebo-text-xs: 0.6875rem;
+  --yebo-text-sm: 0.8125rem;
+  --yebo-text-base: 0.875rem;
+  --yebo-text-md: 0.9375rem;
+  --yebo-text-lg: 1.0625rem;
+  --yebo-text-xl: 1.25rem;
+  --yebo-text-2xl: 1.5rem;
+  --yebo-text-3xl: 1.875rem;
+
+  --yebo-leading-tight: 1.25;
+  --yebo-leading-normal: 1.5;
+  --yebo-leading-relaxed: 1.65;
+
+  --yebo-weight-medium: 500;
+  --yebo-weight-semibold: 600;
+  --yebo-weight-bold: 700;
+
+  /* Spacing (4px base) */
+  --yebo-space-1: 0.25rem;
+  --yebo-space-2: 0.5rem;
+  --yebo-space-3: 0.75rem;
+  --yebo-space-4: 1rem;
+  --yebo-space-5: 1.25rem;
+  --yebo-space-6: 1.5rem;
+  --yebo-space-8: 2rem;
+  --yebo-space-10: 2.5rem;
+
+  /* Radius */
+  --yebo-radius-sm: 0.5rem;
+  --yebo-radius-md: 0.75rem;
+  --yebo-radius-lg: 1rem;
+  --yebo-radius-xl: 1.25rem;
+  --yebo-radius-2xl: 1.5rem;
+  --yebo-radius-full: 9999px;
+
+  /* Shadows */
+  --yebo-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --yebo-shadow-md: 0 4px 16px rgba(41, 98, 93, 0.1);
+  --yebo-shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.12);
+  --yebo-shadow-xl: 0 24px 64px rgba(15, 23, 42, 0.16);
+
+  /* Colors */
+  --yebo-primary: #29625d;
+  --yebo-primary-dark: #1a4c47;
+  --yebo-gold: #fed592;
+  --yebo-muted: #6b7280;
+  --yebo-border: rgba(41, 98, 93, 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --yebo-duration: 0ms;
+  }
+}

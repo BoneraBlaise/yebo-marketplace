@@ -1,54 +1,55 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-  AiOutlineHeart,
-  AiOutlineSearch,
-  AiOutlineShoppingCart,
-} from "react-icons/ai";
+import { AiOutlineSearch, AiOutlinePlus } from "react-icons/ai";
 import { BiMenuAltLeft } from "react-icons/bi";
 import { CgProfile } from "react-icons/cg";
-import { HiOutlineSparkles } from "react-icons/hi";
-import { IoNotificationsOutline } from "react-icons/io5";
+import { FiMessageSquare } from "react-icons/fi";
+import { HiOutlineBell } from "react-icons/hi";
 import DropDown from "../Layout/DropDown";
 import Navbar from "../Layout/Navbar";
 import LanguageSwitcher from "../LanguageSwitcher";
+import YEBOSearchSparkle from "./YEBOSearchSparkle";
+import YEBOSearchCamera from "./YEBOSearchCamera";
+import HeaderThemeToggle from "./HeaderThemeToggle";
 import MobileCategoriesPanel from "./MobileCategoriesPanel";
-import {
-  CountrySwitcher,
-  NotificationsPanel,
-  WishlistPanel,
-  CartPanel,
-} from "../Layout/overlays";
-import useHeaderDropdown from "../Layout/overlays/useHeaderDropdown";
+import { CountrySwitcher } from "../Layout/overlays";
 import { buildMobileNavCategories } from "./mainCategoryHierarchy";
 import useSiteSearch from "../../hooks/useSiteSearch";
+import useInboxUnreadCount from "../../hooks/useInboxUnreadCount";
+import useNotificationUnreadCount from "../../hooks/useNotificationUnreadCount";
 import { Container } from "../ui";
-import { resolveSellerNavAction } from "../../utils/sellerNav";
-import { useMarketplaceMode } from "../../context/MarketplaceModeContext";
+import { useAIOptional } from "../ai/core/AIContext";
+import MobileCreateActionSheet from "../seller-experience/MobileCreateActionSheet";
+import ProfileHub from "../Layout/ProfileHub";
+import CreateMenuPopover from "../Layout/CreateMenuPopover";
 import YeboneLogo from "./YeboneLogo";
-import MarketplaceModeSwitch from "../Layout/MarketplaceModeSwitch";
 import SkipToContent from "../Layout/SkipToContent";
+import { useBreakpoint } from "../../design-system/responsive/useBreakpoint";
+import { useMarketplaceMode } from "../../context/MarketplaceModeContext";
+import { SELLER_DASHBOARD_PATH } from "../../utils/sellerNav";
 import "./home.css";
-
-/** Presentation-only unread count for notification badge (Phase 8H.11) */
-const NOTIFICATION_UNREAD_MOCK = 2;
+import "./profileHub.css";
 
 const HomeHeader = ({ activeHeading: _activeHeading }) => {
+  const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { isSeller } = useSelector((state) => state.seller);
   const { setMode } = useMarketplaceMode();
-  const { wishlist } = useSelector((state) => state.wishlist);
-  const { cart } = useSelector((state) => state.cart);
+  const ai = useAIOptional();
+  const { count: inboxUnread } = useInboxUnreadCount(isAuthenticated);
+  const { count: notificationUnread } = useNotificationUnreadCount(isAuthenticated);
+  const breakpoint = useBreakpoint();
+  const isSheetProfile = breakpoint === "mobile" || breakpoint === "tablet";
+
   const [dropDown, setDropDown] = useState(false);
-  const [openCart, setOpenCart] = useState(false);
-  const [openWishlist, setOpenWishlist] = useState(false);
-  const [openNotifications, setOpenNotifications] = useState(false);
-  const notificationsRef = useRef(null);
-  const wishlistRef = useRef(null);
-  const cartRef = useRef(null);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createSheetOpen, setCreateSheetOpen] = useState(false);
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false);
+  const profileRef = useRef(null);
+  const createRef = useRef(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const {
     searchTerm,
     searchData,
@@ -58,8 +59,17 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
   } = useSiteSearch();
 
   const marketplaceNavCategories = useMemo(() => buildMobileNavCategories(), []);
+  const inboxPath = isSeller ? "/dashboard-messages" : "/inbox";
 
-  const sellerAction = resolveSellerNavAction({ isAuthenticated, isSeller });
+  const openYebo = () => {
+    ai?.setShoppingMode?.("chat");
+    ai?.openPanel?.();
+  };
+
+  const openVisualSearch = () => {
+    ai?.setShoppingMode?.("visual");
+    ai?.openPanel?.();
+  };
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 12);
@@ -97,9 +107,120 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
     };
   }, [dropDown]);
 
-  useHeaderDropdown(openNotifications, () => setOpenNotifications(false), notificationsRef);
-  useHeaderDropdown(openWishlist, () => setOpenWishlist(false), wishlistRef);
-  useHeaderDropdown(openCart, () => setOpenCart(false), cartRef);
+  const renderBadge = (value) =>
+    value > 0 ? (
+      <span className="home-header__badge" aria-hidden="true">
+        {value > 9 ? "9+" : value}
+      </span>
+    ) : null;
+
+  const renderInboxLink = () => (
+    <Link
+      to={isAuthenticated ? inboxPath : "/login"}
+      className="home-header__icon-btn"
+      aria-label="Inbox"
+    >
+      <FiMessageSquare size={20} />
+      {isAuthenticated && renderBadge(inboxUnread)}
+    </Link>
+  );
+
+  const renderNotificationsButton = () => (
+    <button
+      type="button"
+      className="home-header__icon-btn"
+      aria-label="Notifications"
+      onClick={() => {
+        if (!isAuthenticated) {
+          navigate("/login");
+          return;
+        }
+        navigate("/profile", { state: { active: 12 } });
+      }}
+    >
+      <HiOutlineBell size={20} />
+      {isAuthenticated && renderBadge(notificationUnread)}
+    </button>
+  );
+
+  const renderMyShopButton = () => {
+    if (!isSeller) return null;
+
+    return (
+      <Link
+        to={SELLER_DASHBOARD_PATH}
+        onClick={() => setMode("seller")}
+        className="home-header__shop-pill"
+      >
+        My Shop
+      </Link>
+    );
+  };
+
+  const renderCreateButton = () => {
+    if (!isSeller) return null;
+
+    const createBtn = (
+      <button
+        type="button"
+        className="home-header__create-btn"
+        onClick={() => {
+          if (isSheetProfile) {
+            setCreateSheetOpen(true);
+            return;
+          }
+          setCreateOpen((v) => !v);
+        }}
+        aria-expanded={!isSheetProfile && createOpen}
+        aria-haspopup="menu"
+        aria-label="Create new listing"
+      >
+        <AiOutlinePlus size={16} />
+      </button>
+    );
+
+    if (isSheetProfile) return createBtn;
+
+    return (
+      <div className="home-header__create-wrap relative" ref={createRef}>
+        {createBtn}
+        <CreateMenuPopover
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+          anchorRef={createRef}
+        />
+      </div>
+    );
+  };
+
+  const renderProfileButton = () => (
+    <div className="home-header__profile-wrap relative" ref={profileRef}>
+      <button
+        type="button"
+        onClick={() => setProfileOpen(true)}
+        className="home-header__profile-btn"
+        aria-expanded={profileOpen}
+        aria-haspopup="true"
+        aria-label={isAuthenticated ? "Account menu" : "Sign in"}
+      >
+        {isAuthenticated && user?.avatar?.url ? (
+          <img src={user.avatar.url} alt="" className="home-header__avatar" />
+        ) : (
+          <div className="home-header__avatar home-header__avatar--placeholder">
+            <CgProfile size={20} className="text-yebone-primary" />
+          </div>
+        )}
+      </button>
+      {!isSheetProfile && (
+        <ProfileHub
+          open={profileOpen}
+          onClose={() => setProfileOpen(false)}
+          variant="popover"
+          anchorRef={profileRef}
+        />
+      )}
+    </div>
+  );
 
   return (
     <>
@@ -114,25 +235,12 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
             <p className="home-header__utility-tagline">Yebone — Everything in one place</p>
             <div className="home-header__utility-actions">
               <CountrySwitcher />
-
               <span className="home-header__utility-divider" aria-hidden="true" />
-
               <LanguageSwitcher />
-
-              {isAuthenticated && isSeller ? (
-                <>
-                  <span className="home-header__utility-divider" aria-hidden="true" />
-                  <MarketplaceModeSwitch />
-                </>
-              ) : null}
-
               {!isAuthenticated && (
                 <>
                   <span className="home-header__utility-divider" aria-hidden="true" />
-                  <Link
-                    to="/login"
-                    className="text-sm font-medium text-yebone-primary hover:underline px-1"
-                  >
+                  <Link to="/login" className="text-sm font-medium text-yebone-primary hover:underline px-1">
                     Login
                   </Link>
                   <Link
@@ -151,7 +259,7 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
           <div className="home-header__main-row">
             <div className="home-header__brand shrink-0">
               <YeboneLogo size="md" className="home-header__logo" />
-              <span className="home-header__logo-tagline hidden sm:block">
+              <span className="home-header__logo-tagline hidden lg:block">
                 Everything in one place
               </span>
             </div>
@@ -186,218 +294,81 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
               )}
             </div>
 
-            <div className="relative lg:hidden shrink-0 home-header__categories-mobile">
+            <div className="home-header__search-row">
               <button
                 type="button"
                 onClick={() => setMobileCategoriesOpen(true)}
-                className="home-header__icon-btn"
+                className="home-header__categories-mobile"
                 aria-label="Browse categories"
                 aria-expanded={mobileCategoriesOpen}
               >
-                <BiMenuAltLeft size={22} />
+                <BiMenuAltLeft size={20} aria-hidden="true" />
               </button>
-            </div>
 
-            <form
-              onSubmit={handleSearchSubmit}
-              className="home-header__search-form flex-1 relative max-w-3xl min-w-0"
-            >
-              <div className="home-header__search-shell flex items-center rounded-2xl border border-[var(--home-border)] bg-[var(--home-surface)] focus-within:border-yebone-primary focus-within:ring-4 focus-within:ring-yebone-primary/10 transition shadow-sm">
-                <AiOutlineSearch
-                  size={22}
-                  className="home-header__search-icon ml-4 text-yebone-primary shrink-0"
-                />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  placeholder="Search products, brands, categories..."
-                  className="home-header__search-input flex-1 h-12 px-3 bg-transparent outline-none text-sm text-[var(--home-text)] placeholder:text-[var(--home-text-muted)]"
-                />
-                <Link
-                  to="/#ai-experience"
-                  className="home-header__search-ai hidden md:flex items-center gap-1.5 mr-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-yebone-primary to-yebone-primary-dark text-white text-xs font-semibold hover:opacity-90 transition shrink-0"
-                >
-                  <HiOutlineSparkles size={16} />
-                  <span>AI Search</span>
-                </Link>
-                <button
-                  type="submit"
-                  className="home-header__search-submit h-10 mr-1.5 px-5 rounded-xl bg-yebone-primary text-white text-sm font-semibold hover:bg-yebone-primary-dark transition"
-                >
-                  Search
-                </button>
-              </div>
-
-              {searchData?.length > 0 && (
-                <div
-                  className="home-search-suggest"
-                  role="listbox"
-                  aria-label="Search suggestions"
-                >
-                  <div className="home-search-suggest__scroll">
-                    {searchData.slice(0, 8).map((item) => {
-                      const meta =
-                        item.shop?.name ||
-                        item.category ||
-                        (item.type === "flashsale"
-                          ? "Flash Sale"
-                          : item.type === "bid"
-                          ? "Auction"
-                          : null);
-
-                      return (
-                        <Link
-                          key={`${item.type || "product"}-${item._id}`}
-                          to={`/product/${item._id}`}
-                          onClick={() => setSearchData(null)}
-                          className="home-search-suggest__row"
-                          role="option"
-                        >
-                          <span className="home-search-suggest__thumb">
-                            <img
-                              src={item.images?.[0]?.url}
-                              alt=""
-                              loading="lazy"
-                              decoding="async"
-                            />
-                          </span>
-                          <span className="home-search-suggest__body">
-                            <span className="home-search-suggest__title">{item.name}</span>
-                            {meta && (
-                              <span className="home-search-suggest__meta">{meta}</span>
-                            )}
-                          </span>
-                        </Link>
-                      );
-                    })}
+              <form
+                onSubmit={handleSearchSubmit}
+                className="home-header__search-form flex-1 relative min-w-0"
+              >
+                <div className="home-header__search-shell">
+                  <AiOutlineSearch size={18} className="home-header__search-icon shrink-0" />
+                  <input
+                    type="search"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    placeholder="Search products..."
+                    className="home-header__search-input"
+                    enterKeyHint="search"
+                  />
+                  <div className="home-header__search-actions">
+                    <YEBOSearchCamera onClick={openVisualSearch} />
+                    <YEBOSearchSparkle onClick={openYebo} />
                   </div>
                 </div>
-              )}
-            </form>
+
+                {searchData?.length > 0 && (
+                  <div className="home-search-suggest" role="listbox" aria-label="Search suggestions">
+                    <div className="home-search-suggest__scroll">
+                      {searchData.slice(0, 8).map((item) => {
+                        const meta =
+                          item.shop?.name ||
+                          item.category ||
+                          (item.type === "flashsale"
+                            ? "Flash Sale"
+                            : item.type === "bid"
+                            ? "Auction"
+                            : null);
+
+                        return (
+                          <Link
+                            key={`${item.type || "product"}-${item._id}`}
+                            to={`/product/${item._id}`}
+                            onClick={() => setSearchData(null)}
+                            className="home-search-suggest__row"
+                            role="option"
+                          >
+                            <span className="home-search-suggest__thumb">
+                              <img src={item.images?.[0]?.url} alt="" loading="lazy" decoding="async" />
+                            </span>
+                            <span className="home-search-suggest__body">
+                              <span className="home-search-suggest__title">{item.name}</span>
+                              {meta && <span className="home-search-suggest__meta">{meta}</span>}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
 
             <div className="home-header__actions shrink-0">
-              <Link
-                to={sellerAction.to}
-                onClick={() => {
-                  if (isSeller) setMode("seller");
-                }}
-                className="home-header__seller-link hidden lg:inline-flex"
-              >
-                {sellerAction.label}
-              </Link>
-
-              <div className="relative" ref={wishlistRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenCart(false);
-                    setOpenNotifications(false);
-                    setOpenWishlist(!openWishlist);
-                  }}
-                  className="home-header__icon-btn"
-                  aria-expanded={openWishlist}
-                  aria-haspopup="true"
-                  aria-label="Wishlist"
-                >
-                  <AiOutlineHeart size={22} />
-                  {wishlist?.length > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yebone-primary text-white text-[10px] font-bold flex items-center justify-center">
-                      {wishlist.length}
-                    </span>
-                  )}
-                </button>
-                {openWishlist && (
-                  <WishlistPanel onClose={() => setOpenWishlist(false)} />
-                )}
-              </div>
-
-              <div className="relative hidden lg:block" ref={notificationsRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenWishlist(false);
-                    setOpenCart(false);
-                    setOpenNotifications(!openNotifications);
-                  }}
-                  className="home-header__icon-btn home-header__notifications"
-                  aria-expanded={openNotifications}
-                  aria-haspopup="true"
-                  aria-label="Notifications"
-                >
-                  <IoNotificationsOutline size={22} />
-                  {NOTIFICATION_UNREAD_MOCK > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yebone-primary text-white text-[10px] font-bold flex items-center justify-center">
-                      {NOTIFICATION_UNREAD_MOCK}
-                    </span>
-                  )}
-                </button>
-                {openNotifications && (
-                  <NotificationsPanel
-                    onClose={() => setOpenNotifications(false)}
-                    isAuthenticated={isAuthenticated}
-                  />
-                )}
-              </div>
-
-              <div className="relative" ref={cartRef}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setOpenWishlist(false);
-                    setOpenNotifications(false);
-                    setOpenCart(!openCart);
-                  }}
-                  className="home-header__icon-btn"
-                  aria-expanded={openCart}
-                  aria-haspopup="true"
-                  aria-label="Cart"
-                >
-                  <AiOutlineShoppingCart size={22} />
-                  {cart?.length > 0 && (
-                    <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-yebone-gold text-yebone-dark-text text-[10px] font-bold flex items-center justify-center">
-                      {cart.length}
-                    </span>
-                  )}
-                </button>
-                {openCart && <CartPanel onClose={() => setOpenCart(false)} />}
-              </div>
-
-              <Link
-                to={isAuthenticated ? "/profile" : "/login"}
-                className="home-header__profile-mobile lg:hidden p-0.5 rounded-full border-2 border-yebone-primary/25 hover:border-yebone-primary transition"
-                aria-label={isAuthenticated ? "Go to profile" : "Sign in"}
-              >
-                {isAuthenticated && user?.avatar?.url ? (
-                  <img
-                    src={user.avatar.url}
-                    alt=""
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-[var(--home-surface-muted)] flex items-center justify-center">
-                    <CgProfile size={20} className="text-yebone-primary" />
-                  </div>
-                )}
-              </Link>
-
-              <Link
-                to={isAuthenticated ? "/profile" : "/login"}
-                className="home-header__profile-desktop hidden lg:flex p-0.5 rounded-full border-2 border-yebone-primary/25 hover:border-yebone-primary transition"
-                aria-label={isAuthenticated ? "Open account menu" : "Sign in"}
-              >
-                {isAuthenticated && user?.avatar?.url ? (
-                  <img
-                    src={user.avatar.url}
-                    alt=""
-                    className="w-9 h-9 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-9 h-9 rounded-full bg-[var(--home-surface-muted)] flex items-center justify-center">
-                    <CgProfile size={22} className="text-yebone-primary" />
-                  </div>
-                )}
-              </Link>
+              {renderMyShopButton()}
+              {renderInboxLink()}
+              {renderNotificationsButton()}
+              <HeaderThemeToggle />
+              {renderCreateButton()}
+              {renderProfileButton()}
             </div>
           </div>
         </Container>
@@ -407,14 +378,26 @@ const HomeHeader = ({ activeHeading: _activeHeading }) => {
             <Navbar />
           </Container>
         </div>
+      </header>
 
+      {isSheetProfile && (
+        <ProfileHub
+          open={profileOpen}
+          onClose={() => setProfileOpen(false)}
+          variant="sheet"
+          anchorRef={profileRef}
+        />
+      )}
 
+      <MobileCreateActionSheet open={createSheetOpen} onClose={() => setCreateSheetOpen(false)} />
+
+      {isSheetProfile && (
         <MobileCategoriesPanel
           open={mobileCategoriesOpen}
           onClose={() => setMobileCategoriesOpen(false)}
           categoriesData={marketplaceNavCategories}
         />
-      </header>
+      )}
     </>
   );
 };

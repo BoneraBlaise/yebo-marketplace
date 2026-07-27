@@ -4,9 +4,14 @@
 
 @import './design-system/global.css';
 @import './ui-polish/platformPolish.css';
+@import './ui-polish/premiumTokens.css';
+@import './ui-polish/premiumDropdowns.css';
+@import './ui-polish/premiumSelect.css';
+@import './ui-polish/premiumAiWorkspace.css';
 @import './components/Marketplace/marketplace.css';
 @import './components/Auth/auth.css';
 @import './components/Dashboard/dashboard.css';
+@import './components/seller-experience/seller-experience.css';
 
 /* fonts */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');

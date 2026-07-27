@@ -2,8 +2,8 @@
 
 :root {
   --mc-nav-z: 2200;
-  --mc-nav-motion: 0.36s cubic-bezier(0.32, 0.72, 0, 1);
-  --mc-nav-motion-fast: 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  --mc-nav-motion: 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+  --mc-nav-motion-fast: 0.12s cubic-bezier(0.22, 1, 0.36, 1);
   --mc-nav-bg: #ffffff;
   --mc-nav-surface: #f3f6f5;
   --mc-nav-surface-elevated: #ffffff;
@@ -73,6 +73,7 @@ body.mc-nav-open {
 
 .mc-nav.is-open .mc-nav__backdrop {
   opacity: 1;
+  transition-duration: 0.12s;
 }
 
 .mc-nav.is-closing .mc-nav__backdrop {
