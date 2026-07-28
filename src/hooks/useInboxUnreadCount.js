@@ -21,7 +21,12 @@ const useInboxUnreadCount = (enabled = true) => {
   useEffect(() => {
     refresh();
     const id = window.setInterval(refresh, 60_000);
-    return () => window.clearInterval(id);
+    const onRefresh = () => refresh();
+    window.addEventListener("inbox:refresh", onRefresh);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("inbox:refresh", onRefresh);
+    };
   }, [refresh]);
 
   return { count, refresh };

@@ -28,14 +28,25 @@ const AI_METRICS = [
 ];
 
 const ProductAIRail = ({ title, products }) => {
-  if (!products?.length) return null;
+  if (!products?.length) {
+    return (
+      <div className="mb-8">
+        <p className="font-Poppins font-semibold text-sm lg:text-base mb-3 dark:text-white">{title}</p>
+        <div className="mc-empty-state mc-empty-state--compact rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 bg-gray-50/40 dark:bg-gray-900/20">
+          <p className="text-sm text-gray-500 dark:text-gray-400 m-0">
+            No recommendations yet — browse the marketplace to build smarter matches.
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="mb-8">
       <p className="font-Poppins font-semibold text-sm lg:text-base mb-3 dark:text-white">{title}</p>
-      <div className="marketplace-product-grid mpc-grid--page">
+      <div className="marketplace-product-grid mpc-grid--page mpc-grid--pdp-dense">
         {products.slice(0, 4).map((product) => (
-          <div key={product._id} className="mpc-card-slot mpc-card-slot--centered">
-            <HomeProductCard data={product} compact fluid />
+          <div key={product._id} className="mpc-card-slot">
+            <HomeProductCard data={product} compact dense fluid />
           </div>
         ))}
       </div>

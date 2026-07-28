@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
-import { createProduct } from "../../redux/actions/product";
+import { createProduct, getAllProducts, getAllProductsShop } from "../../redux/actions/product";
 import { categoriesData } from "../../static/data";
 import { toast } from "react-toastify";
 import WizardShell from "./WizardShell";
@@ -23,7 +23,6 @@ const STEPS = [
 
 const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
   const { seller } = useSelector((state) => state.seller);
-  const { success, error } = useSelector((state) => state.products);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -46,19 +45,6 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
     images: [],
     coverIndex: 0,
   });
-
-  useEffect(() => {
-    if (error) toast.error(error);
-    if (success) {
-      toast.success("Product published successfully!");
-      if (embedded && onComplete) {
-        onComplete();
-      } else {
-        navigate("/dashboard");
-        window.location.reload();
-      }
-    }
-  }, [error, success, navigate, embedded, onComplete]);
 
   const categoryOptions = useMemo(
     () =>
@@ -125,8 +111,12 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
     setStepIndex((i) => Math.max(i - 1, 0));
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!isProductWizardValid(values)) return;
+    if (!seller?._id) {
+      toast.error("Seller session not found. Please sign in again.");
+      return;
+    }
     setSubmitting(true);
     const orderedImages =
       values.coverIndex > 0
@@ -136,22 +126,41 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
           ]
         : values.images;
 
-    dispatch(
-      createProduct({
-        name: values.name,
-        description: values.description,
-        category: values.category,
-        tags: values.tags,
-        originalPrice: values.originalPrice,
-        discountPrice: values.discountPrice,
-        stock: values.stock,
-        productType: values.productType,
-        condition: values.condition,
-        location: values.location,
-        shopId: seller._id,
-        images: orderedImages,
-      })
-    );
+    try {
+      const result = await dispatch(
+        createProduct(
+          values.name,
+          values.description,
+          values.category,
+          values.tags,
+          values.originalPrice,
+          values.discountPrice,
+          values.stock,
+          seller._id,
+          orderedImages
+        )
+      );
+
+      if (result?.success) {
+        toast.success("Product published successfully!");
+        dispatch(getAllProductsShop(seller._id));
+        dispatch(getAllProducts());
+        if (embedded && onComplete) {
+          onComplete();
+        }
+        if (result.product?._id) {
+          navigate(`/product/${result.product._id}`, {
+            state: { product: result.product },
+          });
+        } else if (!embedded) {
+          navigate("/dashboard-products");
+        }
+      } else if (result?.message) {
+        toast.error(result.message);
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const canProceed =

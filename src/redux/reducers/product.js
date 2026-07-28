@@ -7,11 +7,23 @@ const initialState = {
 export const productReducer = createReducer(initialState, {
   productCreateRequest: (state) => {
     state.isLoading = true;
+    state.error = null;
+    state.success = false;
   },
   productCreateSuccess: (state, action) => {
     state.isLoading = false;
+    state.error = null;
     state.product = action.payload;
     state.success = true;
+    const created = action.payload;
+    if (created?._id) {
+      const upsert = (list) => {
+        const arr = Array.isArray(list) ? list : [];
+        return [created, ...arr.filter((item) => item._id !== created._id)];
+      };
+      state.products = upsert(state.products);
+      state.allProducts = upsert(state.allProducts);
+    }
   },
   productCreateFail: (state, action) => {
     state.isLoading = false;

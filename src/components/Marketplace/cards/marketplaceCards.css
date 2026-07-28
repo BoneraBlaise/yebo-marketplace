@@ -68,6 +68,30 @@
   align-items: stretch;
 }
 
+.mpc-grid--pdp-dense {
+  gap: 0.625rem;
+}
+
+.mpc-grid--pdp-dense .mpc-card-slot {
+  max-height: 16.25rem;
+}
+
+@media (min-width: 640px) {
+  .mpc-grid--pdp-dense {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
+    justify-content: start;
+    gap: 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mpc-grid--pdp-dense {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
+    justify-content: start;
+    gap: 0.875rem;
+  }
+}
+
 /* ── Mobile product card (grid contexts, ≤900px) ── */
 .mpc-mobile-card {
   position: relative;
@@ -411,6 +435,64 @@
 @media (min-width: 1280px) {
   .mpc-rail {
     --mpc-rail-visible: 5;
+  }
+}
+
+/* ── PDP similar-products rail — tighter rhythm, more cards visible ── */
+.mpc-rail--pdp {
+  --mpc-rail-gap: 0.5rem;
+  --mpc-rail-visible: 2.35;
+  gap: var(--mpc-rail-gap);
+  scroll-padding-inline: 0.25rem;
+}
+
+.mpc-rail__item--pdp {
+  flex: 0 0
+    clamp(
+      8.25rem,
+      calc(
+        (100% - (var(--mpc-rail-visible) - 1) * var(--mpc-rail-gap)) /
+          var(--mpc-rail-visible)
+      ),
+      16.5rem
+    );
+  max-width: 16.5rem;
+}
+
+.mpc-rail__item--pdp .ypc--dense {
+  max-height: 16.25rem;
+}
+
+@media (min-width: 640px) {
+  .mpc-rail--pdp {
+    --mpc-rail-visible: 2.85;
+  }
+}
+
+@media (min-width: 768px) {
+  .mpc-rail--pdp {
+    --mpc-rail-visible: 3.75;
+  }
+
+  .mpc-rail__item--pdp {
+    max-width: 15.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mpc-rail--pdp {
+    --mpc-rail-visible: 4.75;
+  }
+
+  .mpc-rail__item--pdp {
+    flex-basis: clamp(14.5rem, calc((100% - 3 * var(--mpc-rail-gap)) / 4.75), 16.5rem);
+    max-width: 16.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .mpc-rail--pdp {
+    --mpc-rail-visible: 5.5;
   }
 }
 

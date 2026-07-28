@@ -28,6 +28,10 @@ import ProductPurchasePanel from "./ProductPurchasePanel";
 import ProductAISections from "./ProductAISections";
 import ProductTrustSection from "./ProductTrustSection";
 import ProductDetailsTabs from "./ProductDetailsTabs";
+import ProductSimilarRails from "./ProductSimilarRails";
+import ProductTryOnModal from "./ProductTryOnModal";
+import ProductTryOnUnavailableModal from "./ProductTryOnUnavailableModal";
+import { isVendorTryOnSubscribed } from "./resolveVendorTryOn";
 
 // Modal Component
 const Modal = ({ show, onClose, description }) => {
@@ -64,10 +68,11 @@ const ProductDetails = ({ data }) => {
   const [count, setCount] = useState(1);
   const [click, setClick] = useState(false);
   const [select, setSelect] = useState(0);
-  const [shopVerify, setShopVerify] = useState(false);
-  const [shopBusinessStatus, setShopBusinessStatus] = useState("open");
-  const [loading, setLoading] = useState(true); // To track loading state
-  const [error, setError] = useState(null);
+  const [shopVerify, setShopVerify] = useState(Boolean(data?.shop?.isVerified));
+  const [shopBusinessStatus, setShopBusinessStatus] = useState(data?.shop?.businessStatus || "open");
+  const [shopInfo, setShopInfo] = useState(null);
+  const [tryOnOpen, setTryOnOpen] = useState(false);
+  const [tryOnUnavailableOpen, setTryOnUnavailableOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
@@ -86,11 +91,15 @@ const ProductDetails = ({ data }) => {
   const toggleModal = () => setIsModalOpen(!isModalOpen);
 
   useEffect(() => {
-    if (data) {
+    if (!data?.shop?._id) return;
+    setClick(wishlist.some((i) => i._id === data._id));
+    const hasShopProducts = products?.some(
+      (p) => String(p.shopId) === String(data.shop._id)
+    );
+    if (!hasShopProducts) {
       dispatch(getAllProductsShop(data.shop._id));
-      setClick(wishlist.some((i) => i._id === data._id));
     }
-  }, [data, wishlist, dispatch]);
+  }, [data?._id, data?.shop?._id, wishlist, dispatch, products]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -173,26 +182,36 @@ const ProductDetails = ({ data }) => {
     }
     navigate("/checkout");
   };
-  //Fetching the shop details to get if shop is verified
+  // Refresh shop details in background (verify badge, business status, try-on flags)
   useEffect(() => {
-    if (data?.shop?._id) {
-      axios
-        .get(`${server}/shop/get-shop-info/${data.shop._id}`)
-        .then((response) => {
-          setShopVerify(response.data.shop.isVerified);
-          setShopBusinessStatus(response.data.shop.businessStatus || "open");
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error fetching shop details:", error);
-          setError("Error fetching shop details");
-          setLoading(false);
-        });
-    } else {
-      console.warn("No shop ID found in data", data);
-      setLoading(false); // No shop ID, stop loading
+    if (!data?.shop?._id) return undefined;
+
+    if (data.shop.isVerified !== undefined) {
+      setShopVerify(Boolean(data.shop.isVerified));
     }
-  }, [data]);
+    if (data.shop.businessStatus) {
+      setShopBusinessStatus(data.shop.businessStatus);
+    }
+
+    const controller = new AbortController();
+    axios
+      .get(`${server}/shop/get-shop-info/${data.shop._id}`, {
+        signal: controller.signal,
+      })
+      .then((response) => {
+        const shop = response.data.shop;
+        setShopInfo(shop);
+        setShopVerify(Boolean(shop?.isVerified));
+        setShopBusinessStatus(shop?.businessStatus || "open");
+      })
+      .catch((error) => {
+        if (error.name !== "CanceledError" && error.code !== "ERR_CANCELED") {
+          console.error("Error fetching shop details:", error);
+        }
+      });
+
+    return () => controller.abort();
+  }, [data?.shop?._id, data?.shop?.isVerified, data?.shop?.businessStatus]);
   const handleMessageSubmit = async () => {
     if (!isAuthenticated) {
       toast.error("Please login to create a conversation");
@@ -226,6 +245,25 @@ const ProductDetails = ({ data }) => {
       toast.error(error.response?.data?.message || "Error creating conversation");
     }
   };
+  const handleTryOn = () => {
+    const vendorId = data.shop?._id || data.shopId;
+    const subscribed = isVendorTryOnSubscribed(
+      vendorId,
+      shopInfo || data.shop,
+      data
+    );
+    if (subscribed) {
+      setTryOnOpen(true);
+    } else {
+      setTryOnUnavailableOpen(true);
+    }
+  };
+
+  const handleNotifySeller = () => {
+    setTryOnUnavailableOpen(false);
+    handleMessageSubmit();
+  };
+
   const formatPrice = (price) =>
     price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
@@ -483,7 +521,7 @@ const ProductDetails = ({ data }) => {
               )}
             </div>
 
-            <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-start">
+            <div className="pdp-hero-grid">
               <ProductGallery images={data.images} select={select} setSelect={setSelect} />
               <ProductPurchasePanel
                 data={data}
@@ -497,6 +535,7 @@ const ProductDetails = ({ data }) => {
                 shopVerify={shopVerify}
                 shopBusinessStatus={shopBusinessStatus}
                 handleMessageSubmit={handleMessageSubmit}
+                handleTryOn={handleTryOn}
                 handleGenerateShareLink={handleGenerateShareLink}
                 formatPrice={formatPrice}
                 discountPct={
@@ -517,6 +556,10 @@ const ProductDetails = ({ data }) => {
                 CommissionShare={CommissionShare}
               />
             </div>
+          </Container>
+
+          <Container className="pb-8">
+            <ProductSimilarRails data={data} />
           </Container>
 
           <ProductAISections category={data.category} />
@@ -557,6 +600,20 @@ const ProductDetails = ({ data }) => {
 
       <Modal show={isModalOpen} onClose={toggleModal} description={data?.description} />
       <ShareModal />
+      <ProductTryOnModal
+        open={tryOnOpen}
+        onClose={() => setTryOnOpen(false)}
+        productId={data?._id}
+        productName={data?.name}
+        userId={user?._id}
+      />
+      <ProductTryOnUnavailableModal
+        open={tryOnUnavailableOpen}
+        onClose={() => setTryOnUnavailableOpen(false)}
+        shopId={data?.shop?._id || data?.shopId}
+        shopName={data?.shop?.name}
+        onNotifySeller={handleNotifySeller}
+      />
     </div>
   );
 };

@@ -35,11 +35,15 @@ export const createProduct =
         type: "productCreateSuccess",
         payload: data.product,
       });
+      return { success: true, product: data.product };
     } catch (error) {
+      const message =
+        error.response?.data?.message || "Failed to create product";
       dispatch({
         type: "productCreateFail",
-        payload: error.response.data.message,
+        payload: message,
       });
+      return { success: false, message };
     }
   };
 

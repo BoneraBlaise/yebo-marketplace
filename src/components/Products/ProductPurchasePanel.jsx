@@ -68,6 +68,7 @@ const ProductPurchasePanel = ({
   shopVerify,
   shopBusinessStatus,
   handleMessageSubmit,
+  handleTryOn,
   handleGenerateShareLink,
   formatPrice,
   discountPct,
@@ -141,6 +142,18 @@ const ProductPurchasePanel = ({
             </p>
           )}
         </div>
+
+        {/* YEBO AI Try-On */}
+        {handleTryOn && (
+          <button
+            type="button"
+            onClick={handleTryOn}
+            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-yebone-primary to-yebone-primary-dark text-white font-semibold text-sm shadow-lg shadow-yebone-primary/20 hover:shadow-yebone-primary/30 transition-all duration-300 yebone-btn-lift"
+          >
+            <span aria-hidden="true">✨</span>
+            See it on you
+          </button>
+        )}
 
         {/* Short description */}
         {shortDescription && (
@@ -271,15 +284,15 @@ const ProductPurchasePanel = ({
                 Visit store →
               </Link>
             </div>
-            <button
-              type="button"
-              onClick={handleMessageSubmit}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-yebone-primary/10 text-yebone-primary text-xs font-semibold hover:bg-yebone-primary hover:text-white transition pdp-btn-lift"
-            >
-              <AiOutlineMessage size={16} />
-              Contact
-            </button>
           </div>
+          <button
+            type="button"
+            onClick={handleMessageSubmit}
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-yebone-primary/25 bg-white dark:bg-gray-900 text-yebone-primary text-sm font-semibold hover:bg-yebone-primary/5 dark:hover:bg-yebone-primary/10 transition pdp-btn-lift"
+          >
+            <AiOutlineMessage size={18} />
+            Message Seller
+          </button>
         </div>
 
         {/* Share & commission */}

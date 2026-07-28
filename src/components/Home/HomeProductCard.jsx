@@ -15,12 +15,13 @@ import { server } from "../../server";
 import { addToWishlist, removeFromWishlist } from "../../redux/actions/wishlist";
 import { addTocart } from "../../redux/actions/cart";
 import ProductCardReviews from "../Route/ProductCard/ProductCardReviews";
+import { optimizeProductImage } from "../../utils/productImageUtils";
 import "../Route/ProductCard/productCard.css";
 
 const formatPrice = (price) =>
   (price ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-const HomeProductCard = ({ data, isEvent, compact = false, fluid = false }) => {
+const HomeProductCard = ({ data, isEvent, compact = false, dense = false, fluid = false }) => {
   const { wishlist } = useSelector((state) => state.wishlist);
   const { cart } = useSelector((state) => state.cart);
   const [inWishlist, setInWishlist] = useState(false);
@@ -101,16 +102,18 @@ const HomeProductCard = ({ data, isEvent, compact = false, fluid = false }) => {
   const reviewCount = data.reviews?.length || 0;
 
   const sizeClass = fluid ? "ypc--fluid" : compact ? "ypc--compact" : "ypc--fixed";
+  const denseClass = dense ? "ypc--dense" : "";
+  const imageSrc = optimizeProductImage(data.images?.[0]?.url, "card");
 
   return (
     <article
-      className={`ypc home-card-lift group ${sizeClass}`}
+      className={`ypc home-card-lift group ${sizeClass} ${denseClass}`}
       onClick={saveToRecentlyViewed}
     >
       <div className="ypc__media">
         <Link to={productUrl} className="ypc__media-link" onClick={saveToRecentlyViewed}>
           <img
-            src={data.images?.[0]?.url}
+            src={imageSrc}
             alt={data.name || "Yebone product"}
             className={`ypc__img${data.stock === 0 ? " ypc__img--dimmed" : ""}`}
             loading="lazy"
@@ -144,17 +147,19 @@ const HomeProductCard = ({ data, isEvent, compact = false, fluid = false }) => {
             type="button"
             onClick={addToCartHandler}
             className="ypc__action-btn ypc__action-btn--primary"
+            aria-label="Add to cart"
+            title="Add to cart"
           >
             <AiOutlineShoppingCart size={15} />
-            Add to Cart
           </button>
           <Link
             to={productUrl}
             onClick={saveToRecentlyViewed}
             className="ypc__action-btn ypc__action-btn--secondary"
+            aria-label="Quick view"
+            title="Quick view"
           >
             <AiOutlineEye size={15} />
-            Quick View
           </Link>
         </div>
       </div>
@@ -171,7 +176,9 @@ const HomeProductCard = ({ data, isEvent, compact = false, fluid = false }) => {
           <h3 className="ypc__title">{data.name}</h3>
         </Link>
 
-        <ProductCardReviews rating={rating} reviewCount={reviewCount} />
+        {!dense && (
+          <ProductCardReviews rating={rating} reviewCount={reviewCount} />
+        )}
 
         <div className="ypc__pricing">
           <p className="ypc__price">RWF {formatPrice(price)}</p>
@@ -180,7 +187,11 @@ const HomeProductCard = ({ data, isEvent, compact = false, fluid = false }) => {
           )}
         </div>
 
-        <p className="ypc__sold">{soldCount} sold</p>
+        {(soldCount > 0 || !dense) && (
+          <p className="ypc__sold" data-zero={soldCount === 0 ? "true" : undefined}>
+            {soldCount > 0 ? `${soldCount} sold` : dense ? null : "0 sold"}
+          </p>
+        )}
       </div>
     </article>
   );

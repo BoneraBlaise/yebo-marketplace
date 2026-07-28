@@ -6,14 +6,14 @@
     0 1px 2px rgba(15, 23, 20, 0.04),
     0 4px 16px -4px rgba(41, 98, 93, 0.1);
   --ypc-shadow-hover: 0 10px 32px -8px rgba(41, 98, 93, 0.2);
-  --ypc-body-min: 7.25rem;
-  --ypc-min-height: 17.5rem;
+  --ypc-body-min: 4.5rem;
+  --ypc-min-height: auto;
 }
 
 .ypc {
   position: relative;
   display: grid;
-  grid-template-rows: minmax(0, 62fr) minmax(0, 38fr);
+  grid-template-rows: minmax(0, 75fr) minmax(0, 25fr);
   width: 100%;
   height: 100%;
   min-height: var(--ypc-min-height);
@@ -80,17 +80,27 @@
 .ypc__media {
   position: relative;
   min-height: 0;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
-  background: var(--home-surface-muted, #f4f5f4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    var(--home-surface-muted, #f4f5f4) 0%,
+    rgba(244, 245, 244, 0.65) 100%
+  );
   border-radius: var(--ypc-radius) var(--ypc-radius) 0 0;
 }
 
 .dark .ypc__media {
-  background: #262626;
+  background: linear-gradient(180deg, #262626 0%, #1f1f1f 100%);
 }
 
 .ypc__media-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   height: 100%;
 }
@@ -98,8 +108,8 @@
 .ypc__img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  object-position: center;
+  object-fit: contain;
+  object-position: center center;
   display: block;
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -171,21 +181,22 @@
   outline-offset: 2px;
 }
 
-/* ── Desktop hover actions ── */
+/* ── Desktop hover actions — compact floating pills ── */
 .ypc__actions {
   position: absolute;
-  inset-inline: 0;
-  bottom: 0;
+  top: 0.5rem;
+  right: 0.5rem;
   z-index: 2;
   display: flex;
-  gap: 0.5rem;
-  padding: 0.625rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, transparent 100%);
-  transform: translateY(100%);
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0;
+  background: transparent;
+  transform: translateY(-0.25rem);
   opacity: 0;
   transition:
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.3s ease;
+    transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.25s ease;
 }
 
 .ypc:hover .ypc__actions,
@@ -195,19 +206,24 @@
 }
 
 .ypc__action-btn {
-  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.375rem;
-  min-height: 2.25rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0;
+  width: 2rem;
+  height: 2rem;
+  min-height: 0;
+  padding: 0;
   border: none;
-  border-radius: 0.625rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
+  border-radius: 9999px;
+  font-size: 0;
   cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
   transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.ypc__action-btn svg {
+  flex-shrink: 0;
 }
 
 .ypc__action-btn--primary {
@@ -217,12 +233,17 @@
 
 .ypc__action-btn--primary:hover {
   background: #1f4f4a;
+  transform: scale(1.06);
 }
 
 .ypc__action-btn--secondary {
   background: rgba(255, 255, 255, 0.96);
   color: #1f2937;
   text-decoration: none;
+}
+
+.ypc__action-btn--secondary:hover {
+  transform: scale(1.06);
 }
 
 .ypc__action-btn:focus-visible {
@@ -234,9 +255,9 @@
 .ypc__body {
   display: flex;
   flex-direction: column;
-  gap: 0.3125rem;
+  gap: 0.1875rem;
   min-height: 0;
-  padding: 0.5625rem 0.6875rem 0.6875rem;
+  padding: 0.4375rem 0.5625rem 0.5rem;
   overflow: hidden;
 }
 
@@ -284,13 +305,13 @@
   font-family: Poppins, system-ui, sans-serif;
   font-size: 0.8125rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
   color: var(--home-text, #1f2937);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: 2.7em;
+  min-height: 0;
   word-break: break-word;
   transition: color 0.2s ease;
 }
@@ -312,7 +333,7 @@
   display: flex;
   align-items: center;
   gap: 0.3125rem;
-  min-height: 1.125rem;
+  min-height: 0;
   flex-shrink: 0;
 }
 
@@ -360,8 +381,8 @@
 .ypc__pricing {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
-  margin-top: 0.125rem;
+  gap: 0.0625rem;
+  margin-top: 0;
   flex-shrink: 0;
 }
 
@@ -395,9 +416,9 @@
 
 /* ── Sold ── */
 .ypc__sold {
-  margin: auto 0 0;
-  padding-top: 0.25rem;
-  font-size: 0.6875rem;
+  margin: 0;
+  padding-top: 0;
+  font-size: 0.625rem;
   font-weight: 500;
   line-height: 1.2;
   color: var(--home-text-muted, #6b7280);
@@ -414,6 +435,69 @@
   width: 100%;
   max-width: 100%;
   height: 100%;
+}
+
+/* ── Dense / AI / PDP cards — image ≈75% / info ≈25% ── */
+.ypc--dense {
+  --ypc-min-height: auto;
+  max-height: 16.25rem;
+  grid-template-rows: minmax(0, 75fr) minmax(0, 25fr);
+}
+
+.ypc--dense .ypc__media {
+  aspect-ratio: 1 / 1;
+}
+
+.ypc--dense .ypc__body {
+  padding: 0.25rem 0.4375rem 0.375rem;
+  gap: 0.0625rem;
+}
+
+.ypc--dense .ypc__title {
+  font-size: 0.75rem;
+  min-height: 0;
+  line-height: 1.22;
+  -webkit-line-clamp: 2;
+}
+
+.ypc--dense .ypc__price {
+  font-size: 0.8125rem;
+}
+
+.ypc--dense .ypc__price-old,
+.ypc--dense .ypc__sold,
+.ypc--dense .ypc__verified,
+.ypc--dense .ypc__reviews-empty,
+.ypc--dense .ypc__review-count {
+  font-size: 0.625rem;
+}
+
+.ypc--dense .ypc__reviews {
+  display: none;
+}
+
+.ypc--dense .ypc__verified {
+  display: none;
+}
+
+.ypc--dense .ypc__sold:empty,
+.ypc--dense .ypc__sold[data-zero="true"] {
+  display: none;
+}
+
+.ypc--dense .ypc__wishlist {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.ypc--dense .ypc__actions {
+  top: 0.375rem;
+  right: 2rem;
+}
+
+.ypc--dense .ypc__action-btn {
+  width: 1.625rem;
+  height: 1.625rem;
 }
 
 /* Hide desktop hover actions on touch/mobile */

@@ -61,10 +61,10 @@ const SuggestedProduct = ({ data }) => {
           </div>
         </div>
 
-        <div className="marketplace-product-grid mpc-grid--page yebone-fade-up">
+      <div className="marketplace-product-grid mpc-grid--page mpc-grid--pdp-dense yebone-fade-up">
           {productData.slice(0, visibleCount).map((product) => (
-            <div key={product._id} className="mpc-card-slot mpc-card-slot--centered">
-                <HomeProductCard data={product} compact fluid />
+            <div key={product._id} className="mpc-card-slot">
+                <HomeProductCard data={product} compact dense fluid />
             </div>
           ))}
         </div>

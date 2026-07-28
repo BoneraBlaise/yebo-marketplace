@@ -8,8 +8,11 @@ import {
   AiOutlineSend,
   AiOutlineSearch,
   AiOutlineArrowLeft,
+  AiOutlinePaperClip,
+  AiOutlineSmile,
 } from "react-icons/ai";
-import { IoArchiveOutline, IoPricetagOutline } from "react-icons/io5";
+import { IoArchiveOutline, IoPricetagOutline, IoChatbubblesOutline } from "react-icons/io5";
+import { HiOutlineInbox } from "react-icons/hi";
 import { socketUrl } from "../../config/serverConfig";
 import {
   archiveConversation,
@@ -22,6 +25,7 @@ import {
   sendConversationMessage,
   unarchiveConversation,
 } from "../../services/communicationService";
+import { notifyInboxRefresh, optimizeProductImage } from "../../utils/productImageUtils";
 import "./messaging-center.css";
 
 const readAuthCookie = () => {
@@ -30,17 +34,30 @@ const readAuthCookie = () => {
   return match ? decodeURIComponent(match[1]) : null;
 };
 
-const createSocket = () =>
-  socketIO(socketUrl, {
-    transports: ["websocket", "polling"],
-    autoConnect: false,
-    auth: { token: readAuthCookie() },
-  });
-
-let socket = createSocket();
+const sortMessages = (items) =>
+  [...items].sort(
+    (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+  );
 
 const formatAmount = (amount, currency = "RWF") =>
   `${Number(amount || 0).toLocaleString()} ${currency}`;
+
+const formatTime = (date) => {
+  if (!date) return "";
+  try {
+    return new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
+};
+
+const otherMemberId = (chat, currentUserId) =>
+  (chat?.members || []).find((m) => String(m) !== String(currentUserId));
+
+const isMessageRead = (msg, otherId) => {
+  if (!otherId || !msg?.readBy) return false;
+  return msg.readBy.map(String).includes(String(otherId));
+};
 
 const OfferCard = ({ offer, currentUserId, onRespond, onCounter, onCheckout }) => {
   const isSeller = String(offer.sellerId) === String(currentUserId);
@@ -98,22 +115,36 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
   const currentUserId = mode === "seller" ? seller?._id : user?._id;
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const conversationParam = searchParams.get("conversation") || searchParams.get("") || null;
+  const conversationParam = searchParams.get("conversation") || null;
 
   const [conversations, setConversations] = useState([]);
   const [messages, setMessages] = useState([]);
   const [offers, setOffers] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
   const [newMessage, setNewMessage] = useState("");
-  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showArchived, setShowArchived] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState([]);
   const [mobileShowThread, setMobileShowThread] = useState(false);
   const [offerModal, setOfferModal] = useState(null);
   const [offerAmount, setOfferAmount] = useState("");
   const [offerMessage, setOfferMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
+  const socketRef = useRef(null);
+  const currentChatRef = useRef(null);
+
+  useEffect(() => {
+    currentChatRef.current = currentChat;
+  }, [currentChat]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(searchInput.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
 
   const offersById = useMemo(() => {
     const map = {};
@@ -125,14 +156,14 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
     if (!currentUserId) return;
     setLoading(true);
     try {
-      const data = await fetchConversations({ search, includeArchived: showArchived });
+      const data = await fetchConversations({ search: debouncedSearch, includeArchived: showArchived });
       setConversations(data);
     } catch (_error) {
       toast.error("Could not load conversations");
     } finally {
       setLoading(false);
     }
-  }, [currentUserId, search, showArchived]);
+  }, [currentUserId, debouncedSearch, showArchived]);
 
   const loadThread = useCallback(async (conversation) => {
     if (!conversation?._id) return;
@@ -141,8 +172,12 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
         fetchMessages(conversation._id),
         fetchOfferHistory(conversation._id),
       ]);
-      setMessages(messageData);
+      setMessages(sortMessages(messageData));
       setOffers(offerData);
+      setConversations((prev) =>
+        prev.map((c) => (String(c._id) === String(conversation._id) ? { ...c, unreadCount: 0 } : c))
+      );
+      notifyInboxRefresh();
     } catch (_error) {
       toast.error("Could not load messages");
     }
@@ -153,53 +188,89 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
   }, [loadConversations]);
 
   useEffect(() => {
-    if (!currentUserId) return;
+    if (!currentUserId) return undefined;
     const token = readAuthCookie();
-    if (!token) return;
-    socket.auth = { token };
-    if (!socket.connected) socket.connect();
+    if (!token) return undefined;
 
-    const onUsers = (data) => setOnlineUsers(data);
+    const socket = socketIO(socketUrl, {
+      transports: ["websocket", "polling"],
+      autoConnect: true,
+      auth: { token },
+    });
+    socketRef.current = socket;
+
+    const refreshAll = () => {
+      loadConversations();
+      notifyInboxRefresh();
+      const active = currentChatRef.current;
+      if (active?._id) loadThread(active);
+    };
+
+    const onUsers = (data) => setOnlineUsers(data || []);
     const onMessage = (data) => {
       const incoming = data.message || data;
       const incomingId = incoming?._id;
-      if (currentChat && String(data.conversationId) === String(currentChat._id)) {
+      const convId = data.conversationId;
+
+      loadConversations();
+      notifyInboxRefresh();
+
+      if (currentChatRef.current && String(convId) === String(currentChatRef.current._id)) {
         setMessages((prev) => {
           if (incomingId && prev.some((m) => m._id === incomingId)) return prev;
-          return [...prev, incoming];
+          return sortMessages([...prev, incoming]);
         });
-        loadConversations();
       }
     };
-    const onNotification = () => loadConversations();
+    const onNotification = () => {
+      loadConversations();
+      notifyInboxRefresh();
+    };
+    const onTyping = (data) => {
+      if (
+        currentChatRef.current &&
+        String(data?.conversationId) === String(currentChatRef.current._id) &&
+        String(data?.userId) !== String(currentUserId)
+      ) {
+        setIsTyping(Boolean(data?.typing));
+        window.setTimeout(() => setIsTyping(false), 3000);
+      }
+    };
+    const onConnect = () => refreshAll();
 
+    socket.on("connect", onConnect);
     socket.on("getUsers", onUsers);
     socket.on("getMessage", onMessage);
     socket.on("notification", onNotification);
+    socket.on("typing", onTyping);
 
     return () => {
+      socket.off("connect", onConnect);
       socket.off("getUsers", onUsers);
       socket.off("getMessage", onMessage);
       socket.off("notification", onNotification);
+      socket.off("typing", onTyping);
+      socket.disconnect();
+      socketRef.current = null;
     };
-  }, [currentUserId, currentChat, loadConversations]);
+  }, [currentUserId, loadConversations, loadThread]);
 
   useEffect(() => {
     if (!conversationParam || !conversations.length) return;
     const match = conversations.find((c) => String(c._id) === String(conversationParam));
-    if (match) {
+    if (match && String(currentChat?._id) !== String(match._id)) {
       setCurrentChat(match);
       setMobileShowThread(true);
       loadThread(match);
     }
-  }, [conversationParam, conversations, loadThread]);
+  }, [conversationParam, conversations, loadThread, currentChat?._id]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isTyping]);
 
   const onlineCheck = (chat) => {
-    const otherId = (chat.members || []).find((m) => String(m) !== String(currentUserId));
+    const otherId = otherMemberId(chat, currentUserId);
     return onlineUsers.some((u) => String(u.userId) === String(otherId));
   };
 
@@ -212,18 +283,39 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
 
   const sendMessage = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !currentChat) return;
-    const otherId = (currentChat.members || []).find((m) => String(m) !== String(currentUserId));
+    const text = newMessage.trim();
+    if (!text || !currentChat || sending) return;
+
+    const tempId = `pending-${Date.now()}`;
+    const optimistic = {
+      _id: tempId,
+      text,
+      sender: currentUserId,
+      createdAt: new Date().toISOString(),
+      pending: true,
+      readBy: [String(currentUserId)],
+    };
+
+    setMessages((prev) => sortMessages([...prev, optimistic]));
+    setNewMessage("");
+    setSending(true);
+
     try {
-      const message = await sendConversationMessage(currentChat._id, { text: newMessage.trim() });
-      setMessages((prev) => {
-        if (message?._id && prev.some((m) => m._id === message._id)) return prev;
-        return [...prev, message];
-      });
-      setNewMessage("");
+      const message = await sendConversationMessage(currentChat._id, { text });
+      setMessages((prev) =>
+        sortMessages(prev.map((m) => (m._id === tempId ? message : m)).filter((m, i, arr) => {
+          if (!m._id) return true;
+          return arr.findIndex((x) => x._id === m._id) === i;
+        }))
+      );
       loadConversations();
+      notifyInboxRefresh();
     } catch (_error) {
+      setMessages((prev) => prev.filter((m) => m._id !== tempId));
+      setNewMessage(text);
       toast.error("Failed to send message");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -292,10 +384,19 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
     }
   };
 
+  const otherId = currentChat ? otherMemberId(currentChat, currentUserId) : null;
+  const productImage = currentChat?.productSnapshot?.image
+    ? optimizeProductImage(currentChat.productSnapshot.image, "thumb")
+    : null;
+
   if (!currentUserId) {
     return (
-      <div className="mc-empty">
-        <p>Please sign in to view messages.</p>
+      <div className="mc-empty-state">
+        <div className="mc-empty-state__icon">
+          <IoChatbubblesOutline size={32} />
+        </div>
+        <h3>Sign in to message</h3>
+        <p>Connect with sellers about products, offers, and orders.</p>
       </div>
     );
   }
@@ -310,8 +411,8 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
             <input
               type="search"
               placeholder="Search conversations"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               aria-label="Search conversations"
             />
           </div>
@@ -328,42 +429,71 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
         <div className="mc-conversation-list" role="list">
           {loading && <p className="mc-muted">Loading...</p>}
           {!loading && conversations.length === 0 && (
-            <div className="mc-empty">
-              <p>No conversations yet.</p>
-              <p className="mc-muted">Contact a seller from any product page.</p>
+            <div className="mc-empty-state mc-empty-state--compact">
+              <div className="mc-empty-state__icon">
+                <HiOutlineInbox size={28} />
+              </div>
+              <h3>No conversations yet</h3>
+              <p>Contact a seller from any product page to start chatting.</p>
+              <Link to="/products" className="mc-btn mc-btn--primary mc-empty-state__cta">
+                Browse products
+              </Link>
             </div>
           )}
-          {conversations.map((chat) => (
-            <button
-              key={chat._id}
-              type="button"
-              role="listitem"
-              className={`mc-conversation-item ${currentChat?._id === chat._id ? "is-active" : ""}`}
-              onClick={() => openConversation(chat)}
-            >
-              <div className="mc-conversation-item__top">
-                <span className="mc-conversation-item__name">
-                  {chat.productSnapshot?.name || "Product conversation"}
-                </span>
-                {chat.unreadCount > 0 && (
-                  <span className="mc-badge">{chat.unreadCount}</span>
-                )}
-              </div>
-              <p className="mc-conversation-item__preview">{chat.lastMessage || "No messages yet"}</p>
-              <div className="mc-conversation-item__meta">
-                <span className={onlineCheck(chat) ? "mc-online" : "mc-offline"}>
-                  {onlineCheck(chat) ? "Online" : "Offline"}
-                </span>
-              </div>
-            </button>
-          ))}
+          {conversations.map((chat) => {
+            const thumb = chat.productSnapshot?.image
+              ? optimizeProductImage(chat.productSnapshot.image, "thumb")
+              : null;
+            return (
+              <button
+                key={chat._id}
+                type="button"
+                role="listitem"
+                className={`mc-conversation-item ${currentChat?._id === chat._id ? "is-active" : ""} ${chat.unreadCount > 0 ? "has-unread" : ""}`}
+                onClick={() => openConversation(chat)}
+              >
+                <div className="mc-conversation-item__thumb">
+                  {thumb ? (
+                    <img src={thumb} alt="" />
+                  ) : (
+                    <span className="mc-conversation-item__thumb-fallback">
+                      <IoChatbubblesOutline />
+                    </span>
+                  )}
+                </div>
+                <div className="mc-conversation-item__content">
+                  <div className="mc-conversation-item__top">
+                    <span className="mc-conversation-item__name">
+                      {chat.productSnapshot?.name || "Product conversation"}
+                    </span>
+                    <span className="mc-conversation-item__time">
+                      {chat.updatedAt ? format(chat.updatedAt) : ""}
+                    </span>
+                  </div>
+                  <p className="mc-conversation-item__preview">{chat.lastMessage || "No messages yet"}</p>
+                  <div className="mc-conversation-item__meta">
+                    <span className={onlineCheck(chat) ? "mc-online" : "mc-offline"}>
+                      {onlineCheck(chat) ? "Online" : "Offline"}
+                    </span>
+                    {chat.unreadCount > 0 && (
+                      <span className="mc-badge">{chat.unreadCount}</span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className={`mc-thread ${mobileShowThread ? "mc-thread--visible-mobile" : ""}`}>
         {!currentChat ? (
-          <div className="mc-thread-empty">
-            <p>Select a conversation to start messaging</p>
+          <div className="mc-empty-state">
+            <div className="mc-empty-state__icon">
+              <IoChatbubblesOutline size={36} />
+            </div>
+            <h3>Select a conversation</h3>
+            <p>Pick a thread from the left to view messages, offers, and product details.</p>
           </div>
         ) : (
           <>
@@ -376,10 +506,18 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
               >
                 <AiOutlineArrowLeft />
               </button>
-              <div>
+              <div className="mc-thread__avatar">
+                {productImage ? (
+                  <img src={productImage} alt="" />
+                ) : (
+                  <span>{(currentChat.productSnapshot?.name || "P").charAt(0)}</span>
+                )}
+                <span className={`mc-thread__presence ${onlineCheck(currentChat) ? "is-online" : ""}`} />
+              </div>
+              <div className="mc-thread__identity">
                 <h2>{currentChat.productSnapshot?.name || "Conversation"}</h2>
                 <span className={onlineCheck(currentChat) ? "mc-online" : "mc-offline"}>
-                  {onlineCheck(currentChat) ? "Online" : "Offline"}
+                  {onlineCheck(currentChat) ? "Online now" : "Offline"}
                 </span>
               </div>
               <div className="mc-thread__actions">
@@ -404,9 +542,7 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
 
             {currentChat.productSnapshot && (
               <Link to={`/product/${currentChat.productId}`} className="mc-product-preview">
-                {currentChat.productSnapshot.image && (
-                  <img src={currentChat.productSnapshot.image} alt="" />
-                )}
+                {productImage && <img src={productImage} alt="" />}
                 <div>
                   <strong>{currentChat.productSnapshot.name}</strong>
                   <span>{formatAmount(currentChat.productSnapshot.price)}</span>
@@ -418,10 +554,11 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
               {messages.map((msg) => {
                 const isMine = String(msg.sender) === String(currentUserId);
                 const linkedOffer = msg.offerId ? offersById[msg.offerId] : null;
+                const read = isMine && isMessageRead(msg, otherId);
                 return (
                   <div
                     key={msg._id || `${msg.createdAt}-${msg.text}`}
-                    className={`mc-message ${isMine ? "mc-message--mine" : "mc-message--theirs"}`}
+                    className={`mc-message ${isMine ? "mc-message--mine" : "mc-message--theirs"} ${msg.pending ? "mc-message--pending" : ""} ${msg.failed ? "mc-message--failed" : ""}`}
                   >
                     {msg.messageType === "offer" && linkedOffer ? (
                       <OfferCard
@@ -439,25 +576,48 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
                         )}
                       </div>
                     )}
-                    <time className="mc-message__time">
-                      {msg.createdAt ? format(msg.createdAt) : "Just now"}
-                    </time>
+                    <div className="mc-message__meta">
+                      <time>{msg.createdAt ? formatTime(msg.createdAt) : "Now"}</time>
+                      {isMine && (
+                        <span className="mc-message__status">
+                          {msg.pending ? "Sending…" : read ? "Read" : "Delivered"}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 );
               })}
+              {isTyping && (
+                <div className="mc-typing" aria-live="polite">
+                  <span /><span /><span />
+                  Typing…
+                </div>
+              )}
               <div ref={scrollRef} />
             </div>
 
             <form className="mc-composer" onSubmit={sendMessage}>
+              <button type="button" className="mc-composer__icon" aria-label="Attach file" title="Attach file">
+                <AiOutlinePaperClip size={20} />
+              </button>
               <input
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
+                placeholder="Write a message…"
                 aria-label="Message"
+                disabled={sending}
               />
-              <button type="submit" className="mc-btn mc-btn--primary" aria-label="Send">
-                <AiOutlineSend />
+              <button type="button" className="mc-composer__icon" aria-label="Emoji" title="Emoji">
+                <AiOutlineSmile size={20} />
+              </button>
+              <button
+                type="submit"
+                className="mc-btn mc-btn--primary mc-composer__send"
+                aria-label="Send"
+                disabled={sending || !newMessage.trim()}
+              >
+                <AiOutlineSend size={18} />
               </button>
             </form>
           </>
