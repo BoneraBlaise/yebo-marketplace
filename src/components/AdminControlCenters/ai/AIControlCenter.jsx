@@ -133,7 +133,7 @@ const AIControlCenter = () => {
             <MetricCard label="Active AI products" value={enabledCount} />
             <MetricCard label="Runtime" value={health?.healthy ? "Healthy" : "Degraded"} />
             <MetricCard label="Version" value={health?.version || "—"} />
-            <MetricCard label="Provider" value={health?.primaryProvider || "mock"} />
+            <MetricCard label="AI Platform" value="YEBO AI" />
           </div>
 
           <div className="admin-cc-ai-grid">

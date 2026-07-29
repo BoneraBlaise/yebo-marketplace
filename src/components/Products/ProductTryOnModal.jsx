@@ -4,7 +4,7 @@ import { HiOutlineSparkles, HiOutlinePhotograph, HiOutlineCamera } from "react-i
 import { PreviewExperience } from "../../ai-experience-ui/components/preview/PreviewExperience";
 import { Button } from "../ui";
 
-const ProductTryOnModal = ({ open, onClose, productId, productName, userId }) => {
+const ProductTryOnModal = ({ open, onClose, productId, productName, userId, vendorId }) => {
   const fileInputRef = useRef(null);
   const [photoPreview, setPhotoPreview] = useState(null);
 
@@ -87,7 +87,13 @@ const ProductTryOnModal = ({ open, onClose, productId, productName, userId }) =>
             </div>
           )}
 
-          <PreviewExperience userId={userId || "guest"} productId={productId} />
+          <PreviewExperience
+            userId={userId || "guest"}
+            productId={productId}
+            vendorId={vendorId}
+            customerId={userId}
+            personPhoto={photoPreview}
+          />
 
           <Button variant="secondary" size="lg" className="w-full" onClick={onClose}>
             Done

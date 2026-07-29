@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Select, Progress } from "../../../design-system/components";
 import { AIPreviewCard } from "../../../design-system/ai";
 import { AI_PREVIEW_TYPE } from "../../../ai/commerce/CommerceTypes";
@@ -14,23 +14,54 @@ const AI_PREVIEW_TYPE_OPTIONS = Object.entries(AI_PREVIEW_TYPE).map(([, value]) 
   label: value.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
 }));
 
-export const PreviewExperience = ({ userId = "demo-user", productId = "p-1" }) => {
+export const PreviewExperience = ({
+  userId = "demo-user",
+  productId = "p-1",
+  vendorId = null,
+  customerId = null,
+  personPhoto = null,
+}) => {
   const [previewType, setPreviewType] = useState("body_tryon");
   const [activeSession, setActiveSession] = useState(null);
+  const [progressView, setProgressView] = useState(null);
   const { createPreview, getSessions, getProgress } = useAIExperiencePlatform(userId);
 
   const sessions = getSessions()?.previewSessions || [];
   const session = activeSession || sessions[sessions.length - 1];
-  const progress = session ? getProgress(session.sessionId) : null;
-  const viewModel = progress?.viewModel;
+  const viewModel = progressView?.viewModel;
   const status = viewModel?.status || session?.status || "idle";
 
-  logAIExperienceDiagnostics("preview", { productId, previewType, status });
+  useEffect(() => {
+    if (!session?.sessionId) {
+      setProgressView(null);
+      return undefined;
+    }
+    let cancelled = false;
+    (async () => {
+      const progress = await getProgress(session.sessionId);
+      if (!cancelled) setProgressView(progress);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.sessionId, getProgress]);
 
-  const handleStart = () => {
-    const created = createPreview({ ai_preview_type: previewType, productId, inputs: {} });
+  logAIExperienceDiagnostics("preview", { productId, previewType, status, vendorId });
+
+  const handleStart = async () => {
+    if (!vendorId) {
+      logAIExperienceDiagnostics("preview", { action: "blocked", reason: "missing_vendor_id" });
+      return;
+    }
+    const created = await createPreview({
+      ai_preview_type: previewType,
+      productId,
+      vendorId,
+      customerId: customerId || userId,
+      inputs: personPhoto ? { personImage: personPhoto, userPhoto: personPhoto } : {},
+    });
     setActiveSession(created);
-    logAIExperienceDiagnostics("preview", { action: "start", sessionId: created.sessionId });
+    logAIExperienceDiagnostics("preview", { action: "start", sessionId: created?.sessionId, vendorId });
   };
 
   const actions = [
@@ -63,7 +94,13 @@ export const PreviewExperience = ({ userId = "demo-user", productId = "p-1" }) =
         </div>
 
         <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl flex items-center justify-center mb-6 border border-gray-200/80 dark:border-gray-700/80 overflow-hidden" role="img" aria-label="AI preview result area">
-          {session ? (
+          {session?.previewImageUrl || viewModel?.previewImageUrl ? (
+            <img
+              src={session?.previewImageUrl || viewModel?.previewImageUrl}
+              alt="YEBO AI try-on result"
+              className="w-full h-full object-contain"
+            />
+          ) : session ? (
             <div className="text-center p-6 w-full max-w-md">
               <p className="text-sm font-semibold capitalize mb-3">{previewType.replace(/_/g, " ")}</p>
               <Progress value={viewModel?.progress || 0} />
@@ -75,7 +112,10 @@ export const PreviewExperience = ({ userId = "demo-user", productId = "p-1" }) =
         </div>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          <Button onClick={handleStart}>Preview with AI</Button>
+          <Button onClick={handleStart} disabled={!vendorId}>Preview with AI</Button>
+          {!vendorId && (
+            <p className="text-xs text-amber-600 w-full">Vendor information is required to start a YEBO AI preview.</p>
+          )}
           {actions.map((a) => (
             <Button key={a.id} size="sm" variant="ghost" onClick={() => logAIExperienceDiagnostics("preview", { action: a.id })} aria-label={a.label}>
               {a.label}

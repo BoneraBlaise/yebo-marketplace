@@ -73,7 +73,7 @@ export class CommerceEngine {
 
   /**
    * Execute an AI service request through the commerce platform.
-   * Routes provider calls via ProviderFactory only.
+   * DEV/TEST ONLY — production must use YIPGatewayClient / yeboAIService.
    */
   async executeService({
     service,

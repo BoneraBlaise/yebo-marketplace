@@ -606,6 +606,7 @@ const ProductDetails = ({ data }) => {
         productId={data?._id}
         productName={data?.name}
         userId={user?._id}
+        vendorId={data?.shop?._id || data?.shopId}
       />
       <ProductTryOnUnavailableModal
         open={tryOnUnavailableOpen}

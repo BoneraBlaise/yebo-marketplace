@@ -1,8 +1,7 @@
-import { createCommerceEngine } from "../../ai/commerce";
-import { AI_SERVICE } from "../../ai/commerce/CommerceTypes";
+import yeboAIService from "../../services/yeboAIService";
 
-/** Resolve whether a vendor has YEBO AI Try-On enabled (presentation — uses existing commerce subscription state). */
-export function isVendorTryOnSubscribed(vendorId, shop = {}, product = {}) {
+/** Resolve whether a vendor has YEBO AI Try-On enabled via backend gateway. */
+export async function isVendorTryOnSubscribed(vendorId, shop = {}, product = {}) {
   if (product?.ai_preview_type) return true;
   if (shop?.aiTryOnEnabled === true) return true;
   if (shop?.features?.aiTryOn === true) return true;
@@ -10,13 +9,13 @@ export function isVendorTryOnSubscribed(vendorId, shop = {}, product = {}) {
 
   if (!vendorId) return false;
 
-  const commerce = createCommerceEngine({ vendorId: String(vendorId) });
-  const explicit = commerce.subscription?.subscriptions?.has?.(String(vendorId));
-  if (!explicit) return false;
-
-  const sub = commerce.subscription.getSubscription(String(vendorId));
-  const caps = sub?.plan?.capabilities || [];
-  return sub?.active !== false && caps.includes(AI_SERVICE.PREVIEW);
+  try {
+    const response = await yeboAIService.getVendorSubscription();
+    const sub = response?.data || response;
+    return sub?.active !== false && (sub?.products || []).includes("virtual_try_on");
+  } catch {
+    return false;
+  }
 }
 
 export default isVendorTryOnSubscribed;

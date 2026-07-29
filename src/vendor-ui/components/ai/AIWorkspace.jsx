@@ -2,7 +2,7 @@ import React from "react";
 import { Card, Tabs, Badge } from "../../../design-system/components";
 import {
   AICreditsCard, AISubscriptionCard, AIROICard, AIAnalyticsCard,
-  AIRecommendationCard, AIHistoryCard, AIUsageMeter, AIProviderStatus, AIModelBadge, AIJobCard,
+  AIRecommendationCard, AIHistoryCard, AIUsageMeter,
 } from "../../../design-system/ai";
 import { useVendorExperience } from "../../hooks/useVendorExperience";
 import { logVendorUIDiagnostics } from "../../diagnostics/VendorUIDiagnostics";
@@ -31,7 +31,7 @@ export const AIWorkspace = ({ vendorId = "demo-vendor" }) => {
         { id: "overview", label: "Overview" },
         { id: "usage", label: "Usage" },
         { id: "history", label: "History" },
-        { id: "providers", label: "Providers" },
+        { id: "performance", label: "Performance" },
       ]} active={tab} onChange={setTab} />
 
       <div className="mt-4 space-y-4">
@@ -52,7 +52,7 @@ export const AIWorkspace = ({ vendorId = "demo-vendor" }) => {
         )}
         {tab === "usage" && (
           <Card>
-            <h3 className="font-semibold mb-3">Preview Usage</h3>
+            <h3 className="font-semibold mb-3">YEBO AI Usage</h3>
             <AIUsageMeter used={credits.consumed} total={credits.allocated} />
             <p className="text-sm text-gray-500 mt-4">Total credits consumed: {usage.totalCredits || 0}</p>
             <div className="mt-3 space-y-1">
@@ -65,15 +65,16 @@ export const AIWorkspace = ({ vendorId = "demo-vendor" }) => {
         {tab === "history" && (
           <AIHistoryCard items={historyItems.length ? historyItems : [{ id: 0, label: "No preview history yet" }]} />
         )}
-        {tab === "providers" && (
+        {tab === "performance" && (
           <Card>
-            <h3 className="font-semibold mb-3">Provider & Model Status</h3>
-            <div className="space-y-3">
-              <div className="flex items-center gap-2"><AIProviderStatus provider="Primary Provider" status="online" /><Badge variant="success">Active</Badge></div>
-              <div className="flex items-center gap-2"><AIProviderStatus provider="Fallback Provider" status="online" /><Badge variant="default">Standby</Badge></div>
-              <AIModelBadge model="preview-v2" />
-              <AIJobCard jobId="latest" status="idle" progress={0} />
+            <h3 className="font-semibold mb-3">YEBO AI Performance</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><p className="text-sm text-gray-500">Preview Requests</p><p className="font-bold">{analytics.metrics?.aiUsageCount || 0}</p></div>
+              <div><p className="text-sm text-gray-500">Completed Sessions</p><p className="font-bold">{historyItems.length}</p></div>
+              <div><p className="text-sm text-gray-500">Conversion Rate</p><p className="font-bold">—</p></div>
+              <div><p className="text-sm text-gray-500">Revenue Generated</p><p className="font-bold">{roi.revenueLift || "—"}</p></div>
             </div>
+            <p className="text-xs text-gray-400 mt-4">Powered by YEBO AI</p>
           </Card>
         )}
       </div>

@@ -15,7 +15,7 @@ import { consumeStream } from "../utils/streaming";
 import { YIPAnalytics } from "../utils/analytics";
 import { normalizeError, YIP_ERROR } from "../utils/errors";
 import { YIPGatewayClient } from "../gateway/YIPGatewayClient";
-import { YIPShoppingIntelligence } from "../intelligence/YIPShoppingIntelligence";
+import yeboAIService from "../../services/yeboAIService";
 import { createDecisionEngine } from "../decision/DecisionEngine";
 import { createYEBOIntelligenceEngine } from "../intelligence/YEBOIntelligenceEngine";
 import { createAIOrchestrator } from "../orchestration/AIOrchestrator";
@@ -494,7 +494,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const runComparison = useCallback(async (products = []) => {
     setIsTyping(true);
     try {
-      const result = await YIPShoppingIntelligence.compareProducts(products);
+      const result = await yeboAIService.compareProducts(products);
       setComparisonResult(result);
       return result;
     } finally {
@@ -505,7 +505,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const runBudgetAdvice = useCallback(async (selection) => {
     setIsTyping(true);
     try {
-      const result = await YIPShoppingIntelligence.budgetAdvice(selection);
+      const result = await yeboAIService.budgetAdvice(selection);
       setBudgetAdvice(result);
       return result;
     } finally {
@@ -516,7 +516,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
   const runGiftFinder = useCallback(async (categoryId) => {
     setIsTyping(true);
     try {
-      const result = await YIPShoppingIntelligence.giftFinder(categoryId);
+      const result = await yeboAIService.giftFinder(categoryId);
       setGiftResults(result);
       return result;
     } finally {
@@ -524,12 +524,13 @@ export const YIPProvider = ({ children, config: configOverride }) => {
     }
   }, []);
 
-  const proactiveSuggestions = useMemo(
-    () => YIPShoppingIntelligence.getProactiveSuggestions(memoryRef.current.getSnapshot()),
-    [isPanelOpen, messages]
-  );
+  const [proactiveSuggestions, setProactiveSuggestions] = useState([]);
+  const [shoppingTips, setShoppingTips] = useState([]);
 
-  const shoppingTips = useMemo(() => YIPShoppingIntelligence.getShoppingTips(), []);
+  useEffect(() => {
+    yeboAIService.getProactiveSuggestions().then(setProactiveSuggestions).catch(() => setProactiveSuggestions([]));
+    yeboAIService.getShoppingTips().then(setShoppingTips).catch(() => setShoppingTips([]));
+  }, []);
 
   const memoryContextValue = useMemo(
     () => ({
@@ -597,7 +598,7 @@ export const YIPProvider = ({ children, config: configOverride }) => {
       analytics: YIPAnalytics,
       events: YIPEvents,
       // Shopping intelligence (Phase 7C)
-      intelligence: YIPShoppingIntelligence,
+      intelligence: yeboAIService,
       shoppingMode,
       setShoppingMode,
       smartSearchResults,
