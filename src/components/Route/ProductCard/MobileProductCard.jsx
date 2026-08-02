@@ -139,14 +139,14 @@ const MobileProductCard = ({ data, isEvent }) => {
           <h3 className="ypc__title">{data.name}</h3>
         </Link>
 
-        <ProductCardReviews rating={rating} reviewCount={reviewCount} />
-
         <div className="ypc__pricing">
           <p className="ypc__price">RWF {formatPrice(price)}</p>
           {hasDiscount && (
             <p className="ypc__price-old">RWF {formatPrice(data.originalPrice)}</p>
           )}
         </div>
+
+        <ProductCardReviews rating={rating} reviewCount={reviewCount} />
 
         <p className="ypc__sold">{soldCount} sold</p>
       </div>

@@ -14,22 +14,40 @@ export const CreateExperienceProvider = ({ children }) => {
   const ai = useAIOptional();
   const [open, setOpen] = useState(false);
   const [initialStep, setInitialStep] = useState("pick");
+  const [initialCategory, setInitialCategory] = useState(null);
   const onCompleteRef = useRef(null);
   const restorePanelRef = useRef(false);
 
-  const openCreate = useCallback((type = "pick", onComplete) => {
+  const openCreate = useCallback((type = "pick", onComplete, options = {}) => {
     if (ai?.isPanelOpen) {
       restorePanelRef.current = true;
       ai.closePanel();
     }
-    setInitialStep(type === "product" || type === "property" ? type : "pick");
-    onCompleteRef.current = typeof onComplete === "function" ? onComplete : null;
+
+    const normalizedOptions = typeof onComplete === "object" && onComplete !== null && !options?.category
+      ? onComplete
+      : options;
+    const callback = typeof onComplete === "function" ? onComplete : null;
+
+    if (type === "product") {
+      setInitialStep("product");
+      setInitialCategory(null);
+    } else if (type === "property" || type === "vehicle") {
+      setInitialStep("property");
+      setInitialCategory(normalizedOptions.category || (type === "vehicle" ? "cars" : null));
+    } else {
+      setInitialStep("pick");
+      setInitialCategory(null);
+    }
+
+    onCompleteRef.current = callback;
     setOpen(true);
   }, [ai]);
 
   const closeCreate = useCallback(() => {
     setOpen(false);
     setInitialStep("pick");
+    setInitialCategory(null);
     onCompleteRef.current = null;
     if (restorePanelRef.current) {
       restorePanelRef.current = false;
@@ -50,7 +68,13 @@ export const CreateExperienceProvider = ({ children }) => {
   return (
     <CreateExperienceContext.Provider value={value}>
       {children}
-      <CreateExperienceModal open={open} onClose={closeCreate} onComplete={handleComplete} initialStep={initialStep} />
+      <CreateExperienceModal
+        open={open}
+        onClose={closeCreate}
+        onComplete={handleComplete}
+        initialStep={initialStep}
+        initialCategory={initialCategory}
+      />
     </CreateExperienceContext.Provider>
   );
 };

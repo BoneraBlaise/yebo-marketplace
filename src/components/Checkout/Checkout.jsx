@@ -1,22 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Country, State } from "country-state-city";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { trackCommissionClick } from "../../redux/actions/order";
 import { addTocart, removeFromCart } from "../../redux/actions/cart";
 import { useReferral } from "../../context/ReferralContext";
 import { validateGrowthCoupon } from "../../services/growthConfigurationService";
 import { fetchNegotiatedCheckout } from "../../services/communicationService";
-import { Container, Button } from "../ui";
-import { typography } from "../../design-system/typography";
+import { Container } from "../ui";
 import CheckoutOrderSummary from "./CheckoutOrderSummary";
 import CheckoutCartItem from "./CheckoutCartItem";
 import CheckoutEmptyCart from "./CheckoutEmptyCart";
 import CheckoutDeliveryMethods from "./CheckoutDeliveryMethods";
-import { YEBOCheckoutIntelligence } from "../ai";
+import CheckoutAIAssistant from "./CheckoutAIAssistant";
 import "./checkout.css";
+
+const applyAddress = (address, setters) => {
+  setters.setAddress1(address.address1 || "");
+  setters.setAddress2(address.address2 || "");
+  setters.setZipCode(address.zipCode || "");
+  setters.setCountry(address.country || "");
+  setters.setCity(address.city || "");
+};
 
 const Checkout = () => {
   const { user } = useSelector((state) => state.user);
@@ -31,10 +37,11 @@ const Checkout = () => {
   const [negotiatedLoading, setNegotiatedLoading] = useState(Boolean(offerIdParam && offerTokenParam));
   const [country, setCountry] = useState("");
   const [city, setCity] = useState("");
-  const [userInfo, setUserInfo] = useState(false);
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
-  const [zipCode, setZipCode] = useState(null);
+  const [zipCode, setZipCode] = useState("");
+  const [selectedAddressIndex, setSelectedAddressIndex] = useState(null);
+  const [addressInitialized, setAddressInitialized] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [couponCodeData, setCouponCodeData] = useState(null);
   const [discountPrice, setDiscountPrice] = useState(null);
@@ -43,9 +50,7 @@ const Checkout = () => {
   const dispatch = useDispatch();
   const { referralProducts, getReferralPayload } = useReferral();
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const addressSetters = { setAddress1, setAddress2, setZipCode, setCountry, setCity };
 
   useEffect(() => {
     if (!offerIdParam || !offerTokenParam) return;
@@ -81,6 +86,15 @@ const Checkout = () => {
       dispatch(trackCommissionClick(refCode));
     }
   }, [dispatch]);
+
+  useEffect(() => {
+    if (addressInitialized || !user?.addresses?.length) return;
+    const defaultAddress =
+      user.addresses.find((item) => item.isDefault) || user.addresses[0];
+    applyAddress(defaultAddress, addressSetters);
+    setSelectedAddressIndex(0);
+    setAddressInitialized(true);
+  }, [user?.addresses, addressInitialized]);
 
   const subTotalPrice = negotiatedCartItem
     ? Number(negotiatedCartItem.discountPrice || negotiatedCartItem.price || 0)
@@ -218,7 +232,6 @@ const Checkout = () => {
   };
 
   const discountAmount = couponCodeData ? Number(discountPrice || 0) : 0;
-
   const totalPrice = (parseFloat(subTotalPrice) + shipping - discountAmount).toFixed(2);
 
   const quantityChangeHandler = (data) => {
@@ -229,10 +242,17 @@ const Checkout = () => {
     dispatch(removeFromCart(data));
   };
 
+  const handleSelectSavedAddress = (index) => {
+    const address = user.addresses[index];
+    if (!address) return;
+    setSelectedAddressIndex(index);
+    applyAddress(address, addressSetters);
+  };
+
   if (negotiatedLoading) {
     return (
-      <Container className="py-12">
-        <p className="text-center text-gray-500">Loading negotiated checkout...</p>
+      <Container className="checkout-page">
+        <p className="checkout-page__loading">Loading checkout…</p>
       </Container>
     );
   }
@@ -243,45 +263,35 @@ const Checkout = () => {
 
   return (
     <>
-      <Container className="py-8 lg:py-12 pb-28 lg:pb-12">
-        <div className="mb-8 yebone-fade-up">
-          <h1 className={`${typography.heading} mb-2`}>Checkout</h1>
-          <p className="text-gray-500 dark:text-gray-400">
-            Review your items and complete shipping details on Yebone.
-          </p>
-        </div>
-
-        <div className="grid lg:grid-cols-3 gap-8 lg:gap-10 items-start">
-          <div className="lg:col-span-2 space-y-6 yebone-fade-up">
+      <Container className="checkout-page">
+        <div className="checkout-layout">
+          <div className="checkout-layout__main">
             {negotiatedCartItem && (
-              <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
-                <h2 className={`${typography.subheading} mb-5`}>Negotiated offer</h2>
+              <section className="checkout-section">
+                <h2 className="checkout-section__title">Cart</h2>
                 <CheckoutCartItem
                   data={{ ...negotiatedCartItem, qty: 1 }}
                   quantityChangeHandler={() => {}}
                   removeFromCartHandler={() => {}}
                   hasReferral={false}
-                  showMoveToWishlist={false}
                   compact
                 />
               </section>
             )}
 
             {!wonBid && !negotiatedCartItem && cart.length > 0 && (
-              <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
-                <h2 className={`${typography.subheading} mb-5`}>
-                  Cart ({cart.length} {cart.length === 1 ? "item" : "items"})
+              <section className="checkout-section">
+                <h2 className="checkout-section__title">
+                  Cart ({cart.length})
                 </h2>
-                <div className="space-y-4">
+                <div className="checkout-cart-list">
                   {cart.map((item, index) => (
                     <CheckoutCartItem
                       key={item._id || index}
                       data={item}
                       quantityChangeHandler={quantityChangeHandler}
                       removeFromCartHandler={removeFromCartHandler}
-                      hasReferral={
-                        referralProducts.has(item._id) || item.referralCode
-                      }
+                      hasReferral={referralProducts.has(item._id) || item.referralCode}
                     />
                   ))}
                 </div>
@@ -294,57 +304,50 @@ const Checkout = () => {
               setCountry={setCountry}
               city={city}
               setCity={setCity}
-              userInfo={userInfo}
-              setUserInfo={setUserInfo}
               address1={address1}
               setAddress1={setAddress1}
               address2={address2}
               setAddress2={setAddress2}
               zipCode={zipCode}
               setZipCode={setZipCode}
+              selectedAddressIndex={selectedAddressIndex}
+              onSelectSavedAddress={handleSelectSavedAddress}
             />
 
             <CheckoutDeliveryMethods value={deliveryMethod} onChange={setDeliveryMethod} />
+
+            <CheckoutAIAssistant />
           </div>
 
-          <div className="space-y-6">
-            <YEBOCheckoutIntelligence />
+          <aside className="checkout-layout__aside">
             <CheckoutOrderSummary
-            subTotalPrice={subTotalPrice}
-            shipping={shipping}
-            totalPrice={totalPrice}
-            discountAmount={discountAmount}
-            couponCode={couponCode}
-            setCouponCode={setCouponCode}
-            handleCouponSubmit={handleCouponSubmit}
-            handleSubmit={handleSubmit}
-            isWonBid={!!wonBid}
-            wonBid={wonBid}
-          />
-          </div>
+              subTotalPrice={subTotalPrice}
+              shipping={shipping}
+              totalPrice={totalPrice}
+              discountAmount={discountAmount}
+              couponCode={couponCode}
+              setCouponCode={setCouponCode}
+              handleCouponSubmit={handleCouponSubmit}
+              handleSubmit={handleSubmit}
+              isWonBid={!!wonBid}
+              wonBid={wonBid}
+              checkoutLabel="Pay now"
+            />
+          </aside>
         </div>
       </Container>
 
-      <div className="checkout-mobile-bar fixed bottom-0 inset-x-0 z-40 lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-2xl px-4 py-3 flex items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="text-xs text-gray-500">Total</p>
-          <p className="font-Poppins font-bold text-yebone-primary text-lg tabular-nums">
-            RWF {Number(totalPrice).toLocaleString()}
-          </p>
-        </div>
-        <Button size="md" className="yebone-btn-lift shrink-0" onClick={handleSubmit}>
+      <div className="checkout-mobile-bar">
+        <p className="checkout-mobile-bar__total">
+          RWF {Number(totalPrice).toLocaleString()}
+        </p>
+        <button type="button" className="checkout-mobile-bar__pay" onClick={handleSubmit}>
           Pay now
-        </Button>
+        </button>
       </div>
     </>
   );
 };
-
-const fieldClass =
-  "w-full h-11 px-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:border-yebone-primary focus:ring-4 focus:ring-yebone-primary/10 outline-none transition text-sm dark:text-white";
-
-const selectClass =
-  "w-full h-11 px-4 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 focus:border-yebone-primary outline-none transition text-sm dark:text-white";
 
 const ShippingInfo = ({
   user,
@@ -352,65 +355,73 @@ const ShippingInfo = ({
   setCountry,
   city,
   setCity,
-  userInfo,
-  setUserInfo,
   address1,
   setAddress1,
   address2,
   setAddress2,
   zipCode,
   setZipCode,
+  selectedAddressIndex,
+  onSelectSavedAddress,
 }) => (
-  <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
-    <h2 className={`${typography.subheading} mb-6`}>Shipping address</h2>
-    <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Full name
-          </label>
-          <input type="text" value={user?.name || ""} readOnly className={fieldClass} />
-        </div>
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Email
-          </label>
-          <input type="email" value={user?.email || ""} readOnly className={fieldClass} />
+  <section className="checkout-section">
+    <h2 className="checkout-section__title">Shipping address</h2>
+
+    {user?.addresses?.length > 0 && (
+      <div className="checkout-saved-addresses">
+        <p className="checkout-saved-addresses__label">Saved addresses</p>
+        <div className="checkout-saved-addresses__list">
+          {user.addresses.map((item, index) => (
+            <button
+              key={`${item.addressType}-${index}`}
+              type="button"
+              className={`checkout-saved-addresses__chip${
+                selectedAddressIndex === index ? " is-selected" : ""
+              }`}
+              onClick={() => onSelectSavedAddress(index)}
+            >
+              {item.addressType || `Address ${index + 1}`}
+            </button>
+          ))}
         </div>
       </div>
+    )}
 
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Phone
-          </label>
-          <input type="number" value={user?.phoneNumber || ""} readOnly className={fieldClass} />
+    <form className="checkout-shipping-form" onSubmit={(e) => e.preventDefault()}>
+      <div className="checkout-shipping-form__grid">
+        <div className="checkout-field-wrap">
+          <label htmlFor="checkout-name">Full name</label>
+          <input id="checkout-name" type="text" value={user?.name || ""} readOnly className="checkout-field" />
         </div>
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Zip code
-          </label>
+        <div className="checkout-field-wrap">
+          <label htmlFor="checkout-email">Email</label>
+          <input id="checkout-email" type="email" value={user?.email || ""} readOnly className="checkout-field" />
+        </div>
+        <div className="checkout-field-wrap">
+          <label htmlFor="checkout-phone">Phone</label>
+          <input id="checkout-phone" type="tel" value={user?.phoneNumber || ""} readOnly className="checkout-field" />
+        </div>
+        <div className="checkout-field-wrap">
+          <label htmlFor="checkout-zip">Zip code</label>
           <input
-            type="number"
+            id="checkout-zip"
+            type="text"
+            inputMode="numeric"
             value={zipCode || ""}
             onChange={(e) => setZipCode(e.target.value)}
             required
-            className={fieldClass}
+            className="checkout-field"
           />
         </div>
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Country
-          </label>
+        <div className="checkout-field-wrap">
+          <label htmlFor="checkout-country">Country</label>
           <select
-            className={selectClass}
+            id="checkout-country"
+            className="checkout-field"
             value={country}
             onChange={(e) => setCountry(e.target.value)}
           >
-            <option value="">Choose your country</option>
+            <option value="">Choose country</option>
             {Country?.getAllCountries().map((item) => (
               <option key={item.isoCode} value={item.isoCode}>
                 {item.name}
@@ -418,12 +429,10 @@ const ShippingInfo = ({
             ))}
           </select>
         </div>
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            City
-          </label>
-          <select className={selectClass} value={city} onChange={(e) => setCity(e.target.value)}>
-            <option value="">Choose your city</option>
+        <div className="checkout-field-wrap">
+          <label htmlFor="checkout-city">City</label>
+          <select id="checkout-city" className="checkout-field" value={city} onChange={(e) => setCity(e.target.value)}>
+            <option value="">Choose city</option>
             {State?.getStatesOfCountry(country).map((item) => (
               <option key={item.isoCode} value={item.isoCode}>
                 {item.name}
@@ -431,68 +440,30 @@ const ShippingInfo = ({
             ))}
           </select>
         </div>
-      </div>
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Address line 1
-          </label>
+        <div className="checkout-field-wrap checkout-field-wrap--full">
+          <label htmlFor="checkout-address1">Address line 1</label>
           <input
+            id="checkout-address1"
             type="text"
             required
             value={address1}
             onChange={(e) => setAddress1(e.target.value)}
-            className={fieldClass}
+            className="checkout-field"
           />
         </div>
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-2">
-            Address line 2
-          </label>
+        <div className="checkout-field-wrap checkout-field-wrap--full">
+          <label htmlFor="checkout-address2">Address line 2</label>
           <input
+            id="checkout-address2"
             type="text"
             value={address2}
             onChange={(e) => setAddress2(e.target.value)}
             required
-            className={fieldClass}
+            className="checkout-field"
           />
         </div>
       </div>
     </form>
-
-    <button
-      type="button"
-      className="mt-6 text-sm font-semibold text-yebone-primary hover:underline yebone-btn-lift"
-      onClick={() => setUserInfo(!userInfo)}
-    >
-      Choose from saved addresses
-    </button>
-
-    {userInfo && user?.addresses?.length > 0 && (
-      <div className="mt-4 space-y-2">
-        {user.addresses.map((item, index) => (
-          <label
-            key={index}
-            className="flex items-center gap-3 p-4 rounded-xl border border-gray-100 dark:border-gray-800 hover:border-yebone-primary/40 cursor-pointer transition yebone-card-lift"
-          >
-            <input
-              type="checkbox"
-              className="accent-yebone-primary"
-              value={item.addressType}
-              onChange={() => {
-                setAddress1(item.address1);
-                setAddress2(item.address2);
-                setZipCode(item.zipCode);
-                setCountry(item.country);
-                setCity(item.city);
-              }}
-            />
-            <span className="text-sm font-medium dark:text-white">{item.addressType}</span>
-          </label>
-        ))}
-      </div>
-    )}
   </section>
 );
 

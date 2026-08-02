@@ -1,9 +1,9 @@
 .shop-storefront {
   --shop-accent: #29625d;
-  --shop-space-sm: 1.5rem;   /* 24px */
-  --shop-space-md: 2rem;     /* 32px */
-  --shop-space-lg: 3rem;     /* 48px */
-  --shop-radius: 0.75rem;    /* rounded-xl */
+  --shop-space-sm: var(--yebo-space-6, 1.5rem);
+  --shop-space-md: var(--yebo-space-8, 2rem);
+  --shop-space-lg: var(--yebo-space-10, 3rem);
+  --shop-radius: var(--yebo-radius-md, 0.75rem);
 }
 
 /* ─── Profile header ─── */

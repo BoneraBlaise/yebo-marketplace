@@ -61,7 +61,7 @@ const ProductDetailsPage = () => {
     "View product details on Yebone marketplace.";
 
   return (
-    <div className="yebone-premium-screen bg-yebone-light-gray dark:bg-gray-950 min-h-screen flex flex-col">
+    <div className="yebone-premium-screen pdp-page-shell min-h-screen flex flex-col">
       <PageMeta
         title={metaTitle}
         description={metaDescription}

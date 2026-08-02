@@ -46,8 +46,12 @@ export function optimizeProductImage(url, preset = "hero") {
 }
 
 /** Broadcast inbox unread refresh to header badges */
-export function notifyInboxRefresh() {
-  if (typeof window !== "undefined") {
-    window.dispatchEvent(new CustomEvent("inbox:refresh"));
+export function notifyInboxRefresh(identity) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("inbox:refresh"));
+  if (identity) {
+    window.dispatchEvent(
+      new CustomEvent("inbox:refresh:identity", { detail: { identity } })
+    );
   }
 }

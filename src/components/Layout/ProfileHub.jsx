@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { RxCross1 } from "react-icons/rx";
 import {
@@ -15,12 +15,16 @@ import {
   HiOutlineCube,
   HiOutlineCurrencyDollar,
   HiOutlineSparkles,
+  HiOutlineSun,
+  HiOutlineMoon,
+  HiOutlineDesktopComputer,
 } from "react-icons/hi";
 import { AiOutlineLogin, AiOutlineShoppingCart } from "react-icons/ai";
 import { FiMessageSquare } from "react-icons/fi";
 import { logoutUser } from "../../config/authService";
 import { resolveSellerNavAction, SELLER_DASHBOARD_PATH, SELLER_ONBOARDING_PATH } from "../../utils/sellerNav";
 import { useMarketplaceMode } from "../../context/MarketplaceModeContext";
+import { useTheme } from "../../context/ThemeContext";
 
 const ProfileHubRoleSwitch = ({ onSwitch }) => {
   const { mode, switchToCustomerMode, switchToSellerMode } = useMarketplaceMode();
@@ -58,12 +62,44 @@ const ProfileHubRoleSwitch = ({ onSwitch }) => {
   );
 };
 
+const APPEARANCE_OPTIONS = [
+  { id: "light", label: "Light", icon: HiOutlineSun },
+  { id: "dark", label: "Dark", icon: HiOutlineMoon },
+  { id: "system", label: "System", icon: HiOutlineDesktopComputer },
+];
+
+const ProfileHubAppearance = () => {
+  const { themePreference, setThemePreference } = useTheme();
+
+  return (
+    <div className="profile-hub__appearance" role="radiogroup" aria-label="Appearance">
+      <p className="profile-hub__appearance-label">Appearance</p>
+      <div className="profile-hub__appearance-row">
+        {APPEARANCE_OPTIONS.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={themePreference === id}
+            className={`profile-hub__appearance-option${themePreference === id ? " is-active" : ""}`}
+            onClick={() => setThemePreference(id)}
+          >
+            <Icon size={18} aria-hidden="true" />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 /**
  * Unified profile navigation hub.
  * variant: "sheet" (mobile bottom sheet) | "popover" (desktop/tablet dropdown)
  */
 const ProfileHub = ({ open, onClose, variant = "sheet", anchorRef }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const panelRef = useRef(null);
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { isSeller } = useSelector((state) => state.seller);
@@ -113,10 +149,10 @@ const ProfileHub = ({ open, onClose, variant = "sheet", anchorRef }) => {
 
   const logoutHandler = async () => {
     await logoutUser();
+    dispatch({ type: "LoadUserFail", payload: "Logged out" });
     toast.success("Logged out");
     onClose();
     navigate("/login");
-    window.location.reload();
   };
 
   const Item = ({ icon: Icon, children, onClick, to, className = "" }) => {
@@ -157,6 +193,8 @@ const ProfileHub = ({ open, onClose, variant = "sheet", anchorRef }) => {
             <Item icon={AiOutlineLogin} to="/login">Login</Item>
             <Item icon={HiOutlineUser} to="/sign-up">Sign Up</Item>
             <Item icon={HiOutlineSparkles} to={SELLER_ONBOARDING_PATH}>Sell with Us</Item>
+            <div className="profile-hub__divider" role="separator" />
+            <ProfileHubAppearance />
           </>
         ) : (
           <>
@@ -205,6 +243,7 @@ const ProfileHub = ({ open, onClose, variant = "sheet", anchorRef }) => {
 
             <div className="profile-hub__divider" role="separator" />
             <Item icon={HiOutlineCog} onClick={() => goProfileTab(13)}>Settings</Item>
+            <ProfileHubAppearance />
 
             {isSeller ? <ProfileHubRoleSwitch onSwitch={onClose} /> : null}
 
@@ -253,4 +292,4 @@ const ProfileHub = ({ open, onClose, variant = "sheet", anchorRef }) => {
   );
 };
 
-export default ProfileHub;
+export default React.memo(ProfileHub);

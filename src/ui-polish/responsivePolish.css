@@ -1,0 +1,89 @@
+/**
+ * Responsive polish — overflow, touch targets, spacing (presentation only)
+ * Mobile-first; desktop layouts preserved at 901px+
+ */
+
+/* Prevent horizontal scroll on small viewports */
+@media (max-width: 900px) {
+  .home-page,
+  .dashboard-page,
+  .marketplace-page {
+    overflow-x: clip;
+  }
+
+  /* Minimum touch targets (44px) */
+  .home-header__icon-btn,
+  .home-header__search-submit,
+  .mc-composer__icon,
+  .mc-composer__send,
+  .mc-back-mobile,
+  .ypc__wishlist {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  /* Auth forms — full-width inputs on narrow screens */
+  .auth-page .auth-card {
+    width: min(100%, 24rem);
+    margin-inline: auto;
+  }
+
+  /* Dashboard content breathing room */
+  .dashboard-page {
+    padding-inline: max(0.75rem, env(safe-area-inset-left))
+      max(0.75rem, env(safe-area-inset-right));
+  }
+
+  .dashboard-section {
+    padding-inline: 0;
+  }
+
+  /* Product details — prevent gallery overflow */
+  .product-details-page {
+    overflow-x: clip;
+  }
+
+  /* Profile hub tabs */
+  .profile-hub {
+    overflow-x: clip;
+  }
+
+  /* Marketplace filter row */
+  .marketplace-filter-panel {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .marketplace-filter-panel::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Search results grid gap */
+  .products-grid,
+  .home-product-grid {
+    gap: 0.625rem;
+  }
+}
+
+/* Tablet refinements */
+@media (min-width: 601px) and (max-width: 900px) {
+  .dashboard-page {
+    padding-inline: 1.25rem;
+  }
+}
+
+/* Safe area for fixed bottom nav / composer */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (max-width: 900px) {
+    .mc-composer {
+      padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc-messages {
+    scroll-behavior: auto;
+  }
+}

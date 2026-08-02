@@ -6,9 +6,11 @@ import { Provider } from "react-redux";
 import Store from "./redux/store";
 import { ThemeProvider } from "./context/ThemeContext";
 import { setupApiClient } from "./config/setupApiClient";
+import { restoreAuthSessionFromBackup } from "./config/authStorage";
 import { logDevNetworkInfo } from "./config/devNetworkInfo";
 import './i18n';
 
+restoreAuthSessionFromBackup();
 setupApiClient();
 logDevNetworkInfo();
 

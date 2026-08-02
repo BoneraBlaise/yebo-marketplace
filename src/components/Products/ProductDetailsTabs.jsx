@@ -2,15 +2,9 @@ import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import ReactQuill from "react-quill";
 import { AiOutlineMessage } from "react-icons/ai";
-import { HiOutlineThumbUp, HiOutlineSparkles } from "react-icons/hi";
+import { HiOutlineThumbUp } from "react-icons/hi";
 import {
   MdVerified,
-  MdLocalShipping,
-  MdReplay,
-  MdOutlineDescription,
-  MdOutlineInventory2,
-  MdOutlineWash,
-  MdOutlineGppGood,
 } from "react-icons/md";
 import { Button } from "../ui";
 import { typography } from "../../design-system/typography";
@@ -18,20 +12,12 @@ import Ratings from "./Ratings";
 import verified from "../verify/verified.png";
 
 const TABS = [
-  { id: "overview", label: "Overview" },
+  { id: "description", label: "Description" },
   { id: "specs", label: "Specifications" },
   { id: "reviews", label: "Reviews" },
   { id: "seller", label: "Seller" },
 ];
 
-const ACCORDION_SECTIONS = [
-  { key: "features", label: "Features", icon: MdOutlineDescription },
-  { key: "materials", label: "Materials", icon: MdOutlineInventory2 },
-  { key: "care", label: "Care Instructions", icon: MdOutlineWash },
-  { key: "shipping", label: "Shipping", icon: MdLocalShipping },
-  { key: "returns", label: "Returns", icon: MdReplay },
-  { key: "warranty", label: "Warranty", icon: MdOutlineGppGood },
-];
 
 const ProductDetailsTabs = ({
   data,
@@ -41,8 +27,7 @@ const ProductDetailsTabs = ({
   shopVerify,
   handleMessageSubmit,
 }) => {
-  const [activeTab, setActiveTab] = useState("overview");
-  const [openAccordion, setOpenAccordion] = useState("features");
+  const [activeTab, setActiveTab] = useState("description");
   const [sortBy, setSortBy] = useState("recent");
   const [reviewPage, setReviewPage] = useState(1);
   const [helpful, setHelpful] = useState({});
@@ -90,25 +75,10 @@ const ProductDetailsTabs = ({
     return rows;
   }, [data]);
 
-  const accordionContent = {
-    features: data.details || "Product features will appear here when provided by the seller.",
-    materials: "Material information provided by the seller on Yebone.",
-    care: "Follow seller care instructions included with your purchase.",
-    shipping: "Standard delivery across Africa — typically 3–7 business days depending on location.",
-    returns: "Easy returns within the seller's return window. Contact the seller via Yebone messaging.",
-    warranty: data.condition?.toLowerCase() === "new"
-      ? "Manufacturer warranty may apply for new items — confirm with seller."
-      : "Warranty terms vary by seller — message before purchase.",
-  };
-
   return (
-    <section className="pdp-section">
-      <div className="yebone-surface rounded-[1.75rem] overflow-hidden">
-        {/* Premium tab nav */}
-        <div
-          className="relative flex overflow-x-auto hide-scrollbar border-b border-gray-100/80 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50"
-          role="tablist"
-        >
+    <section className="pdp-section pdp-tabs">
+      <div className="pdp-tabs__shell">
+        <div className="pdp-tabs__nav" role="tablist">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -116,72 +86,31 @@ const ProductDetailsTabs = ({
               role="tab"
               aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`relative shrink-0 px-6 lg:px-8 py-4 text-sm font-semibold transition-colors duration-300 ${
-                activeTab === tab.id
-                  ? "text-yebone-primary"
-                  : "text-gray-500 hover:text-yebone-primary/80"
-              }`}
+              className={`pdp-tabs__tab${activeTab === tab.id ? " is-active" : ""}`}
             >
               {tab.label}
               {tab.id === "reviews" && reviewCount > 0 && (
-                <span className="ml-1.5 text-xs opacity-70">({reviewCount})</span>
-              )}
-              {activeTab === tab.id && (
-                <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-yebone-primary rounded-full yebone-tab-indicator" />
+                <span className="pdp-tabs__count">({reviewCount})</span>
               )}
             </button>
           ))}
         </div>
 
-        <div className="p-6 lg:p-10">
-          {/* Overview */}
-          {activeTab === "overview" && (
-            <div className="space-y-8 pdp-fade-in">
-              <div>
-                <h3 className={`${typography.subheading} mb-4`}>Product Overview</h3>
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <ReactQuill value={data.description} readOnly theme="bubble" />
+        <div className="pdp-tabs__body">
+          {activeTab === "description" && (
+            <div className="pdp-tabs__panel">
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <ReactQuill value={data.description} readOnly theme="bubble" />
+              </div>
+              {data.details && (
+                <div className="pdp-tabs__details">
+                  <h3 className={typography.subheading}>Details</h3>
+                  <p>{data.details}</p>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                {ACCORDION_SECTIONS.map(({ key, label, icon: Icon }) => (
-                  <div
-                    key={key}
-                    className="rounded-2xl border border-gray-100/80 dark:border-gray-800 overflow-hidden yebone-card-lift bg-white/60 dark:bg-gray-900/40"
-                  >
-                    <button
-                      type="button"
-                      onClick={() => setOpenAccordion(openAccordion === key ? "" : key)}
-                      className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left font-Poppins font-semibold text-sm hover:bg-yebone-light-gray/40 dark:hover:bg-gray-800/40 transition"
-                      aria-expanded={openAccordion === key}
-                    >
-                      <span className="flex items-center gap-3">
-                        <span className="w-9 h-9 rounded-xl bg-yebone-primary/10 flex items-center justify-center">
-                          <Icon className="text-yebone-primary" size={18} />
-                        </span>
-                        {label}
-                      </span>
-                      <span className={`text-yebone-primary text-xl transition-transform duration-300 ${openAccordion === key ? "rotate-45" : ""}`}>
-                        +
-                      </span>
-                    </button>
-                    {openAccordion === key && (
-                      <div className="px-5 pb-5 text-sm text-gray-600 dark:text-gray-400 leading-relaxed border-t border-gray-100 dark:border-gray-800 pt-4 yebone-accordion-content">
-                        {key === "features" && data.details ? (
-                          <p>{data.details}</p>
-                        ) : (
-                          accordionContent[key]
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              )}
             </div>
           )}
 
-          {/* Specifications */}
           {activeTab === "specs" && (
             <div className="pdp-fade-in">
               <h3 className={`${typography.subheading} mb-6`}>Specifications</h3>

@@ -3,7 +3,7 @@ import VendorDashboardLayout from "../../components/Dashboard/VendorDashboardLay
 import DashboardMessages from "../../components/Shop/DashboardMessages";
 
 const ShopInboxPage = () => (
-  <VendorDashboardLayout active={8} bare fullWidth>
+  <VendorDashboardLayout active={8} messagingLayout>
     <DashboardMessages />
   </VendorDashboardLayout>
 );

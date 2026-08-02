@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   HiOutlineMenu,
@@ -22,6 +22,7 @@ const DashboardLayout = ({
   mode = "customer",
   bare = false,
   fullWidth = false,
+  messagingLayout = false,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -36,17 +37,44 @@ const DashboardLayout = ({
       ? VENDOR_TITLES[active] || "Seller"
       : DASHBOARD_TITLES[active] || "Account";
 
-  const mainClass = fullWidth || bare
-    ? "flex-1 min-w-0"
-    : "flex-1 min-w-0 dashboard-section yebone-surface yebone-fade-up";
+  const mainClass =
+    messagingLayout || fullWidth || bare
+      ? "flex-1 min-w-0 mc-dashboard-main"
+      : "flex-1 min-w-0 dashboard-section yebone-surface yebone-fade-up";
 
-  const sidebarWidth = sidebarCollapsed ? "w-[72px]" : "w-[280px]";
+  const sidebarWidth = messagingLayout
+    ? "w-[280px]"
+    : sidebarCollapsed
+      ? "w-[72px]"
+      : "w-[280px]";
+
+  const pageClass = [
+    "dashboard-page yebone-premium-screen dark:text-gray-200",
+    messagingLayout ? "dashboard-page--messaging pb-0" : "pb-10",
+    isVendor ? "dashboard-page--vendor-premium" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const containerClass = messagingLayout
+    ? "!w-full !max-w-none !mx-0 px-0 py-0 lg:!px-6 lg:py-4"
+    : undefined;
+
+  const flexGapClass = messagingLayout ? "gap-0 lg:gap-6" : "gap-6 lg:gap-8";
+
+  useEffect(() => {
+    if (!messagingLayout) return undefined;
+    const openNav = () => setMobileOpen(true);
+    window.addEventListener("yebone:open-vendor-nav", openNav);
+    return () => window.removeEventListener("yebone:open-vendor-nav", openNav);
+  }, [messagingLayout]);
 
   return (
     <>
       {(isAdmin || isVendor) && <PageMeta title={title} noIndex />}
-      <div className={`dashboard-page yebone-premium-screen dark:text-gray-200 pb-10${isVendor ? " dashboard-page--vendor-premium" : ""}`}>
-        <Container className="py-6 lg:py-8">
+      <div className={pageClass}>
+        <Container className={containerClass ?? "py-6 lg:py-8"}>
+          {!messagingLayout && (
           <div className="dashboard-header yebone-fade-up">
             <div className="flex-1 min-w-0">
               <nav className="dashboard-breadcrumb mb-2" aria-label="Breadcrumb">
@@ -135,8 +163,9 @@ const DashboardLayout = ({
               )}
             </div>
           </div>
+          )}
 
-          <div className="flex gap-6 lg:gap-8">
+          <div className={`flex ${flexGapClass}`}>
             <aside
               className={`hidden lg:block ${sidebarWidth} shrink-0 sticky top-24 self-start transition-all duration-300`}
             >

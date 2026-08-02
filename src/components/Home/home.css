@@ -1384,9 +1384,11 @@
   color: var(--home-text);
   cursor: pointer;
   transition:
-    background 200ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    background 80ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 80ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 80ms cubic-bezier(0.22, 1, 0.36, 1);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .home-header__icon-btn:hover {
@@ -1394,7 +1396,9 @@
 }
 
 .home-header__icon-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.94);
+  background: var(--home-surface-muted);
+  transition-duration: 40ms;
 }
 
 .home-header__icon-btn:focus-visible {
@@ -1810,6 +1814,38 @@
     gap: 0.25rem;
   }
 
+  .home-header__actions--primary {
+    gap: 0.125rem;
+    align-items: center;
+  }
+
+  .home-header__actions--primary .home-header__icon-btn,
+  .home-header__actions--primary .home-header__create-btn,
+  .home-header__actions--primary .home-header__profile-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+  }
+
+  .home-header__actions--primary .home-header__create-btn {
+    border-radius: 9999px;
+  }
+
+  .home-header__actions--primary .home-header__avatar {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .home-header__actions--primary .home-header__avatar--placeholder svg {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  .home-header__shop-pill {
+    display: none;
+  }
+
   .home-header__search-row {
     order: 4;
     flex: 1 1 100%;
@@ -1900,14 +1936,14 @@
   }
 
   .dark .home-header--scrolled .home-header__icon-btn {
-    width: 2.125rem;
-    height: 2.125rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
   }
 
-  .dark .home-header--scrolled .home-header__profile-mobile img,
-  .dark .home-header--scrolled .home-header__profile-mobile div {
-    width: 1.75rem;
-    height: 1.75rem;
+  .home-header__actions--primary .home-header__profile-btn {
+    box-shadow: inset 0 0 0 2px rgba(41, 98, 93, 0.14);
   }
 
   .home-page .home-section {

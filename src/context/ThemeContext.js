@@ -1,70 +1,73 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useMemo } from "react";
 
-// Create context
 const ThemeContext = createContext();
 
-// Theme provider component
+const PREFERENCE_KEY = "themePreference";
+
+const getSystemTheme = () => {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+};
+
+const resolveEffectiveTheme = (preference) => {
+  if (preference === "system") return getSystemTheme();
+  return preference === "dark" ? "dark" : "light";
+};
+
+const readInitialPreference = () => {
+  if (typeof window === "undefined") return "system";
+
+  const stored = localStorage.getItem(PREFERENCE_KEY);
+  if (stored === "light" || stored === "dark" || stored === "system") return stored;
+
+  const legacy = localStorage.getItem("theme");
+  if (legacy === "light" || legacy === "dark") return legacy;
+
+  return "system";
+};
+
+const applyThemeToDocument = (effectiveTheme) => {
+  document.body.classList.toggle("dark", effectiveTheme === "dark");
+  document.body.style.backgroundColor = effectiveTheme === "dark" ? "#1f1f1f" : "";
+};
+
 export const ThemeProvider = ({ children }) => {
-  const getInitialTheme = () => {
-    if (typeof window !== 'undefined') {
-      // Check if there's a saved theme in localStorage
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        return savedTheme;
-      }
+  const [themePreference, setThemePreferenceState] = useState(readInitialPreference);
+  const theme = useMemo(() => resolveEffectiveTheme(themePreference), [themePreference]);
 
-      // Check the device's preferred theme
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return prefersDark ? 'dark' : 'light';
-    }
-    return 'light'; // Default theme if window is not available (e.g., SSR)
-  };
-
-  const [theme, setTheme] = useState(getInitialTheme);
-
-  // Update the theme in localStorage and on the document body
   useEffect(() => {
-    localStorage.setItem('theme', theme);
-    document.body.classList.toggle('dark', theme === 'dark'); // Apply the dark class to <body>
-    
-     // Set background color for the entire site based on the theme
-     if (theme === "dark") {
-      document.body.style.backgroundColor = "#1f1f1f";
-    } else {
-      document.body.style.backgroundColor = ""; // Reset background to default for light theme
-    }
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleThemeChange = (e) => {
-      if (!localStorage.getItem('theme')) {
-        // Only change the theme if the user hasn't manually set a theme
-        setTheme(e.matches ? 'dark' : 'light');
-      }
-    };
+    localStorage.setItem(PREFERENCE_KEY, themePreference);
+    localStorage.setItem("theme", theme);
+    applyThemeToDocument(theme);
+  }, [theme, themePreference]);
 
-    // Attach the event listener to listen for system theme changes
-    mediaQuery.addEventListener('change', handleThemeChange);
+  useEffect(() => {
+    if (themePreference !== "system") return undefined;
 
-    // Cleanup the listener on unmount
-    return () => {
-      mediaQuery.removeEventListener('change', handleThemeChange);
-    };
-  }, [theme]);
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => applyThemeToDocument(resolveEffectiveTheme("system"));
 
-  // Function to toggle theme
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-  };
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
+  }, [themePreference]);
+
+  const setThemePreference = useCallback((next) => {
+    if (next !== "light" && next !== "dark" && next !== "system") return;
+    setThemePreferenceState(next);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setThemePreferenceState((prev) => {
+      const effective = resolveEffectiveTheme(prev);
+      return effective === "dark" ? "light" : "dark";
+    });
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, themePreference, setThemePreference, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
 };
 
-// Custom hook to use theme context
-export const useTheme = () => {
-  return useContext(ThemeContext);
-};
+export const useTheme = () => useContext(ThemeContext);

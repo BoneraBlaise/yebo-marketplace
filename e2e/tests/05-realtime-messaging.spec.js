@@ -29,7 +29,7 @@ test.describe("Suite 5 — Realtime messaging", () => {
     const sellerPage = await sellerContext.newPage();
 
     await buyerPage.goto(`/inbox?conversation=${conversation._id}`);
-    await sellerPage.goto(`/inbox?conversation=${conversation._id}`);
+    await sellerPage.goto(`/dashboard-messages?conversation=${conversation._id}`);
 
     await expect(buyerPage.getByRole("log")).toBeVisible();
     await expect(sellerPage.getByRole("log")).toBeVisible();
@@ -52,5 +52,38 @@ test.describe("Suite 5 — Realtime messaging", () => {
 
     await buyerContext.close();
     await sellerContext.close();
+  });
+
+  test("dual-session seller dashboard uses shop identity when both cookies exist", async ({
+    browser,
+    buyerSession,
+    sellerSession,
+    product,
+  }) => {
+    const conversation = await startProductConversation(
+      buyerSession.token,
+      product,
+      `Dual session ${Date.now()}`
+    );
+
+    const dualContext = await browser.newContext();
+    await dualContext.addInitScript(
+      ({ buyerToken, sellerToken }) => {
+        document.cookie = `token=${encodeURIComponent(buyerToken)}; path=/`;
+        document.cookie = `seller_token=${encodeURIComponent(sellerToken)}; path=/`;
+      },
+      { buyerToken: buyerSession.token, sellerToken: sellerSession.token }
+    );
+
+    const page = await dualContext.newPage();
+    await page.goto(`/dashboard-messages?conversation=${conversation._id}`);
+    await expect(page.getByRole("log")).toBeVisible();
+
+    const sellerMessage = `Dual session seller ${Date.now()}`;
+    await page.getByRole("textbox", { name: "Message" }).fill(sellerMessage);
+    await page.getByRole("button", { name: "Send" }).click();
+    await expect(page.getByText(sellerMessage)).toBeVisible({ timeout: 20_000 });
+
+    await dualContext.close();
   });
 });

@@ -5,7 +5,7 @@ import { useCreateExperience } from "./CreateExperienceContext";
 import { CREATE_ACTIONS } from "../../navigation/createActions";
 import "./seller-experience.css";
 
-const MobileCreateActionSheet = ({ open, onClose }) => {
+const MobileCreateActionSheet = ({ open, onClose, actions = CREATE_ACTIONS, title = "Create" }) => {
   const { openCreate } = useCreateExperience();
   const navigate = useNavigate();
 
@@ -27,7 +27,7 @@ const MobileCreateActionSheet = ({ open, onClose }) => {
   const handlePick = (item) => {
     onClose();
     if (item.route) {
-      navigate(item.route);
+      navigate(item.route, item.state ? { state: item.state } : undefined);
       return;
     }
     window.requestAnimationFrame(() => openCreate(item.step));
@@ -45,14 +45,14 @@ const MobileCreateActionSheet = ({ open, onClose }) => {
         <div className="mobile-create-sheet__handle" aria-hidden="true" />
         <div className="mobile-create-sheet__header">
           <h2 id="mobile-create-sheet-title" className="mobile-create-sheet__title">
-            Create
+            {title}
           </h2>
           <button type="button" className="mobile-create-sheet__close" onClick={onClose} aria-label="Close">
             <RxCross1 size={18} />
           </button>
         </div>
         <div className="mobile-create-sheet__list">
-          {CREATE_ACTIONS.map((item) => (
+          {actions.map((item) => (
             <button
               key={item.id}
               type="button"

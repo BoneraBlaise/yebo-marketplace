@@ -1,8 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import { fetchConversationUnreadCount } from "../services/communicationService";
+import { useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { COMMUNICATION_IDENTITY } from "../config/communicationIdentity";
+import { resolveInboxIdentity } from "../config/inboxIdentity";
+import {
+  fetchConversationUnreadCount,
+  runWithCommunicationIdentity,
+} from "../services/communicationService";
 
-/** Unread conversation count for header inbox badge */
-const useInboxUnreadCount = (enabled = true) => {
+/** Unread conversation count for header / sidebar inbox badges — socket-driven, no polling. */
+const useInboxUnreadCount = (enabled = true, identityOverride) => {
+  const { pathname } = useLocation();
+  const { isSeller } = useSelector((state) => state.seller);
+  const identity =
+    identityOverride || resolveInboxIdentity(pathname, isSeller);
   const [count, setCount] = useState(0);
 
   const refresh = useCallback(async () => {
@@ -11,25 +22,29 @@ const useInboxUnreadCount = (enabled = true) => {
       return;
     }
     try {
-      const next = await fetchConversationUnreadCount();
+      const next = await runWithCommunicationIdentity(identity, fetchConversationUnreadCount);
       setCount(typeof next === "number" ? next : 0);
     } catch {
       setCount(0);
     }
-  }, [enabled]);
+  }, [enabled, identity]);
 
   useEffect(() => {
     refresh();
-    const id = window.setInterval(refresh, 60_000);
     const onRefresh = () => refresh();
-    window.addEventListener("inbox:refresh", onRefresh);
-    return () => {
-      window.clearInterval(id);
-      window.removeEventListener("inbox:refresh", onRefresh);
+    const onIdentityRefresh = (event) => {
+      if (event?.detail?.identity === identity) refresh();
     };
-  }, [refresh]);
+    window.addEventListener("inbox:refresh", onRefresh);
+    window.addEventListener("inbox:refresh:identity", onIdentityRefresh);
+    return () => {
+      window.removeEventListener("inbox:refresh", onRefresh);
+      window.removeEventListener("inbox:refresh:identity", onIdentityRefresh);
+    };
+  }, [refresh, identity]);
 
-  return { count, refresh };
+  return { count, refresh, identity };
 };
 
+export { COMMUNICATION_IDENTITY };
 export default useInboxUnreadCount;

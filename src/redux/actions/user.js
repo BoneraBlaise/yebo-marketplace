@@ -1,11 +1,13 @@
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
-import { clearAuthSession } from "../../config/authStorage";
+import { clearAuthSession, restoreAuthSessionFromBackup } from "../../config/authStorage";
+import { logAuthFailure } from "../../utils/headerInteractionDebug";
 
 // load user
 export const loadUser = () => async (dispatch) => {
   try {
+    restoreAuthSessionFromBackup();
     dispatch({
       type: "LoadUserRequest",
     });
@@ -19,6 +21,7 @@ export const loadUser = () => async (dispatch) => {
   } catch (error) {
     if (error?.response?.status === 401 || error?.authExpired) {
       clearAuthSession();
+      logAuthFailure("loadUser", error);
     }
     dispatch({
       type: "LoadUserFail",

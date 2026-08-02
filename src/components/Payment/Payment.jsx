@@ -1,27 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
-import {
-  CardNumberElement,
-  CardCvcElement,
-  CardExpiryElement,
-  useStripe,
-  useElements,
-  Elements,
-} from "@stripe/react-stripe-js";
-import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { PaystackButton } from "react-paystack";
-import { MdLock } from "react-icons/md";
-import { HiOutlineSparkles } from "react-icons/hi";
 import { useReferral } from "../../context/ReferralContext";
 import { Container, Button } from "../ui";
 import { typography } from "../../design-system/typography";
 import CheckoutOrderSummary from "../Checkout/CheckoutOrderSummary";
-import CheckoutTrustBadges from "../Checkout/CheckoutTrustBadges";
+import CheckoutAIAssistant from "../Checkout/CheckoutAIAssistant";
 import "../Checkout/checkout.css";
 
 const stripePublishableKey =
@@ -32,9 +20,8 @@ const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : 
 const Payment = () => {
   const [orderData, setOrderData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
-  const { referralProducts, clearAllReferrals } = useReferral();
+  const { clearAllReferrals } = useReferral();
 
   useEffect(() => {
     const savedOrderData = localStorage.getItem("latestOrder");
@@ -137,47 +124,48 @@ const Payment = () => {
 
   if (loading) {
     return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <div className="w-12 h-12 rounded-full border-4 border-yebone-primary/20 border-t-yebone-primary animate-spin" />
-        <p className="text-gray-600 dark:text-gray-300 font-medium">Processing your order...</p>
-      </div>
+      <Container className="checkout-page">
+        <div className="checkout-page__loading-wrap">
+          <div className="checkout-page__spinner" />
+          <p>Processing your order…</p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (!orderData) {
+    return (
+      <Container className="checkout-page">
+        <p className="checkout-page__loading">No order found. Return to checkout to continue.</p>
+      </Container>
     );
   }
 
   return (
-    <Container className="py-8 lg:py-12 pb-28 lg:pb-12">
-      <div className="mb-8 yebone-fade-up">
-        <h1 className={`${typography.heading} mb-2`}>Payment</h1>
-        <p className="text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-          <MdLock size={16} className="text-yebone-primary" />
-          Secure payment powered by Yebone
-        </p>
-      </div>
+    <>
+      <Container className="checkout-page">
+        <div className="checkout-layout">
+          <div className="checkout-layout__main">
+            <PaymentInfo
+              onCashOnDelivery={cashOnDeliveryHandler}
+              onShopPayment={PayViaShopInfo}
+            />
+            <CheckoutAIAssistant />
+          </div>
 
-      <div className="grid lg:grid-cols-3 gap-8 lg:gap-10 items-start">
-        <div className="lg:col-span-2 yebone-fade-up">
-          <PaymentInfo
-            user={user}
-            orderData={orderData}
-            onCashOnDelivery={cashOnDeliveryHandler}
-            onShopPayment={PayViaShopInfo}
-          />
+          <aside className="checkout-layout__aside">
+            <CheckoutOrderSummary
+              subTotalPrice={orderData.subTotalPrice}
+              shipping={orderData.shipping}
+              totalPrice={orderData.totalPrice}
+              discountAmount={orderData.discountPrice}
+              showCoupon={false}
+              showCheckoutButton={false}
+            />
+          </aside>
         </div>
-
-        {orderData && (
-          <CheckoutOrderSummary
-            subTotalPrice={orderData.subTotalPrice}
-            shipping={orderData.shipping}
-            totalPrice={orderData.totalPrice}
-            discountAmount={orderData.discountPrice}
-            showCoupon={false}
-            showCheckoutButton={false}
-            sticky
-            continueShoppingHref="/products"
-          />
-        )}
-      </div>
-    </Container>
+      </Container>
+    </>
   );
 };
 
@@ -185,132 +173,61 @@ const PAYMENT_METHODS = [
   {
     id: 1,
     title: "Pay with Paystack",
-    description: "Secure payment via Paystack — cards, mobile money, and more.",
+    description: "Cards, mobile money, and more.",
   },
   {
     id: 2,
     title: "Cash on Delivery",
-    description: "Pay when your order is delivered to your door.",
-    actionLabel: "Confirm order",
+    description: "Pay when your order arrives.",
+    actionLabel: "Confirm & pay on delivery",
   },
   {
     id: 3,
     title: "Shop Payment Info",
-    description: "Pay using payment details provided by the seller.",
+    description: "Pay using seller payment details.",
     actionLabel: "Confirm order",
   },
 ];
 
-const PaymentInfo = ({ onCashOnDelivery, onShopPayment, user, orderData }) => {
+const PaymentInfo = ({ onCashOnDelivery, onShopPayment }) => {
   const [select, setSelect] = useState(1);
 
   return (
-    <div className="space-y-6">
-      <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
-        <h2 className={`${typography.subheading} mb-6`}>Payment method</h2>
+    <section className="checkout-section">
+      <h2 className={`checkout-section__title ${typography.subheading}`}>Payment</h2>
 
-        <div className="space-y-3">
-          {PAYMENT_METHODS.map((method) => (
-            <div key={method.id}>
-              <button
-                type="button"
-                onClick={() => setSelect(method.id)}
-                className={`w-full flex items-start gap-4 p-4 rounded-2xl border-2 text-left transition-all duration-300 yebone-btn-lift ${
-                  select === method.id
-                    ? "border-yebone-primary bg-yebone-primary/5 shadow-md shadow-yebone-primary/10"
-                    : "border-gray-100 dark:border-gray-800 hover:border-yebone-primary/30"
-                }`}
-              >
-                <span
-                  className={`shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 ${
-                    select === method.id
-                      ? "border-yebone-primary"
-                      : "border-gray-300 dark:border-gray-600"
-                  }`}
-                >
-                  {select === method.id && (
-                    <span className="w-2.5 h-2.5 rounded-full bg-yebone-primary" />
-                  )}
-                </span>
-                <div>
-                  <p className="font-Poppins font-semibold text-sm dark:text-white">
-                    {method.title}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    {method.description}
-                  </p>
-                </div>
-              </button>
+      <div className="checkout-payment__list">
+        {PAYMENT_METHODS.map((method) => (
+          <div key={method.id}>
+            <button
+              type="button"
+              onClick={() => setSelect(method.id)}
+              className={`checkout-payment__option${select === method.id ? " is-selected" : ""}`}
+            >
+              <span className="checkout-payment__radio" aria-hidden="true">
+                {select === method.id && <span />}
+              </span>
+              <span className="checkout-payment__copy">
+                <span className="checkout-payment__title">{method.title}</span>
+                <span className="checkout-payment__desc">{method.description}</span>
+              </span>
+            </button>
 
-              {select === method.id && method.id === 2 && (
-                <div className="mt-3 pl-9">
-                  <Button onClick={onCashOnDelivery} className="yebone-btn-lift">
-                    {method.actionLabel}
-                  </Button>
-                </div>
-              )}
-
-              {select === method.id && method.id === 3 && (
-                <div className="mt-3 pl-9">
-                  <Button onClick={onShopPayment} className="yebone-btn-lift">
-                    {method.actionLabel}
-                  </Button>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <CheckoutTrustBadges />
-      </section>
-
-      {orderData?.cart?.length > 0 && (
-        <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
-          <h2 className={`${typography.subheading} mb-5`}>Order review</h2>
-          <div className="space-y-4">
-            {orderData.cart.map((item, i) => (
-              <div key={item._id || i} className="flex gap-4 items-center">
-                <img
-                  src={item.images?.[0]?.url}
-                  alt=""
-                  className="w-16 h-16 rounded-xl object-cover shadow-md"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium line-clamp-2 dark:text-white">{item.name}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Qty {item.qty} · {item.shop?.name}
-                  </p>
-                </div>
-                <p className="font-semibold text-yebone-primary text-sm tabular-nums shrink-0">
-                  RWF {(item.discountPrice * item.qty).toLocaleString()}
-                </p>
+            {select === method.id && method.id === 2 && (
+              <div className="checkout-payment__action">
+                <Button onClick={onCashOnDelivery}>{method.actionLabel}</Button>
               </div>
-            ))}
-          </div>
-          <p className="flex items-center gap-1.5 text-xs text-gray-400 mt-5">
-            <HiOutlineSparkles className="text-yebone-gold" size={14} />
-            Est. delivery 3–7 business days
-          </p>
-        </section>
-      )}
+            )}
 
-      <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
-        <h2 className={`${typography.subheading} mb-4`}>Shipping to</h2>
-        <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1 leading-relaxed">
-          <p className="font-semibold text-yebone-dark-text dark:text-white">{user?.name}</p>
-          <p>{user?.email}</p>
-          <p>{orderData?.shippingAddress?.address1}</p>
-          {orderData?.shippingAddress?.address2 && (
-            <p>{orderData.shippingAddress.address2}</p>
-          )}
-          <p>
-            {orderData?.shippingAddress?.city}, {orderData?.shippingAddress?.country}{" "}
-            {orderData?.shippingAddress?.zipCode}
-          </p>
-          <p>{user?.phoneNumber}</p>
-        </div>
-      </section>
-    </div>
+            {select === method.id && method.id === 3 && (
+              <div className="checkout-payment__action">
+                <Button onClick={onShopPayment}>{method.actionLabel}</Button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
 

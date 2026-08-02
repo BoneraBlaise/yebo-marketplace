@@ -4,11 +4,9 @@ import Checkout from "../components/Checkout/Checkout";
 import "../components/Checkout/checkout.css";
 
 const CheckoutPage = () => (
-  <div className="yebone-premium-screen min-h-screen flex flex-col bg-yebone-light-gray dark:bg-gray-950">
+  <div className="checkout-page-shell">
     <CheckoutSteps active={1} />
-    <main className="flex-1">
-      <Checkout />
-    </main>
+    <Checkout />
   </div>
 );
 

@@ -4,10 +4,15 @@ import DashboardLayout from "./DashboardLayout";
 const VendorDashboardLayout = ({
   active,
   children,
-  bare = false,
-  fullWidth = false,
+  messagingLayout = false,
 }) => (
-  <DashboardLayout mode="vendor" active={active} bare={bare} fullWidth={fullWidth}>
+  <DashboardLayout
+    mode="vendor"
+    active={active}
+    bare
+    fullWidth
+    messagingLayout={messagingLayout}
+  >
     {children}
   </DashboardLayout>
 );

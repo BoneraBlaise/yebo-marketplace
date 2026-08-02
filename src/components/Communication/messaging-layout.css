@@ -1,0 +1,471 @@
+/**
+ * Messaging layout system — rebuilt shell (not incremental tweaks).
+ * Mobile: full-bleed list, 16–20px page padding, title + list only.
+ * Desktop: 380px list column + fluid chat; seller adds 280px dashboard nav.
+ */
+
+/* ── Page shells ── */
+.mc-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+}
+
+.mc-page--buyer {
+  min-height: calc(100dvh - 4.25rem);
+}
+
+.dashboard-page--messaging {
+  padding-bottom: 0 !important;
+}
+
+.dashboard-page--messaging > .container,
+.dashboard-page--messaging [class*="Container"] {
+  max-width: none !important;
+  width: 100%;
+}
+
+.mc-dashboard-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+}
+
+.mc-dash-toolbar {
+  display: none;
+}
+
+/* ── App shell: list + chat ── */
+.mc-app {
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  background: var(--yebone-surface, #fff);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.dark .mc-app {
+  background: #0f1413;
+}
+
+/* ── Conversation list column ── */
+.mc-list-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border-right: 1px solid rgba(41, 98, 93, 0.08);
+  background: rgba(248, 250, 249, 0.55);
+}
+
+.dark .mc-list-pane {
+  background: rgba(17, 24, 23, 0.72);
+  border-right-color: rgba(255, 255, 255, 0.06);
+}
+
+.mc-list-head {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.125rem 1.5rem 1rem;
+  border-bottom: 1px solid rgba(41, 98, 93, 0.06);
+}
+
+.dark .mc-list-head {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+.mc-list-head__row {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.mc-list-head__menu {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 0.75rem;
+  background: rgba(41, 98, 93, 0.08);
+  color: #29625d;
+  cursor: pointer;
+}
+
+.dark .mc-list-head__menu {
+  background: rgba(255, 255, 255, 0.08);
+  color: #a8d4cf;
+}
+
+.mc-list-head__title {
+  margin: 0;
+  font-family: Poppins, system-ui, sans-serif;
+  font-size: 1.375rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #111827;
+}
+
+.dark .mc-list-head__title {
+  color: #f3f4f6;
+}
+
+.mc-list-head__tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.mc-conversation-list {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.375rem 0.625rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+/* ── Chat column ── */
+.mc-chat-pane {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: #fff;
+}
+
+.dark .mc-chat-pane {
+  background: #0a0f0e;
+}
+
+/* ═══════════════════════════════════════
+   DESKTOP — Messenger / Slack proportions
+   ═══════════════════════════════════════ */
+@media (min-width: 901px) {
+  .mc-page--buyer {
+    height: calc(100vh - 4.5rem);
+    max-height: none;
+    padding: 0 1.5rem;
+  }
+
+  .dashboard-page--messaging > .container,
+  .dashboard-page--messaging [class*="Container"] {
+    padding: 1rem 1.5rem 1.25rem !important;
+    height: calc(100vh - 4.5rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dashboard-page--messaging .flex.gap-0,
+  .dashboard-page--messaging .flex.gap-6 {
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+  }
+
+  .dashboard-page--messaging .flex > aside {
+    width: 280px !important;
+    flex-shrink: 0;
+  }
+
+  .mc-dashboard-main .mc-app,
+  .mc-page--buyer .mc-app {
+    height: 100%;
+    min-height: 0;
+    border-radius: 0.875rem;
+    border: 1px solid rgba(41, 98, 93, 0.08);
+    box-shadow:
+      0 1px 2px rgba(15, 23, 20, 0.04),
+      0 12px 40px -16px rgba(41, 98, 93, 0.12);
+  }
+
+  .dark .mc-dashboard-main .mc-app,
+  .dark .mc-page--buyer .mc-app {
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 12px 40px -16px rgba(0, 0, 0, 0.45);
+  }
+
+  .mc-list-head {
+    padding: 1.375rem 1.5rem 1.125rem;
+    gap: 1rem;
+  }
+
+  .mc-list-head__title {
+    font-size: 1.5rem;
+  }
+
+  .mc-conversation-list {
+    padding: 0.5rem 0.875rem 1.5rem;
+  }
+
+  .mc-conversation-item {
+    padding: 0.9375rem 1rem;
+    border-radius: 0.75rem;
+    margin-bottom: 0.125rem;
+  }
+
+  .mc-messages {
+    flex: 1;
+    min-height: 0;
+    max-width: 44rem;
+    margin: 0 auto;
+    width: 100%;
+    padding: 1.5rem 2rem;
+  }
+
+  .mc-product-header--desktop {
+    padding: 0.875rem 1.5rem;
+    gap: 1rem;
+    min-height: 0;
+    border-bottom: 1px solid rgba(41, 98, 93, 0.08);
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+  }
+
+  .dark .mc-product-header--desktop {
+    background: rgba(15, 20, 19, 0.96);
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .mc-composer:not(.mc-composer--native) {
+    padding: 1rem 1.5rem 1.25rem;
+    border-top: 1px solid rgba(41, 98, 93, 0.08);
+    background: rgba(248, 250, 249, 0.9);
+  }
+
+  .dark .mc-composer:not(.mc-composer--native) {
+    background: rgba(15, 20, 19, 0.92);
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* ═══════════════════════════════════════
+   MOBILE — edge-to-edge inbox (Messenger-style)
+   ═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  :root {
+    --mc-gutter: 1rem; /* 16px screen inset */
+  }
+
+  .dashboard-page--messaging .dashboard-header {
+    display: none !important;
+  }
+
+  .dashboard-page--messaging {
+    padding-inline: 0 !important;
+    background: #fff !important;
+  }
+
+  .dark .dashboard-page--messaging {
+    background: #0f1413 !important;
+  }
+
+  /* Kill all centering / max-width wrappers */
+  .yebone-app-shell > main:has(.mc-page--buyer),
+  .dashboard-page--messaging,
+  .dashboard-page--messaging > .container,
+  .dashboard-page--messaging [class*="Container"],
+  .dashboard-page--messaging .mc-dashboard-main,
+  .mc-page--buyer {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  .mc-page--buyer {
+    min-height: calc(100dvh - 4rem);
+    background: #fff;
+  }
+
+  .dark .mc-page--buyer {
+    background: #0f1413;
+  }
+
+  .mc-app:not(.mc-app--thread-open) {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: none;
+    min-height: calc(100dvh - 4rem);
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: #fff;
+    overflow: visible;
+  }
+
+  .dark .mc-app:not(.mc-app--thread-open) {
+    background: #0f1413;
+  }
+
+  .mc-app:not(.mc-app--thread-open) .mc-chat-pane {
+    display: none !important;
+  }
+
+  .mc-app:not(.mc-app--thread-open) .mc-list-pane {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    background: #fff;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .dark .mc-app:not(.mc-app--thread-open) .mc-list-pane {
+    background: #0f1413;
+  }
+
+  .mc-list-head {
+    padding: 0.625rem var(--mc-gutter) 0.75rem;
+    gap: 0.625rem;
+    border-bottom: none;
+    background: transparent;
+  }
+
+  .mc-list-head__title {
+    font-size: 1.625rem;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+  }
+
+  .mc-list-head__tools {
+    gap: 0.5rem;
+  }
+
+  .mc-conversation-list {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mc-conversation-item {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+    max-width: none;
+    padding: 0.8125rem var(--mc-gutter);
+    gap: 0.75rem;
+    border: 0;
+    border-radius: 0;
+    border-bottom: 1px solid rgba(41, 98, 93, 0.08);
+    background: transparent;
+    text-align: left;
+  }
+
+  .dark .mc-conversation-item {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .mc-conversation-item.is-active {
+    background: rgba(41, 98, 93, 0.06);
+  }
+
+  .mc-conversation-item__thumb {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  .mc-conversation-item__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1875rem;
+  }
+
+  .mc-conversation-item__top {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .mc-conversation-item__name {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .mc-conversation-item__time {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #9ca3af;
+    margin-left: auto;
+  }
+
+  .mc-conversation-item__bottom {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .mc-conversation-item__preview {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: #6b7280;
+  }
+
+  .mc-conversation-item.has-unread .mc-conversation-item__preview {
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .dark .mc-conversation-item.has-unread .mc-conversation-item__preview {
+    color: #e5e7eb;
+  }
+
+  .mc-conversation-item__bottom .mc-badge {
+    flex-shrink: 0;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    margin-left: auto;
+  }
+
+  .mc-list-pane--hidden-mobile {
+    display: none !important;
+  }
+
+  .mc-chat-pane--visible-mobile {
+    display: flex !important;
+  }
+
+  .mc-chat-pane:not(.mc-chat-pane--visible-mobile) {
+    display: none;
+  }
+}

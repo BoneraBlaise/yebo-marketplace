@@ -1,11 +1,34 @@
 import axios from "axios";
+import { COMMUNICATION_IDENTITY } from "../config/communicationIdentity";
 import { server } from "../config/serverConfig";
 
 const BASE = `${server}/marketplace/communication`;
 
+let activeCommunicationIdentity = COMMUNICATION_IDENTITY.BUYER;
+
+export const setActiveCommunicationIdentity = (identity) => {
+  activeCommunicationIdentity =
+    identity === COMMUNICATION_IDENTITY.SELLER
+      ? COMMUNICATION_IDENTITY.SELLER
+      : COMMUNICATION_IDENTITY.BUYER;
+};
+
+export const getActiveCommunicationIdentity = () => activeCommunicationIdentity;
+
+export const runWithCommunicationIdentity = async (identity, fn) => {
+  const previous = activeCommunicationIdentity;
+  setActiveCommunicationIdentity(identity);
+  try {
+    return await fn();
+  } finally {
+    activeCommunicationIdentity = previous;
+  }
+};
+
 const withAuth = (config = {}) => ({
   ...config,
   withCredentials: true,
+  communicationIdentity: getActiveCommunicationIdentity(),
 });
 
 export const fetchConversations = async (params = {}) => {
@@ -34,8 +57,10 @@ export const fetchMessages = async (conversationId) => {
 };
 
 export const startProductConversation = async (payload) => {
-  const { data } = await axios.post(`${BASE}/conversations/product`, payload, withAuth());
-  return data?.data;
+  return runWithCommunicationIdentity(COMMUNICATION_IDENTITY.BUYER, async () => {
+    const { data } = await axios.post(`${BASE}/conversations/product`, payload, withAuth());
+    return data?.data;
+  });
 };
 
 export const sendConversationMessage = async (conversationId, payload) => {

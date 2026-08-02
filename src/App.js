@@ -121,6 +121,8 @@ import { AIProvider } from "./components/ai/core/AIContext";
 import GlobalAIFab from "./components/ai/GlobalAIFab";
 import { CreateExperienceProvider } from "./components/seller-experience/CreateExperienceContext";
 import AppLayout from "./components/Layout/AppLayout";
+import ScrollToTop from "./components/Layout/ScrollToTop";
+import InboxRealtimeBridge from "./components/Communication/InboxRealtimeBridge";
 import "./components/ai/core/ai.css";
 
 // Google Analytics tracking code inside App component
@@ -157,11 +159,13 @@ const routerBasename =
 
   return (
     <BrowserRouter basename={routerBasename}>
+      <InboxRealtimeBridge />
       <ReferralProvider>
         <MarketplaceModeProvider>
         <AIProvider>
         <CreateExperienceProvider>
         <ErrorBoundary>
+        <ScrollToTop />
         <GoogleAnalytics />
         <Suspense fallback={<LoadingFallback />}>
         <div>

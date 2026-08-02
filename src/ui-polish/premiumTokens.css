@@ -55,11 +55,55 @@
   --yebo-primary-dark: #1a4c47;
   --yebo-gold: #fed592;
   --yebo-muted: #6b7280;
-  --yebo-border: rgba(41, 98, 93, 0.1);
+  /* Component sizes */
+  --yebo-avatar-sm: 2rem;
+  --yebo-avatar-md: 2.75rem;
+  --yebo-avatar-lg: 3.5rem;
+  --yebo-input-height: 2.75rem;
+  --yebo-input-height-sm: 2.25rem;
+  --yebo-btn-height: 2.75rem;
+  --yebo-btn-height-sm: 2.25rem;
+  --yebo-badge-height: 1.25rem;
+  --yebo-icon-sm: 1rem;
+  --yebo-icon-md: 1.25rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --yebo-duration: 0ms;
   }
+}
+
+/* Shared card system — consistent padding, typography, elevation */
+.yebo-card {
+  border-radius: var(--yebo-radius-xl);
+  border: 1px solid rgba(41, 98, 93, 0.08);
+  background: var(--yebone-surface, #fff);
+  box-shadow: var(--yebo-shadow-sm);
+}
+
+.dark .yebo-card {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(17, 24, 23, 0.65);
+}
+
+.yebo-card-pad {
+  padding: var(--yebo-space-5) var(--yebo-space-6);
+}
+
+.yebo-card-pad-sm {
+  padding: var(--yebo-space-4) var(--yebo-space-5);
+}
+
+.yebo-card-title {
+  font-size: var(--yebo-text-md);
+  font-weight: var(--yebo-weight-semibold);
+  letter-spacing: -0.01em;
+  line-height: var(--yebo-leading-tight);
+}
+
+.yebo-card-subtitle {
+  font-size: var(--yebo-text-sm);
+  color: var(--yebo-muted);
+  line-height: var(--yebo-leading-normal);
 }

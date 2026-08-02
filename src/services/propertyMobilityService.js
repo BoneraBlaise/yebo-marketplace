@@ -1,13 +1,16 @@
 import axios from "axios";
 import { server } from "../config/serverConfig";
+import { assertAuthenticatedRequest, buildAuthHeaders } from "../config/authHeaders";
+import { restoreAuthSessionFromBackup } from "../config/authStorage";
 import {
   isPropertyMobilityFeatureDisabled,
   resolvePropertyMobilityErrorMessage,
+  logPropertyMobilityError,
 } from "../components/PropertyMobility/propertyMobilityHelpers";
 
 const BASE = `${server}/marketplace/property-mobility`;
 
-export { isPropertyMobilityFeatureDisabled, resolvePropertyMobilityErrorMessage };
+export { isPropertyMobilityFeatureDisabled, resolvePropertyMobilityErrorMessage, logPropertyMobilityError };
 
 export const fetchPropertyMobilityFeatures = async () => {
   const { data } = await axios.get(`${BASE}/features`);
@@ -82,8 +85,35 @@ export const fetchOwnerListings = async () => {
 };
 
 export const createOwnerListing = async (payload) => {
-  const { data } = await axios.post(`${BASE}/owner/listings`, payload, { withCredentials: true });
-  return data;
+  try {
+    restoreAuthSessionFromBackup();
+    assertAuthenticatedRequest();
+
+    const authHeaders = buildAuthHeaders();
+    console.info("[PropertyMobility] Creating listing", {
+      category: payload.category,
+      title: payload.title,
+      photoCount: payload.photos?.length || 0,
+      publish: payload.publish,
+      hasAuthorization: Boolean(authHeaders.Authorization),
+    });
+
+    const { data } = await axios.post(`${BASE}/owner/listings`, payload, {
+      withCredentials: true,
+      headers: authHeaders,
+    });
+    console.info("[PropertyMobility] Listing created", {
+      listingId: data?.data?.listingId,
+      status: data?.data?.status,
+    });
+    return data;
+  } catch (error) {
+    logPropertyMobilityError("createOwnerListing", error, {
+      category: payload?.category,
+      photoCount: payload?.photos?.length,
+    });
+    throw error;
+  }
 };
 
 export const updateOwnerListing = async (listingId, payload) => {

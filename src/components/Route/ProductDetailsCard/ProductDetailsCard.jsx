@@ -6,7 +6,7 @@ import {
   AiOutlineShoppingCart,
 } from "react-icons/ai";
 import { RxCross1 } from "react-icons/rx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from "../../../styles/styles";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -15,15 +15,51 @@ import {
   addToWishlist,
   removeFromWishlist,
 } from "../../../redux/actions/wishlist";
+import { startProductConversation } from "../../../services/communicationService";
 
 const ProductDetailsCard = ({ setOpen, data }) => {
   const { cart } = useSelector((state) => state.cart);
   const { wishlist } = useSelector((state) => state.wishlist);
+  const { isAuthenticated } = useSelector((state) => state.user);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [count, setCount] = useState(1);
   const [click, setClick] = useState(false);
 
-  const handleMessageSubmit = () => {};
+  const handleMessageSubmit = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please login to create a conversation");
+      return;
+    }
+
+    const sellerId = data.shop?._id || data.shopId;
+    if (!sellerId) {
+      toast.error("Seller information unavailable");
+      return;
+    }
+
+    try {
+      const productSnapshot = {
+        productId: String(data._id),
+        name: data.name,
+        price: Number(data.discountPrice || data.originalPrice),
+        image: data.images?.[0]?.url || data.images?.url || null,
+        shopId: String(sellerId),
+      };
+
+      const conversation = await startProductConversation({
+        productId: String(data._id),
+        sellerId: String(sellerId),
+        productSnapshot,
+        initialMessage: `Hi, I'm interested in ${data.name} (${data.discountPrice} RWF). Can you share more details?`,
+      });
+
+      setOpen(false);
+      navigate(`/inbox?conversation=${conversation._id}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Error creating conversation");
+    }
+  };
 
   const decrementCount = () => {
     if (count > 1) {

@@ -176,16 +176,16 @@ const HomeProductCard = ({ data, isEvent, compact = false, dense = false, fluid 
           <h3 className="ypc__title">{data.name}</h3>
         </Link>
 
-        {!dense && (
-          <ProductCardReviews rating={rating} reviewCount={reviewCount} />
-        )}
-
         <div className="ypc__pricing">
           <p className="ypc__price">RWF {formatPrice(price)}</p>
           {hasDiscount && (
             <p className="ypc__price-old">RWF {formatPrice(data.originalPrice)}</p>
           )}
         </div>
+
+        {!dense && (
+          <ProductCardReviews rating={rating} reviewCount={reviewCount} />
+        )}
 
         {(soldCount > 0 || !dense) && (
           <p className="ypc__sold" data-zero={soldCount === 0 ? "true" : undefined}>

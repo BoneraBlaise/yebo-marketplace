@@ -1,19 +1,20 @@
 /* Yebone Premium Product Card — mobile-first ecommerce */
 
 :root {
-  --ypc-radius: 0.875rem;
+  --ypc-radius: var(--yebo-radius-lg, 0.875rem);
   --ypc-shadow:
     0 1px 2px rgba(15, 23, 20, 0.04),
     0 4px 16px -4px rgba(41, 98, 93, 0.1);
   --ypc-shadow-hover: 0 10px 32px -8px rgba(41, 98, 93, 0.2);
-  --ypc-body-min: 4.5rem;
+  --ypc-body-min: auto;
   --ypc-min-height: auto;
+  --ypc-media-ratio: 1 / 1;
 }
 
 .ypc {
   position: relative;
-  display: grid;
-  grid-template-rows: minmax(0, 75fr) minmax(0, 25fr);
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 100%;
   min-height: var(--ypc-min-height);
@@ -79,8 +80,8 @@
 /* ── Media ── */
 .ypc__media {
   position: relative;
-  min-height: 0;
-  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  aspect-ratio: var(--ypc-media-ratio);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -255,9 +256,10 @@
 .ypc__body {
   display: flex;
   flex-direction: column;
-  gap: 0.1875rem;
-  min-height: 0;
-  padding: 0.4375rem 0.5625rem 0.5rem;
+  gap: var(--yebo-space-1, 0.25rem);
+  flex: 1 1 auto;
+  min-height: var(--ypc-body-min);
+  padding: var(--yebo-space-3, 0.75rem) var(--yebo-space-4, 1rem) var(--yebo-space-3, 0.75rem);
   overflow: hidden;
 }
 
@@ -305,7 +307,7 @@
   font-family: Poppins, system-ui, sans-serif;
   font-size: 0.8125rem;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.28;
   color: var(--home-text, #1f2937);
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -314,6 +316,16 @@
   min-height: 0;
   word-break: break-word;
   transition: color 0.2s ease;
+}
+
+/* Price sits directly under title */
+.ypc__pricing {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.375rem;
+  margin-top: 0.0625rem;
+  flex-shrink: 0;
 }
 
 .dark .ypc__title {
@@ -378,14 +390,6 @@
 }
 
 /* ── Pricing ── */
-.ypc__pricing {
-  display: flex;
-  flex-direction: column;
-  gap: 0.0625rem;
-  margin-top: 0;
-  flex-shrink: 0;
-}
-
 .ypc__price {
   margin: 0;
   font-family: Poppins, system-ui, sans-serif;
@@ -437,19 +441,18 @@
   height: 100%;
 }
 
-/* ── Dense / AI / PDP cards — image ≈75% / info ≈25% ── */
+/* ── Dense / AI / PDP cards ── */
 .ypc--dense {
-  --ypc-min-height: auto;
-  max-height: 16.25rem;
-  grid-template-rows: minmax(0, 75fr) minmax(0, 25fr);
+  --ypc-media-ratio: 1 / 1;
+  max-height: none;
 }
 
 .ypc--dense .ypc__media {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: var(--ypc-media-ratio);
 }
 
 .ypc--dense .ypc__body {
-  padding: 0.25rem 0.4375rem 0.375rem;
+  padding: 0.3125rem 0.4375rem 0.375rem;
   gap: 0.0625rem;
 }
 
@@ -498,6 +501,52 @@
 .ypc--dense .ypc__action-btn {
   width: 1.625rem;
   height: 1.625rem;
+}
+
+/* Mobile-first card tuning */
+@media (max-width: 900px) {
+  :root {
+    --ypc-media-ratio: 4 / 5;
+  }
+
+  .ypc__body {
+    padding: 0.4375rem 0.5625rem 0.5rem;
+    gap: 0.125rem;
+  }
+
+  .ypc__title {
+    font-size: 0.8125rem;
+    -webkit-line-clamp: 2;
+  }
+
+  .ypc__price {
+    font-size: 0.875rem;
+  }
+
+  .ypc__verified {
+    font-size: 0.625rem;
+  }
+
+  .ypc__sold {
+    font-size: 0.625rem;
+  }
+
+  .ypc__wishlist {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+}
+
+/* Desktop — preserve existing proportions */
+@media (min-width: 901px) {
+  :root {
+    --ypc-media-ratio: 1 / 1;
+  }
+
+  .ypc__body {
+    padding: 0.5rem 0.6875rem 0.625rem;
+    gap: 0.1875rem;
+  }
 }
 
 /* Hide desktop hover actions on touch/mobile */

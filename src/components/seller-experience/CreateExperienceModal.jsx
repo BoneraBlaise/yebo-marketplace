@@ -6,7 +6,7 @@ import CreateListingWizard from "./CreateListingWizard";
 import { CREATE_ACTIONS } from "../../navigation/createActions";
 import "./seller-experience.css";
 
-const CreateExperienceModal = ({ open, onClose, onComplete, initialStep = "pick" }) => {
+const CreateExperienceModal = ({ open, onClose, onComplete, initialStep = "pick", initialCategory }) => {
   const [step, setStep] = useState(initialStep);
   const navigate = useNavigate();
 
@@ -91,7 +91,11 @@ const CreateExperienceModal = ({ open, onClose, onComplete, initialStep = "pick"
         )}
 
         {step === "property" && (
-          <CreateListingWizard onComplete={handleComplete} onCancel={() => setStep("pick")} />
+          <CreateListingWizard
+            onComplete={handleComplete}
+            onCancel={() => setStep("pick")}
+            initialCategory={initialCategory}
+          />
         )}
       </div>
     </div>

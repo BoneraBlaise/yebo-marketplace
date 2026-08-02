@@ -6,19 +6,19 @@ const METHODS = [
   {
     id: "vendorDelivery",
     label: "Vendor Delivery",
-    description: "Delivered directly by the vendor",
+    description: "Delivered by the vendor",
     icon: HiOutlineShoppingBag,
   },
   {
     id: "customerPickup",
     label: "Customer Pickup",
-    description: "Collect your order from the vendor location",
+    description: "Collect from vendor location",
     icon: HiOutlineLocationMarker,
   },
   {
     id: "yeboneDelivery",
     label: "Yebone Delivery",
-    description: "Platform-managed delivery with courier assignment",
+    description: "Platform-managed delivery",
     icon: HiOutlineTruck,
   },
 ];
@@ -39,9 +39,7 @@ const CheckoutDeliveryMethods = ({ value, onChange }) => {
         if (!mounted) return;
         setOptions((prev) => ({ ...prev, ...(response?.data || {}) }));
       })
-      .catch(() => {
-        if (!mounted) return;
-      })
+      .catch(() => {})
       .finally(() => {
         if (mounted) setLoading(false);
       });
@@ -57,14 +55,13 @@ const CheckoutDeliveryMethods = ({ value, onChange }) => {
   }, [loading, options.vendorDelivery, options.customerPickup, onChange, value]);
 
   return (
-    <section className="yebone-surface rounded-[1.75rem] p-6 lg:p-8">
-      <h2 className="font-Poppins text-lg font-semibold mb-2 dark:text-white">Delivery method</h2>
-      <p className="text-sm text-gray-500 mb-5">Choose how you want to receive your order</p>
+    <section className="checkout-section">
+      <h2 className="checkout-section__title">Delivery method</h2>
 
       {loading ? (
-        <div className="admin-skeleton h-28 rounded-xl" />
+        <div className="checkout-skeleton" />
       ) : (
-        <div className="space-y-3">
+        <div className="checkout-delivery__list">
           {METHODS.map(({ id, label, description, icon: Icon }) => {
             const enabled = Boolean(options[id]);
             const comingSoon = id === "yeboneDelivery" && options.yeboneDeliveryComingSoon;
@@ -73,12 +70,8 @@ const CheckoutDeliveryMethods = ({ value, onChange }) => {
             return (
               <label
                 key={id}
-                className={`flex items-start gap-4 p-4 rounded-xl border transition ${
-                  comingSoon
-                    ? "border-gray-200 dark:border-gray-800 opacity-70 cursor-not-allowed"
-                    : selected
-                    ? "border-yebone-primary bg-yebone-primary/5 cursor-pointer"
-                    : "border-gray-100 dark:border-gray-800 hover:border-yebone-primary/40 cursor-pointer"
+                className={`checkout-delivery__option${
+                  comingSoon ? " is-disabled" : selected ? " is-selected" : ""
                 }`}
               >
                 <input
@@ -88,20 +81,15 @@ const CheckoutDeliveryMethods = ({ value, onChange }) => {
                   checked={selected}
                   disabled={!enabled || comingSoon}
                   onChange={() => onChange?.(id)}
-                  className="mt-1 accent-yebone-primary"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <Icon className="text-yebone-primary" size={18} />
-                    <span className="font-semibold text-sm dark:text-white">{label}</span>
-                    {comingSoon && (
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500">
-                        Coming soon
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">{description}</p>
-                </div>
+                <Icon className="checkout-delivery__icon" size={16} aria-hidden="true" />
+                <span className="checkout-delivery__copy">
+                  <span className="checkout-delivery__label">
+                    {label}
+                    {comingSoon && <em>Coming soon</em>}
+                  </span>
+                  <span className="checkout-delivery__desc">{description}</span>
+                </span>
               </label>
             );
           })}

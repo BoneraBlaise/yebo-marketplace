@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useCreateExperience } from "../seller-experience/CreateExperienceContext";
 import { CREATE_ACTIONS } from "../../navigation/createActions";
 
-/** Desktop/tablet create popover — reuses shared create actions */
-const CreateMenuPopover = ({ open, onClose, anchorRef }) => {
+/** Desktop create popover — reuses shared create actions */
+const CreateMenuPopover = ({ open, onClose, anchorRef, actions = CREATE_ACTIONS, title = "Create" }) => {
   const { openCreate } = useCreateExperience();
   const navigate = useNavigate();
   const panelRef = useRef(null);
@@ -36,16 +36,16 @@ const CreateMenuPopover = ({ open, onClose, anchorRef }) => {
   const handlePick = (item) => {
     onClose();
     if (item.route) {
-      navigate(item.route);
+      navigate(item.route, item.state ? { state: item.state } : undefined);
       return;
     }
     window.requestAnimationFrame(() => openCreate(item.step));
   };
 
   return (
-    <div ref={panelRef} className="create-menu-popover" role="menu" aria-label="Create">
-      <p className="create-menu-popover__title">Create</p>
-      {CREATE_ACTIONS.map((item) => (
+    <div ref={panelRef} className="create-menu-popover" role="menu" aria-label={title}>
+      <p className="create-menu-popover__title">{title}</p>
+      {actions.map((item) => (
         <button
           key={item.id}
           type="button"

@@ -1,21 +1,20 @@
 import React from "react";
 import { HiOutlineMoon, HiOutlineSun } from "react-icons/hi";
-import { useEnterpriseTheme } from "../../design-system/theme/ThemeProvider";
-import { THEME_MODE } from "../../design-system/theme/ThemeEngine";
+import { useTheme } from "../../context/ThemeContext";
+import { wrapHeaderHandler } from "../../utils/headerInteractionDebug";
 
 /** Compact header theme toggle — sun / moon icon button */
 const HeaderThemeToggle = ({ className = "" }) => {
-  const theme = useEnterpriseTheme();
+  const { theme, toggleTheme } = useTheme();
+  const isDark = theme === "dark";
 
-  if (!theme) return null;
-
-  const isDark = theme.resolvedMode === THEME_MODE.DARK;
+  const handleToggle = wrapHeaderHandler("theme", toggleTheme);
 
   return (
     <button
       type="button"
       className={`home-header__icon-btn home-header__theme-btn ${className}`.trim()}
-      onClick={theme.toggle}
+      onClick={handleToggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Light mode" : "Dark mode"}
     >
@@ -26,4 +25,4 @@ const HeaderThemeToggle = ({ className = "" }) => {
   );
 };
 
-export default HeaderThemeToggle;
+export default React.memo(HeaderThemeToggle);

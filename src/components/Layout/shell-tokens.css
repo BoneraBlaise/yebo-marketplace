@@ -1,0 +1,30 @@
+/* Semantic tokens for header overlays — available on every route via app shell */
+.yebone-app-shell {
+  --home-text: #0f1714;
+  --home-text-muted: #5c6b66;
+  --home-surface: #ffffff;
+  --home-surface-muted: rgba(15, 23, 20, 0.04);
+  --home-border: rgba(15, 23, 20, 0.1);
+  --ph-bg: rgba(255, 255, 255, 0.98);
+  --ph-bg-muted: rgba(15, 23, 20, 0.05);
+  --ph-text: #0f1714;
+  --ph-text-muted: #5c6b66;
+  --ph-border: rgba(15, 23, 20, 0.1);
+  --ph-hover: rgba(41, 98, 93, 0.08);
+  --ph-shadow: 0 24px 64px rgba(15, 23, 42, 0.16);
+}
+
+.dark .yebone-app-shell {
+  --home-text: rgba(245, 245, 245, 0.96);
+  --home-text-muted: rgba(200, 210, 206, 0.72);
+  --home-surface: #151b19;
+  --home-surface-muted: rgba(255, 255, 255, 0.05);
+  --home-border: rgba(255, 255, 255, 0.08);
+  --ph-bg: rgba(21, 27, 25, 0.98);
+  --ph-bg-muted: rgba(255, 255, 255, 0.06);
+  --ph-text: rgba(245, 245, 245, 0.96);
+  --ph-text-muted: rgba(200, 210, 206, 0.72);
+  --ph-border: rgba(255, 255, 255, 0.08);
+  --ph-hover: rgba(255, 255, 255, 0.06);
+  --ph-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+}

@@ -30,6 +30,7 @@ import { useSelector } from "react-redux";
 import { useTheme } from "../../context/ThemeContext";
 import { server } from "../../server";
 import { markSellerSessionSkipped } from "../../utils/sellerSession";
+import useInboxUnreadCount, { COMMUNICATION_IDENTITY } from "../../hooks/useInboxUnreadCount";
 
 export const VENDOR_NAV_GROUPS = [
   {
@@ -149,6 +150,10 @@ const VendorSidebar = ({ active, onNavigate, className = "" }) => {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { seller } = useSelector((state) => state.seller);
+  const { count: messageUnread } = useInboxUnreadCount(
+    Boolean(seller?._id),
+    COMMUNICATION_IDENTITY.SELLER
+  );
 
   const [collapsed, setCollapsed] = useState(() =>
     Object.fromEntries(VENDOR_NAV_GROUPS.map((g) => [g.id, !g.defaultOpen]))
@@ -187,6 +192,11 @@ const VendorSidebar = ({ active, onNavigate, className = "" }) => {
       >
         <Icon className="dashboard-nav-icon" size={20} />
         <span>{item.label}</span>
+        {item.id === 8 && messageUnread > 0 && (
+          <span className="dashboard-nav-badge" aria-label={`${messageUnread} unread messages`}>
+            {messageUnread > 9 ? "9+" : messageUnread}
+          </span>
+        )}
       </Link>
     );
   };
