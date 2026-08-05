@@ -105,3 +105,52 @@ export const formatPrice = (value, currency = "RWF") =>
     currency,
     maximumFractionDigits: 0,
   }).format(Number(value || 0));
+
+/** Human-readable listing status for vendor dashboard */
+export const LISTING_STATUS_META = {
+  pending_review: { label: "Pending Review", emoji: "🟡", tone: "pending" },
+  published: { label: "Live", emoji: "🟢", tone: "live" },
+  approved: { label: "Live", emoji: "🟢", tone: "live" },
+  rejected: { label: "Rejected", emoji: "🔴", tone: "rejected" },
+  needs_changes: { label: "Needs Changes", emoji: "🟠", tone: "pending" },
+  paused: { label: "Paused", emoji: "⚪", tone: "paused" },
+  draft: { label: "Draft", emoji: "🔵", tone: "draft" },
+  suspended: { label: "Suspended", emoji: "🔴", tone: "rejected" },
+};
+
+export const formatListingStatus = (status) => {
+  const meta = LISTING_STATUS_META[status];
+  if (!meta) return { label: String(status || "Unknown").replace(/_/g, " "), emoji: "", tone: "draft" };
+  return meta;
+};
+
+export const formatListingLocation = (listing) => {
+  const city = listing?.location?.city || listing?.city;
+  const district = listing?.location?.district || listing?.district;
+  return [district, city].filter(Boolean).join(", ") || "Location not set";
+};
+
+export const formatListingDate = (value) => {
+  if (!value) return null;
+  try {
+    return new Intl.DateTimeFormat(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return null;
+  }
+};
+
+export const getListingThumbnail = (listing) =>
+  listing?.photos?.[0] || listing?.images?.[0] || null;
+
+export const canPublishListing = (status) =>
+  status === "draft" || status === "paused";
+
+export const canFeatureListing = (status) =>
+  status === "published" || status === "approved";
+
+export const canPauseListing = (status) =>
+  status === "published" || status === "approved";

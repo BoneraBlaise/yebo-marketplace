@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import socketIO from "socket.io-client";
+import axios from "axios";
 import { format } from "timeago.js";
 import { toast } from "react-toastify";
 import {
@@ -13,7 +14,7 @@ import {
 } from "react-icons/ai";
 import { IoArchiveOutline, IoChatbubblesOutline } from "react-icons/io5";
 import { HiOutlineInbox, HiOutlinePhone, HiOutlineMenu } from "react-icons/hi";
-import { socketUrl } from "../../config/serverConfig";
+import { socketUrl, server } from "../../config/serverConfig";
 import { COMMUNICATION_IDENTITY, getTokenForIdentity } from "../../config/communicationIdentity";
 import { inboxPathForIdentity } from "../../config/inboxIdentity";
 import {
@@ -131,6 +132,8 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef(null);
   const socketRef = useRef(null);
+  const attachInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
   const currentChatRef = useRef(null);
   const communicationIdentityRef = useRef(communicationIdentity);
   const loadConversationsSeqRef = useRef(0);
@@ -489,6 +492,9 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
     const text = newMessage.trim();
     if (!text || !currentChat || sending) return;
 
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    socketRef.current?.emit("stopTyping", { conversationId: currentChat._id });
+
     const tempId = `pending-${Date.now()}`;
     const optimistic = {
       _id: tempId,
@@ -519,6 +525,56 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
       setMessages((prev) => prev.filter((m) => m._id !== tempId));
       setNewMessage(text);
       toast.error("Failed to send message");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const emitTyping = useCallback((typing) => {
+    if (!socketRef.current || !currentChatRef.current?._id) return;
+    socketRef.current.emit(typing ? "typing" : "stopTyping", {
+      conversationId: currentChatRef.current._id,
+      typing,
+    });
+  }, []);
+
+  const handleMessageInput = (event) => {
+    setNewMessage(event.target.value);
+    emitTyping(true);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = window.setTimeout(() => emitTyping(false), 1200);
+  };
+
+  const handleAttachImage = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !currentChat || sending) return;
+
+    setSending(true);
+    try {
+      const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const { data } = await axios.post(
+        `${server}/marketplace/integration/platform-configuration/upload/banner`,
+        { image: dataUrl },
+        { withCredentials: true }
+      );
+      const url = data?.data?.url;
+      if (!url) throw new Error("Upload failed");
+      await withModeIdentity(() =>
+        sendConversationMessage(currentChat._id, {
+          text: "Shared an image",
+          images: { url, public_id: data?.data?.public_id },
+        })
+      );
+      await loadThread(currentChat);
+      loadConversations();
+    } catch (_error) {
+      toast.error("Failed to send image");
     } finally {
       setSending(false);
     }
@@ -868,12 +924,20 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
             </div>
 
             <form className="mc-composer mc-composer--native" onSubmit={sendMessage}>
+              <input
+                ref={attachInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAttachImage}
+              />
               <div className="mc-composer__bar">
                 <button
                   type="button"
                   className="mc-composer__attach"
                   aria-label="Attach file"
                   title="Attach file"
+                  onClick={() => attachInputRef.current?.click()}
                 >
                   <AiOutlinePaperClip size={22} />
                 </button>
@@ -881,7 +945,7 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
                   <input
                     type="text"
                     value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
+                    onChange={handleMessageInput}
                     placeholder="Message"
                     aria-label="Message"
                     disabled={sending}
@@ -907,13 +971,19 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
             </form>
 
             <form className="mc-composer" onSubmit={sendMessage}>
-              <button type="button" className="mc-composer__icon" aria-label="Attach file" title="Attach file">
+              <button
+                type="button"
+                className="mc-composer__icon"
+                aria-label="Attach file"
+                title="Attach file"
+                onClick={() => attachInputRef.current?.click()}
+              >
                 <AiOutlinePaperClip size={20} />
               </button>
               <input
                 type="text"
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={handleMessageInput}
                 placeholder="Write a message…"
                 aria-label="Message"
                 disabled={sending}

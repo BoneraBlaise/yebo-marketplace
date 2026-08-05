@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAIOptional } from "../ai/core/AIContext";
 import CreateExperienceModal from "./CreateExperienceModal";
 
@@ -11,6 +12,7 @@ export const useCreateExperience = () => {
 
 /** Must render inside AIProvider for panel suspend/restore */
 export const CreateExperienceProvider = ({ children }) => {
+  const navigate = useNavigate();
   const ai = useAIOptional();
   const [open, setOpen] = useState(false);
   const [initialStep, setInitialStep] = useState("pick");
@@ -55,10 +57,21 @@ export const CreateExperienceProvider = ({ children }) => {
     }
   }, [ai]);
 
-  const handleComplete = useCallback(() => {
-    onCompleteRef.current?.();
-    closeCreate();
-  }, [closeCreate]);
+  const handleComplete = useCallback(
+    (listing) => {
+      onCompleteRef.current?.(listing);
+      closeCreate();
+      if (listing?.listingId) {
+        if (!window.location.pathname.includes("/dashboard-property-mobility")) {
+          navigate("/dashboard-property-mobility", { replace: false });
+        }
+        window.requestAnimationFrame(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+    },
+    [closeCreate, navigate]
+  );
 
   const value = useMemo(
     () => ({ openCreate, closeCreate, isOpen: open }),

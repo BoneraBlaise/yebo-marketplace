@@ -2,6 +2,7 @@ import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
 import { clearAuthSession, restoreAuthSessionFromBackup } from "../../config/authStorage";
+import { syncVendorAuthToken, hasValidVendorToken } from "../../config/vendorSession";
 import { logAuthFailure } from "../../utils/headerInteractionDebug";
 
 // load user
@@ -14,6 +15,9 @@ export const loadUser = () => async (dispatch) => {
     const { data } = await axios.get(`${server}/user/getuser`, {
       withCredentials: true,
     });
+    if (data.token) {
+      syncVendorAuthToken(data.token);
+    }
     dispatch({
       type: "LoadUserSuccess",
       payload: data.user,
@@ -30,8 +34,15 @@ export const loadUser = () => async (dispatch) => {
   }
 };
 
-// load seller
+// load seller — requires valid user JWT (single vendor auth pipeline)
 export const loadSeller = () => async (dispatch) => {
+  if (!hasValidVendorToken()) {
+    dispatch({
+      type: "LoadSellerFail",
+      payload: "Vendor session token missing",
+    });
+    return;
+  }
   try {
     dispatch({
       type: "LoadSellerRequest",

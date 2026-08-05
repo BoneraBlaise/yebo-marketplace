@@ -1,7 +1,7 @@
 import axios from "axios";
 import { server } from "../server";
-import { setSellerToken } from "../config/authStorage";
-import { loadSeller } from "../redux/actions/user";
+import { loadSeller, loadUser } from "../redux/actions/user";
+import { syncVendorAuthToken } from "../config/vendorSession";
 
 export const SELLER_RESUME_SKIP_KEY = "yebone_skip_seller_resume";
 
@@ -21,7 +21,7 @@ export const clearSellerSessionSkip = () => {
   }
 };
 
-const shouldAttemptSellerResume = () => {
+const shouldAttemptVendorResume = () => {
   try {
     return sessionStorage.getItem(SELLER_RESUME_SKIP_KEY) !== "1";
   } catch {
@@ -29,32 +29,37 @@ const shouldAttemptSellerResume = () => {
   }
 };
 
-/** Re-establish seller session for logged-in customers who own a shop (same email). */
+/**
+ * Load vendor profile using the single user JWT.
+ * Backend authenticateVendor resolves Shop from user.email.
+ */
+export const loadVendorProfile = () => loadSeller();
+
+/** Resolve linked vendor profile after user login — single user JWT only. */
 export const tryResumeSellerSession = () => async (dispatch, getState) => {
-  if (!shouldAttemptSellerResume()) {
+  if (!shouldAttemptVendorResume()) {
     return false;
   }
   try {
-    const { data } = await axios.get(`${server}/shop/resume-session`, {
-      withCredentials: true,
-    });
+    const { data } = await axios.get(`${server}/shop/resume-session`, { withCredentials: true });
     if (data?.token) {
-      setSellerToken(data.token);
+      syncVendorAuthToken(data.token);
     }
-    await dispatch(loadSeller());
-    return getState().seller?.isSeller === true;
   } catch {
-    return false;
+    /* User may not have a shop yet */
   }
+  await dispatch(loadVendorProfile());
+  return getState().seller?.isSeller === true;
 };
 
-/** Establish seller session after login or activation — no full page reload */
+/** After shop activation — sync user token and load vendor profile. */
 export const establishSellerSession = async (dispatch, token) => {
   clearSellerSessionSkip();
   if (token) {
-    setSellerToken(token);
+    syncVendorAuthToken(token);
   }
-  await dispatch(loadSeller());
+  await dispatch(loadUser());
+  await dispatch(loadVendorProfile());
 };
 
 export default establishSellerSession;

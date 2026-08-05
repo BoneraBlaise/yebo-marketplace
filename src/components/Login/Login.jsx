@@ -16,7 +16,7 @@ import {
 } from "../Auth";
 import { brandCopy } from "../../ui-polish/brandConstants";
 import { useDispatch } from "react-redux";
-import { setAuthToken } from "../../config/authStorage";
+import { syncVendorAuthToken } from "../../config/vendorSession";
 import {
   buildGoogleAuthUrl,
   describeAxiosFailure,
@@ -40,7 +40,7 @@ const Login = () => {
     const error = params.get("error");
 
     if (token) {
-      setAuthToken(token);
+      syncVendorAuthToken(token);
       toast.success(t("auth.googleLoginSuccess"));
       navigate("/");
     } else if (error) {
@@ -64,7 +64,7 @@ const Login = () => {
 
       const token = res.data.token;
 
-      setAuthToken(token);
+      syncVendorAuthToken(token);
       dispatch({
         type: "LoadUserSuccess",
         payload: res.data.user,

@@ -112,8 +112,6 @@ import {
 import VendorCampaignsPage from "./pages/VendorCampaignsPage";
 import VendorSellerOperationsPage from "./pages/VendorSellerOperationsPage";
 import OwnerPropertyMobilityPage from "./pages/OwnerPropertyMobilityPage";
-import PublicPropertyMobilityPage from "./pages/PublicPropertyMobilityPage";
-import PropertyMobilityListingDetailPage from "./pages/PropertyMobilityListingDetailPage";
 import SellerOnboardingPage from "./pages/SellerOnboardingPage";
 import { ReferralProvider } from './context/ReferralContext';
 import { MarketplaceModeProvider } from "./context/MarketplaceModeContext";
@@ -124,6 +122,9 @@ import AppLayout from "./components/Layout/AppLayout";
 import ScrollToTop from "./components/Layout/ScrollToTop";
 import InboxRealtimeBridge from "./components/Communication/InboxRealtimeBridge";
 import "./components/ai/core/ai.css";
+
+const PublicPropertyMobilityPage = React.lazy(() => import("./pages/PublicPropertyMobilityPage"));
+const PropertyMobilityListingDetailPage = React.lazy(() => import("./pages/PropertyMobilityListingDetailPage"));
 
 // Google Analytics tracking code inside App component
 const GoogleAnalytics = () => {
@@ -144,8 +145,9 @@ const LoadingFallback = () => <Loader />;
 
 const App = () => {
   useEffect(() => {
-    Store.dispatch(loadUser());
-    Store.dispatch(loadSeller());
+    Store.dispatch(loadUser()).then(() => {
+      Store.dispatch(loadSeller());
+    });
     Store.dispatch(getAllProducts());
     Store.dispatch(getAllEvents());
     Store.dispatch(getAllFlashSales());
@@ -226,8 +228,22 @@ const routerBasename =
                 </ProtectedRoute>
               }
             />
-            <Route path="/property-mobility" element={<PublicPropertyMobilityPage />} />
-            <Route path="/property-mobility/listing/:listingId" element={<PropertyMobilityListingDetailPage />} />
+            <Route
+              path="/property-mobility"
+              element={
+                <Suspense fallback={<Loader />}>
+                  <PublicPropertyMobilityPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/property-mobility/listing/:listingId"
+              element={
+                <Suspense fallback={<Loader />}>
+                  <PropertyMobilityListingDetailPage />
+                </Suspense>
+              }
+            />
             <Route path="/seller/onboarding" element={<SellerOnboardingPage />} />
             <Route
               path="/inbox"

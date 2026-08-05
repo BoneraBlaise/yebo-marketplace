@@ -1,6 +1,9 @@
 import axios from "axios";
 import { server } from "../config/serverConfig";
-import { assertAuthenticatedRequest, buildAuthHeaders } from "../config/authHeaders";
+import {
+  assertVendorSession,
+  buildVendorAuthHeaders,
+} from "../config/vendorSession";
 import { restoreAuthSessionFromBackup } from "../config/authStorage";
 import {
   isPropertyMobilityFeatureDisabled,
@@ -60,8 +63,10 @@ export const fetchAdminPropertyReports = async (params = {}) => {
   return data;
 };
 
-export const moderateAdminListing = async (listingId, action) => {
-  const { data } = await axios.post(`${BASE}/admin/listings/${listingId}/${action}`, {}, { withCredentials: true });
+export const moderateAdminListing = async (listingId, action, body = {}) => {
+  const { data } = await axios.post(`${BASE}/admin/listings/${listingId}/${action}`, body, {
+    withCredentials: true,
+  });
   return data;
 };
 
@@ -87,9 +92,9 @@ export const fetchOwnerListings = async () => {
 export const createOwnerListing = async (payload) => {
   try {
     restoreAuthSessionFromBackup();
-    assertAuthenticatedRequest();
+    assertVendorSession();
 
-    const authHeaders = buildAuthHeaders();
+    const authHeaders = buildVendorAuthHeaders();
     console.info("[PropertyMobility] Creating listing", {
       category: payload.category,
       title: payload.title,

@@ -16,6 +16,7 @@ import MobileCategoriesPanel from "./MobileCategoriesPanel";
 import { CountrySwitcher } from "../Layout/overlays";
 import { buildMobileNavCategories } from "./mainCategoryHierarchy";
 import useSiteSearch from "../../hooks/useSiteSearch";
+import SiteSearchDropdown from "../Search/SiteSearchDropdown";
 import { COMMUNICATION_IDENTITY } from "../../config/communicationIdentity";
 import { resolveInboxIdentity } from "../../config/inboxIdentity";
 import useInboxUnreadCount from "../../hooks/useInboxUnreadCount";
@@ -65,8 +66,17 @@ const HomeHeader = () => {
   const {
     searchTerm,
     searchData,
+    recentSearches,
+    trendingSearches,
+    showDiscovery,
+    suggestionsLoading,
+    activeIndex,
     handleSearchChange,
     handleSearchSubmit,
+    handleSearchFocus,
+    handleSearchBlur,
+    handleSearchKeyDown,
+    handleQuerySelect,
     setSearchData,
   } = useSiteSearch();
 
@@ -278,9 +288,14 @@ const HomeHeader = () => {
                     type="search"
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    placeholder="Search products..."
+                    onFocus={handleSearchFocus}
+                    onBlur={handleSearchBlur}
+                    onKeyDown={handleSearchKeyDown}
+                    placeholder="Search products, properties, vehicles, events..."
                     className="home-header__search-input"
                     enterKeyHint="search"
+                    aria-autocomplete="list"
+                    aria-expanded={showDiscovery || searchData?.length > 0}
                   />
                   <div className="home-header__search-actions">
                     <YEBOSearchCamera onClick={openVisualSearch} />
@@ -288,33 +303,17 @@ const HomeHeader = () => {
                   </div>
                 </div>
 
-                {searchData?.length > 0 && (
-                  <div className="home-search-suggest" role="listbox" aria-label="Search suggestions">
-                    <div className="home-search-suggest__scroll">
-                      {searchData.slice(0, 8).map((item) => (
-                        <Link
-                          key={`${item.type || "product"}-${item._id}`}
-                          to={`/product/${item._id}`}
-                          onClick={() => setSearchData(null)}
-                          className="home-search-suggest__row"
-                          role="option"
-                        >
-                          <span className="home-search-suggest__thumb">
-                            <img src={item.images?.[0]?.url} alt="" loading="lazy" decoding="async" />
-                          </span>
-                          <span className="home-search-suggest__body">
-                            <span className="home-search-suggest__title">{item.name}</span>
-                            {(item.shop?.name || item.category) && (
-                              <span className="home-search-suggest__meta">
-                                {item.shop?.name || item.category}
-                              </span>
-                            )}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                <SiteSearchDropdown
+                  searchTerm={searchTerm}
+                  searchData={searchData}
+                  recentSearches={recentSearches}
+                  trendingSearches={trendingSearches}
+                  showDiscovery={showDiscovery}
+                  isLoading={suggestionsLoading}
+                  activeIndex={activeIndex}
+                  onQuerySelect={handleQuerySelect}
+                  setSearchData={setSearchData}
+                />
               </form>
             </div>
 

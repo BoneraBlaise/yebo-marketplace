@@ -6,9 +6,11 @@ import { categoriesData } from "../../static/data";
 import { toast } from "react-toastify";
 import { createevent } from "../../redux/actions/event";
 import ReactQuill from 'react-quill';
+import useVendor from "../../hooks/useVendor";
+import { assertVendorSession } from "../../config/vendorSession";
 
 const CreateEvent = () => {
-  const { seller } = useSelector((state) => state.seller);
+  const { vendorId, isVendorReady } = useVendor();
   const { success, error } = useSelector((state) => state.events);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -80,7 +82,17 @@ const CreateEvent = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);  // Set loading to true when form submission starts
+    if (!isVendorReady || !vendorId) {
+      toast.error("Login required. Your session may have expired — please sign in again.");
+      return;
+    }
+    try {
+      assertVendorSession();
+    } catch (authError) {
+      toast.error(authError.message);
+      return;
+    }
+    setLoading(true);
 
     const data = {
       name,
@@ -91,7 +103,7 @@ const CreateEvent = () => {
       discountPrice,
       stock,
       images,
-      shopId: seller._id,
+      shopId: vendorId,
       start_Date: startDate?.toISOString(),
       Finish_Date: endDate?.toISOString(),
     };

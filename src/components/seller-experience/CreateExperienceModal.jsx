@@ -31,7 +31,7 @@ const CreateExperienceModal = ({ open, onClose, onComplete, initialStep = "pick"
 
   if (!open) return null;
 
-  const handleComplete = () => onComplete?.();
+  const handleComplete = (listing) => onComplete?.(listing);
 
   const handleBack = () => {
     if (step === "pick") {

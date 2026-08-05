@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
 import { createOwnerListing } from "../../services/propertyMobilityService";
-import { assertAuthenticatedRequest, buildAuthHeaders } from "../../config/authHeaders";
-import { restoreAuthSessionFromBackup } from "../../config/authStorage";
+import { assertVendorSession, buildVendorAuthHeaders } from "../../config/vendorSession";
+import useVendor from "../../hooks/useVendor";
 import {
   PROPERTY_CATEGORIES,
   MOBILITY_CATEGORIES,
@@ -44,12 +43,13 @@ import "./seller-experience.css";
 import "./listing-publish-success.css";
 
 const CreateListingWizard = ({ onComplete, onCancel, initialCategory }) => {
-  const { isAuthenticated, user } = useSelector((state) => state.user);
+  const { isVendorReady, user } = useVendor();
   const [stepIndex, setStepIndex] = useState(0);
   const [touched, setTouched] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [publishError, setPublishError] = useState(null);
   const [publishedListing, setPublishedListing] = useState(null);
+  const [navigatingAway, setNavigatingAway] = useState(false);
   const [generatingDesc, setGeneratingDesc] = useState(false);
   const [values, setValues] = useState({
     ...DEFAULT_LISTING_VALUES,
@@ -128,8 +128,8 @@ const CreateListingWizard = ({ onComplete, onCancel, initialCategory }) => {
   };
 
   const handlePublish = async () => {
-    if (!isAuthenticated) {
-      toast.error("Login required.");
+    if (!isVendorReady) {
+      toast.error("Login required. Your session may have expired — please sign in again.");
       return;
     }
     if (!isListingWizardValid(values)) {
@@ -146,9 +146,8 @@ const CreateListingWizard = ({ onComplete, onCancel, initialCategory }) => {
     setSubmitting(true);
     setPublishError(null);
 
-    restoreAuthSessionFromBackup();
     try {
-      assertAuthenticatedRequest();
+      assertVendorSession();
     } catch (authError) {
       setSubmitting(false);
       setPublishError(authError.message);
@@ -157,7 +156,7 @@ const CreateListingWizard = ({ onComplete, onCancel, initialCategory }) => {
     }
 
     if (process.env.NODE_ENV !== "production") {
-      console.info("[ListingWizard] Auth headers", buildAuthHeaders());
+      console.info("[ListingWizard] Auth headers", buildVendorAuthHeaders());
     }
 
     const payload = buildListingPayload(values);
@@ -174,7 +173,7 @@ const CreateListingWizard = ({ onComplete, onCancel, initialCategory }) => {
         throw new Error("Server did not return a listing ID.");
       }
       setPublishedListing(listing);
-      onComplete?.(listing);
+      toast.success("✓ Property published successfully.");
     } catch (error) {
       logPropertyMobilityError("handlePublish", error, { stepIndex, category: values.category });
       const message = resolvePropertyMobilityErrorMessage(error, "Unable to create listing.");
@@ -185,8 +184,18 @@ const CreateListingWizard = ({ onComplete, onCancel, initialCategory }) => {
     }
   };
 
+  useEffect(() => {
+    if (!publishedListing || navigatingAway) return undefined;
+    const timer = window.setTimeout(() => {
+      setNavigatingAway(true);
+      onComplete?.(publishedListing);
+    }, 2500);
+    return () => window.clearTimeout(timer);
+  }, [publishedListing, navigatingAway, onComplete]);
+
   const handleCreateAnother = () => {
     setPublishedListing(null);
+    setNavigatingAway(false);
     setPublishError(null);
     setStepIndex(0);
     setTouched({});
@@ -211,6 +220,7 @@ const CreateListingWizard = ({ onComplete, onCancel, initialCategory }) => {
         listing={publishedListing}
         onCreateAnother={handleCreateAnother}
         onClose={onCancel}
+        autoRedirect
       />
     );
   }

@@ -61,8 +61,16 @@ const WizardShell = ({
           className="seller-xp-btn seller-xp-btn--primary"
           onClick={onPublish}
           disabled={!canProceed || isSubmitting}
+          aria-busy={isSubmitting}
         >
-          {isSubmitting ? "Publishing…" : publishLabel}
+          {isSubmitting ? (
+            <>
+              <span className="seller-xp-spinner" aria-hidden="true" />
+              Publishing listing...
+            </>
+          ) : (
+            publishLabel
+          )}
         </button>
       )}
     </div>

@@ -63,6 +63,13 @@ export const startProductConversation = async (payload) => {
   });
 };
 
+export const startListingConversation = async (payload) => {
+  return runWithCommunicationIdentity(COMMUNICATION_IDENTITY.BUYER, async () => {
+    const { data } = await axios.post(`${BASE}/conversations/listing`, payload, withAuth());
+    return data?.data;
+  });
+};
+
 export const sendConversationMessage = async (conversationId, payload) => {
   const { data } = await axios.post(`${BASE}/conversations/${conversationId}/messages`, payload, withAuth());
   return data?.data;

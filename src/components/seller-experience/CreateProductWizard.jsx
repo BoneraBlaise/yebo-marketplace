@@ -1,10 +1,12 @@
 import React, { useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
 import { createProduct, getAllProducts, getAllProductsShop } from "../../redux/actions/product";
 import { categoriesData } from "../../static/data";
 import { toast } from "react-toastify";
+import useVendor from "../../hooks/useVendor";
+import { assertVendorSession } from "../../config/vendorSession";
 import WizardShell from "./WizardShell";
 import InlineField from "./InlineField";
 import { PremiumSelect } from "../ui";
@@ -22,7 +24,7 @@ const STEPS = [
 ];
 
 const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
-  const { seller } = useSelector((state) => state.seller);
+  const { vendorId, isVendorReady } = useVendor();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -113,8 +115,14 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
 
   const handlePublish = async () => {
     if (!isProductWizardValid(values)) return;
-    if (!seller?._id) {
-      toast.error("Seller session not found. Please sign in again.");
+    if (!isVendorReady || !vendorId) {
+      toast.error("Login required. Your session may have expired — please sign in again.");
+      return;
+    }
+    try {
+      assertVendorSession();
+    } catch (authError) {
+      toast.error(authError.message);
       return;
     }
     setSubmitting(true);
@@ -136,14 +144,14 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
           values.originalPrice,
           values.discountPrice,
           values.stock,
-          seller._id,
+          vendorId,
           orderedImages
         )
       );
 
       if (result?.success) {
         toast.success("Product published successfully!");
-        dispatch(getAllProductsShop(seller._id));
+        dispatch(getAllProductsShop(vendorId));
         dispatch(getAllProducts());
         if (embedded && onComplete) {
           onComplete();

@@ -8,6 +8,7 @@ import { server } from "../../server";
 import { toast } from "react-toastify";
 import { getAuthErrorMessage } from "../../config/authService";
 import { establishSellerSession } from "../../utils/sellerSession";
+import { syncVendorAuthToken } from "../../config/vendorSession";
 import { SELLER_DASHBOARD_PATH, SELLER_ONBOARDING_PATH } from "../../utils/sellerNav";
 
 const ShopLogin = () => {
@@ -33,6 +34,9 @@ const ShopLogin = () => {
         { email, password },
         { withCredentials: true }
       );
+      if (res.data?.token) {
+        syncVendorAuthToken(res.data.token);
+      }
       await establishSellerSession(dispatch, res.data?.token);
       toast.success("Login Success!");
       navigate(SELLER_DASHBOARD_PATH);

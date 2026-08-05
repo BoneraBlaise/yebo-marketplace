@@ -1,15 +1,29 @@
 import axios from "axios";
 import { getTokenForIdentity } from "./communicationIdentity";
-import { getAuthToken, getSellerToken, restoreAuthSessionFromBackup } from "./authStorage";
-import { isTokenExpired } from "./authHeaders";
+import { restoreAuthSessionFromBackup } from "./authStorage";
+import { resolveVendorToken } from "./vendorSession";
 
 const isCommunicationApiPath = (url = "") =>
   String(url).includes("/marketplace/communication");
 
-const isSellerApiPath = (url = "") => {
+/** All routes that require vendor authentication — single JWT pipeline */
+const isVendorApiPath = (url = "") => {
   const path = String(url);
-  if (!path.includes("/shop/")) return false;
-  const userAuthPaths = [
+  if (path.includes("/marketplace/") && path.includes("/owner/")) return true;
+  if (path.includes("/create-product")) return true;
+  if (path.includes("/create-event") || path.includes("/event/create-event")) return true;
+  if (path.includes("/create-flashsale")) return true;
+  if (path.includes("/create-coupon")) return true;
+  if (path.includes("/create-bid")) return true;
+  if (path.includes("/create-withdraw")) return true;
+  if (path.includes("/marketplace/growth-commerce/vendor/")) return true;
+  if (path.includes("/marketplace/seller-operations/vendor/")) return true;
+  if (path.includes("/shop/") && !isPublicShopPath(path)) return true;
+  return false;
+};
+
+const isPublicShopPath = (url = "") => {
+  const publicSegments = [
     "/shop/login-shop",
     "/shop/create-shop",
     "/shop/resume-session",
@@ -19,38 +33,7 @@ const isSellerApiPath = (url = "") => {
     "/follow",
     "/favorite",
   ];
-  return !userAuthPaths.some((segment) => path.includes(segment));
-};
-
-const isMarketplaceOwnerPath = (url = "") => {
-  const path = String(url);
-  return path.includes("/marketplace/") && path.includes("/owner/");
-};
-
-const isSellerProtectedPath = (url = "") => {
-  const path = String(url);
-  if (isSellerApiPath(path)) return true;
-  return (
-    path.includes("/create-product") ||
-    path.includes("/create-event") ||
-    path.includes("/event/create-event")
-  );
-};
-
-const pickUserToken = () => {
-  restoreAuthSessionFromBackup();
-  const token = getAuthToken();
-  if (!token) return null;
-  if (isTokenExpired(token)) return null;
-  return token;
-};
-
-const pickSellerToken = () => {
-  restoreAuthSessionFromBackup();
-  const token = getSellerToken();
-  if (!token) return null;
-  if (isTokenExpired(token)) return null;
-  return token;
+  return publicSegments.some((segment) => url.includes(segment));
 };
 
 const attachAuthorization = (config, token) => {
@@ -66,6 +49,7 @@ export const setupApiClient = () => {
 
   axios.interceptors.request.use((config) => {
     const requestUrl = config.url || "";
+    restoreAuthSessionFromBackup();
 
     if (isCommunicationApiPath(requestUrl) && config.communicationIdentity) {
       const token = getTokenForIdentity(config.communicationIdentity);
@@ -73,26 +57,12 @@ export const setupApiClient = () => {
       return config;
     }
 
-    if (isSellerProtectedPath(requestUrl)) {
-      const sellerToken = pickSellerToken();
-      const userToken = pickUserToken();
-      attachAuthorization(config, sellerToken || userToken);
+    if (isVendorApiPath(requestUrl)) {
+      attachAuthorization(config, resolveVendorToken());
       return config;
     }
 
-    if (isMarketplaceOwnerPath(requestUrl)) {
-      const userToken = pickUserToken();
-      const sellerToken = pickSellerToken();
-      attachAuthorization(config, userToken || sellerToken);
-      return config;
-    }
-
-    if (isSellerApiPath(requestUrl)) {
-      attachAuthorization(config, pickSellerToken() || pickUserToken());
-    } else {
-      attachAuthorization(config, pickUserToken());
-    }
-
+    attachAuthorization(config, resolveVendorToken());
     return config;
   });
 

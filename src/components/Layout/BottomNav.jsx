@@ -6,6 +6,8 @@ import WishlistPanel from "../Layout/overlays/WishlistPanel";
 import MobileCategoriesPanel from "../Home/MobileCategoriesPanel";
 import useHeaderDropdown from "../Layout/overlays/useHeaderDropdown";
 import { buildMobileNavCategories } from "../Home/mainCategoryHierarchy";
+import useSiteSearch from "../../hooks/useSiteSearch";
+import SiteSearchDropdown from "../Search/SiteSearchDropdown";
 import { RxCross1 } from "react-icons/rx";
 import { IoGridOutline } from "react-icons/io5";
 import { GrHomeRounded } from "react-icons/gr";
@@ -16,32 +18,48 @@ const BottomNav = () => {
   const { t } = useTranslation();
   const { isAuthenticated, user } = useSelector((state) => state.user);
   const { wishlist } = useSelector((state) => state.wishlist);
-  const { allProducts } = useSelector((state) => state.products);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchData, setSearchData] = useState(null);
   const [openWishlist, setOpenWishlist] = useState(false);
   const [openCategories, setOpenCategories] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const wishlistRef = useRef(null);
   const categoriesRef = useRef(null);
   const navigate = useNavigate();
   const marketplaceNavCategories = useMemo(() => buildMobileNavCategories(), []);
 
+  const {
+    searchTerm,
+    searchData,
+    recentSearches,
+    trendingSearches,
+    showDiscovery,
+    suggestionsLoading,
+    activeIndex,
+    handleSearchChange,
+    handleSearchSubmit,
+    handleSearchFocus,
+    handleSearchKeyDown,
+    handleQuerySelect,
+    setSearchData,
+    clearSearch,
+  } = useSiteSearch();
+
+  const closeSearchModal = () => {
+    setSearchModalOpen(false);
+    clearSearch();
+  };
+
+  const openSearchModal = () => {
+    setSearchModalOpen(true);
+  };
+
+  const onSearchSubmit = (e) => {
+    handleSearchSubmit(e);
+    closeSearchModal();
+  };
+
   useHeaderDropdown(openWishlist, () => setOpenWishlist(false), wishlistRef);
   useHeaderDropdown(openCategories, () => setOpenCategories(false), categoriesRef);
-  const handleSearchChange = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-
-    const filteredProducts = allProducts.filter(
-      (product) =>
-        product.name.toLowerCase().includes(term) ||
-        (product.shop && product.shop.name.toLowerCase().includes(term)) ||
-        product.category.toLowerCase().includes(term)
-    );
-
-    setSearchData(filteredProducts);
-  };
 
   const handleCategoryToggle = () => {
     setOpenCategories((prev) => !prev);
@@ -152,7 +170,8 @@ const BottomNav = () => {
               />
             )}
           </div>
-          <div
+          <button
+            type="button"
             style={{
               width: "25%",
               display: "flex",
@@ -163,10 +182,12 @@ const BottomNav = () => {
               paddingBottom: "5px",
               color: "#4B5563",
               textDecoration: "none",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
             }}
-            onClick={() =>
-              (document.getElementById("searchModal").style.display = "block")
-            }
+            onClick={openSearchModal}
+            aria-label={t("common.search")}
           >
             <AiOutlineSearch
               size={25}
@@ -175,7 +196,7 @@ const BottomNav = () => {
             <span className="tab block text-xs hover:text-[#29625d] dark:text-gray-200">
               {t("common.search")}
             </span>
-          </div>
+          </button>
           <Link
             to={isAuthenticated ? "/profile" : "/login"}
             style={{
@@ -209,86 +230,76 @@ const BottomNav = () => {
         </div>
       </section>
 
-      {/* Search Modal */}
-      <div
-        id="searchModal"
-        style={{
-          display: "none",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          zIndex: 2000,
-        }}
-        onClick={() =>
-          (document.getElementById("searchModal").style.display = "none")
-        }
-      >
+      {searchModalOpen ? (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("common.search")}
           style={{
-            position: "relative",
-            top: "20%",
-            width: "90%",
-            margin: "0 auto",
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "10px",
-            maxHeight: "60%",
-            overflowY: "auto",
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 2000,
           }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={closeSearchModal}
         >
-          <RxCross1
-            size={25}
-            className="absolute right-4 top-4 cursor-pointer"
-            onClick={() =>
-              (document.getElementById("searchModal").style.display = "none")
-            }
-          />
-          <h3 className="text-[18px] font-semibold mb-3">{t("common.search")}</h3>
-          <input
-            type="text"
-            placeholder={t("common.search") + "..."}
-            value={searchTerm}
-            onChange={handleSearchChange}
-            className="w-full border p-2 rounded-lg"
-          />
-          {searchData && searchData.length > 0 ? (
-            <div className="mt-4">
-              {searchData.map((i, index) => (
-                <Link
-                  to={`/product/${i._id}`}
-                  key={index}
-                  onClick={() =>
-                    (document.getElementById("searchModal").style.display =
-                      "none")
-                  }
-                >
-                  <div className="flex items-center py-3 border-b">
-                    <img
-                      src={`${i.images[0]?.url}`}
-                      alt={i.name}
-                      className="w-[40px] h-[40px] mr-[10px]"
-                    />
-                    <div>
-                      <h5 className="text-[16px]">{i.name}</h5>
-                      <p className="text-[14px] text-gray-500">{i.category}</p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+          <div
+            style={{
+              position: "relative",
+              top: "12%",
+              width: "92%",
+              margin: "0 auto",
+              backgroundColor: "white",
+              padding: "20px",
+              borderRadius: "12px",
+              maxHeight: "75%",
+              overflowY: "auto",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <RxCross1
+              size={25}
+              className="absolute right-4 top-4 cursor-pointer"
+              onClick={closeSearchModal}
+              aria-label="Close search"
+            />
+            <h3 className="text-[18px] font-semibold mb-3">{t("common.search")}</h3>
+            <form onSubmit={onSearchSubmit}>
+              <input
+                type="search"
+                placeholder="Search products, properties, vehicles, events..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+                onFocus={handleSearchFocus}
+                onKeyDown={handleSearchKeyDown}
+                className="w-full border p-2 rounded-lg"
+                autoFocus
+                enterKeyHint="search"
+              />
+            </form>
+            <div style={{ position: "relative" }}>
+              <SiteSearchDropdown
+                searchTerm={searchTerm}
+                searchData={searchData}
+                recentSearches={recentSearches}
+                trendingSearches={trendingSearches}
+                showDiscovery={showDiscovery || !searchTerm.trim()}
+                isLoading={suggestionsLoading}
+                activeIndex={activeIndex}
+                onQuerySelect={(query) => {
+                  handleQuerySelect(query);
+                  closeSearchModal();
+                }}
+                setSearchData={setSearchData}
+                className="home-search-suggest"
+              />
             </div>
-          ) : (
-            searchTerm && (
-              <div className="mt-4 text-center py-3">
-                <p>{t("common.noResults")}</p>
-              </div>
-            )
-          )}
+          </div>
         </div>
-      </div>
+      ) : null}
 
 
       <MobileCategoriesPanel
