@@ -9,9 +9,7 @@ import {
   removeFromWishlist,
 } from "../../../redux/actions/wishlist";
 import { addTocart } from "../../../redux/actions/cart";
-import MobileProductCard from "../ProductCard/MobileProductCard";
-import HomeProductCard from "../../Home/HomeProductCard";
-import { useMediaQuery } from "react-responsive";
+import ProductCard from "../../Marketplace/ProductCard";
 import Cookies from "js-cookie";
 import axios from "axios";
 import { server } from "../../../server";
@@ -25,7 +23,6 @@ const ProductList = ({ products }) => {
   const { wishlist } = useSelector((state) => state.wishlist);
   const { cart } = useSelector((state) => state.cart);
   const dispatch = useDispatch();
-  const isMobile = useMediaQuery({ query: "(max-width: 900px)" });
   const [recommendedProducts, setRecommendedProducts] = useState([]);
   const [model, setModel] = useState(null);
   const [isTraining, setIsTraining] = useState(false);
@@ -268,13 +265,7 @@ const ProductList = ({ products }) => {
     <div className="marketplace-product-grid mpc-grid--page w-full">
       {products.map((product) => (
         <div key={product._id} className="mpc-card-slot">
-          {isMobile ? (
-            <MobileProductCard data={product} />
-          ) : (
-            <div className="flex justify-center w-full">
-              <HomeProductCard data={product} compact />
-            </div>
-          )}
+          <ProductCard data={product} />
         </div>
       ))}
     </div>

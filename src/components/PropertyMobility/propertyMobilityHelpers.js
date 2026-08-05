@@ -99,12 +99,56 @@ export const isMobilityCategory = (value) =>
 export const formatCategory = (value) =>
   LISTING_CATEGORIES.find((item) => item.value === value)?.label || value;
 
-export const formatPrice = (value, currency = "RWF") =>
-  new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency,
-    maximumFractionDigits: 0,
-  }).format(Number(value || 0));
+const PRICE_TYPE_SHORT = {
+  one_time: "",
+  per_hour: "hr",
+  per_day: "day",
+  per_week: "wk",
+  per_month: "mo",
+  per_year: "yr",
+};
+
+export const formatPrice = (value, currency = "RWF") => {
+  const amount = Number(value);
+  if (!Number.isFinite(amount)) return "—";
+  const code = currency || "RWF";
+  try {
+    return new Intl.NumberFormat("en-RW", {
+      style: "currency",
+      currency: code,
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `${code} ${amount.toLocaleString("en-RW")}`;
+  }
+};
+
+export const getListingCurrency = (listing) =>
+  listing?.currency || listing?.ownerInfo?.currency || "RWF";
+
+export const getListingOfferType = (listing) => {
+  const listingType = listing?.ownerInfo?.listingType;
+  if (listingType === "for_rent" || listingType === "lease") return "rent";
+  if (listingType === "for_sale" || listingType === "auction") return "sale";
+  const priceType = listing?.ownerInfo?.priceType;
+  if (priceType && priceType !== "one_time") return "rent";
+  return "sale";
+};
+
+export const formatListingPrice = (listing) => {
+  const price = listing?.price;
+  const currency = getListingCurrency(listing);
+  const formatted = formatPrice(price, currency);
+  if (formatted === "—") return formatted;
+
+  const offerType = getListingOfferType(listing);
+  if (offerType === "rent") {
+    const short = PRICE_TYPE_SHORT[listing?.ownerInfo?.priceType] || "mo";
+    return `${formatted}/${short}`;
+  }
+  return formatted;
+};
 
 /** Human-readable listing status for vendor dashboard */
 export const LISTING_STATUS_META = {

@@ -19,7 +19,7 @@ const SellerCreateFab = () => {
       aria-label="Create new listing"
       title="Create"
     >
-      <AiOutlinePlus size={24} />
+      <AiOutlinePlus size={18} />
     </button>
   );
 };

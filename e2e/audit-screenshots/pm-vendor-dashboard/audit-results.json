@@ -1,0 +1,39 @@
+{
+  "hasTable": 0,
+  "hasOwnerCards": 14,
+  "hasRawPendingReview": 0,
+  "hasHumanPendingReview": 15,
+  "cardFields": {
+    "thumbnail": 1,
+    "title": 1,
+    "price": 1,
+    "location": 1,
+    "categoryBadge": 1,
+    "statusBadge": 1,
+    "iconActions": 4,
+    "statusText": "🟡 Pending Review"
+  },
+  "tabs": {
+    "agencies": {
+      "hasTable": 1,
+      "hasOwnerCards": 0
+    },
+    "offers": {
+      "hasTable": 1,
+      "hasOwnerCards": 0
+    },
+    "verification": {
+      "hasTable": 0,
+      "hasOwnerCards": 0
+    }
+  },
+  "problems": [],
+  "successScreen": {
+    "hasListingSubmitted": 1,
+    "hasOldPublishedTitle": 0,
+    "hasTechnicalId": 0,
+    "hasModerationCopy": 1,
+    "has24h": 1,
+    "hasPreviewCard": 1
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Container } from "../ui";
-import HomeProductCard from "../Home/HomeProductCard";
+import ProductCard from "../Marketplace/ProductCard";
 
 const SuggestedProduct = ({ data }) => {
   const { allProducts } = useSelector((state) => state.products);
@@ -39,10 +39,10 @@ const SuggestedProduct = ({ data }) => {
     <section className="pdp-recommendations" aria-label="You may also like">
       <Container>
         <h2 className="pdp-recommendations__title">You may also like</h2>
-        <div className="marketplace-product-grid mpc-grid--page mpc-grid--pdp-dense">
+        <div className="marketplace-product-grid mpc-grid--page">
           {productData.slice(0, 8).map((product) => (
             <div key={product._id} className="mpc-card-slot">
-              <HomeProductCard data={product} compact dense fluid />
+              <ProductCard data={product} />
             </div>
           ))}
         </div>

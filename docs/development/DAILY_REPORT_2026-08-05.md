@@ -139,11 +139,29 @@
 
 ---
 
+## Afternoon / Evening Session — Marketplace Polish
+
+### Additional Work Completed
+- Unified `ProductCard` across all marketplace surfaces
+- Responsive grid fix (2→3→4→5 columns)
+- Shopping page redesign (compact header, sidebar, category collections)
+- Property & Mobility browse/detail final polish
+- Header "+" button 40×40px + 6-option vendor create menu
+- Removed `MobileProductCard` from featured products grid
+- Fixed `ProductList` useMediaQuery reference error
+
+### Checkpoint
+Full end-of-day snapshot: **`docs/development/CHECKPOINT_2026-08-05.md`**
+
+---
+
 ## Build Verification (End of Day)
 
 | Check | Result |
 |-------|--------|
 | Frontend `npm run build` | **PASS** (exit 0) |
 | Backend module smoke test | **PASS** |
-| Frontend branch | `main` @ `origin/main` |
+| Frontend branch | `main` @ checkpoint commit |
 | Backend branch | `main` @ `origin/main` |
+| Browser verify `/products`, `/search` | **PASS** |
+| Create menu 6 vendor options | **PASS** |

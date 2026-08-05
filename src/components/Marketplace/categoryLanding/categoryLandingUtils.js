@@ -152,12 +152,15 @@ const sortByDeals = (items) =>
   });
 
 export const COLLECTION_DEFINITIONS = [
-  { id: "trending", label: "Trending", sort: sortBySold },
-  { id: "popular", label: "Most Popular", sort: sortByLikes },
+  {
+    id: "featured",
+    label: "Featured",
+    sort: (items) =>
+      [...items.filter((p) => p.featured), ...items.filter((p) => !p.featured)],
+  },
+  { id: "best-sellers", label: "Best Sellers", sort: sortBySold },
   { id: "new", label: "New Arrivals", sort: sortByNew },
-  { id: "rated", label: "Best Rated", sort: sortByRating },
-  { id: "deals", label: "Top Deals", sort: sortByDeals },
-  { id: "recommended", label: "Recommended", sort: (items) => items.filter((p) => p.featured).concat(items.filter((p) => !p.featured)) },
+  { id: "trending", label: "Trending", sort: sortByLikes },
 ];
 
 export const buildCategoryCollections = (products, limit = 8) =>
@@ -168,6 +171,25 @@ export const buildCategoryCollections = (products, limit = 8) =>
 
 export const getVerifiedSellerProducts = (products, limit = 8) =>
   products.filter((p) => p?.shop?.isVerified).slice(0, limit);
+
+export const getRecentlyViewedInCategory = (allProducts, matchTitles, limit = 8) => {
+  if (typeof document === "undefined") return [];
+  try {
+    const raw = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("recentlyViewed="))
+      ?.split("=")[1];
+    if (!raw) return [];
+    const viewed = JSON.parse(decodeURIComponent(raw));
+    if (!Array.isArray(viewed)) return [];
+    return viewed
+      .map((item) => allProducts.find((p) => p._id === item._id))
+      .filter((product) => product && matchesCategoryScope(product, matchTitles))
+      .slice(0, limit);
+  } catch {
+    return [];
+  }
+};
 
 export const getAlternativeCategories = (currentTitle, limit = 6) =>
   MAIN_CATEGORIES.filter((c) => c.title !== currentTitle)

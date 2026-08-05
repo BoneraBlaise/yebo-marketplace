@@ -5,7 +5,7 @@ import { useAIOptional } from "../core/AIContext";
 import AISection from "../primitives/AISection";
 import AICard from "../primitives/AICard";
 import AIActionButton from "../primitives/AIActionButton";
-import HomeProductCard from "../../Home/HomeProductCard";
+import ProductCard from "../../Marketplace/ProductCard";
 import { MarketplaceCardGrid, MarketplaceCardSlot } from "../../Marketplace/cards";
 import {
   TRENDING_SEARCHES,
@@ -138,7 +138,7 @@ const HomeAIDiscovery = () => {
           <MarketplaceCardGrid>
             {recommendations.map((product) => (
               <MarketplaceCardSlot key={product._id}>
-                <HomeProductCard data={product} compact fluid />
+                <ProductCard data={product} />
               </MarketplaceCardSlot>
             ))}
           </MarketplaceCardGrid>

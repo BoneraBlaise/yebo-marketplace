@@ -38,8 +38,20 @@ export const fetchPropertyMobilityAvailability = async () => {
   }
 };
 
+const sanitizePropertySearchParams = (params = {}) => {
+  const cleaned = {};
+  Object.entries(params).forEach(([key, value]) => {
+    if (value === "" || value === null || value === undefined) return;
+    if ((key === "verifiedOnly" || key === "featuredOnly") && value !== true) return;
+    cleaned[key] = value;
+  });
+  return cleaned;
+};
+
 export const searchPropertyListings = async (params = {}) => {
-  const { data } = await axios.get(`${BASE}/search`, { params });
+  const { data } = await axios.get(`${BASE}/search`, {
+    params: sanitizePropertySearchParams(params),
+  });
   return data;
 };
 

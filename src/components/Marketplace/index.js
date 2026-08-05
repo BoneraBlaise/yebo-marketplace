@@ -1,5 +1,7 @@
+export { default as ProductCard } from "./ProductCard";
 export { default as MarketplaceEmptyState } from "./MarketplaceEmptyState";
 export { default as MarketplacePageHero } from "./MarketplacePageHero";
+export { default as ShoppingPageHeader } from "./ShoppingPageHeader";
 export { default as MarketplaceActiveFilters } from "./MarketplaceActiveFilters";
 export { default as MarketplaceSectionTabs } from "./MarketplaceSectionTabs";
 export { default as MarketplaceSortSelect } from "./MarketplaceSortSelect";

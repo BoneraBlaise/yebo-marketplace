@@ -4,7 +4,7 @@ import styles from "../../../styles/styles";
 import { MdNavigateNext, MdOutlineNavigateBefore } from "react-icons/md";
 import { useMediaQuery } from "react-responsive";
 import { Link } from "react-router-dom";
-import MobileProductCard from "../ProductCard/MobileProductCard";
+import ProductCard from "../../Marketplace/ProductCard";
 import Cookies from "js-cookie";
 import Shopping from './1.jpg'
 
@@ -151,7 +151,7 @@ const FeaturedProduct = () => {
               {currentProducts.length > 0 ? (
                 currentProducts.map((product) => (
                   <div key={product._id} className="mpc-card-slot">
-                    <MobileProductCard data={product} />
+                    <ProductCard data={product} />
                   </div>
                 ))
               ) : (

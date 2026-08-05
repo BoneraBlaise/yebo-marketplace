@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { Container, SectionTitle, Badge } from "../ui";
-import HomeProductCard from "./HomeProductCard";
+import ProductCard from "../Marketplace/ProductCard";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import { getAIPicksProducts } from "./homeAIPicksFilters";
 import { MarketplaceCardGrid, MarketplaceCardSlot } from "../Marketplace/cards";
@@ -43,7 +43,7 @@ const HomeAIPicks = () => {
           <MarketplaceCardGrid>
             {picks.map((product) => (
               <MarketplaceCardSlot key={product._id}>
-                <HomeProductCard data={product} compact fluid />
+                <ProductCard data={product} />
               </MarketplaceCardSlot>
             ))}
           </MarketplaceCardGrid>

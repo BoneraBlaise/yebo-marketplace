@@ -8,11 +8,15 @@ import "./seller-experience.css";
 
 const CreateExperienceModal = ({ open, onClose, onComplete, initialStep = "pick", initialCategory }) => {
   const [step, setStep] = useState(initialStep);
+  const [wizardCategory, setWizardCategory] = useState(initialCategory);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (open) setStep(initialStep);
-  }, [open, initialStep]);
+    if (open) {
+      setStep(initialStep);
+      setWizardCategory(initialCategory);
+    }
+  }, [open, initialStep, initialCategory]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -45,6 +49,16 @@ const CreateExperienceModal = ({ open, onClose, onComplete, initialStep = "pick"
     if (tile.route) {
       onClose();
       navigate(tile.route);
+      return;
+    }
+    if (tile.step === "vehicle") {
+      setWizardCategory("cars");
+      setStep("property");
+      return;
+    }
+    if (tile.step === "property") {
+      setWizardCategory(null);
+      setStep("property");
       return;
     }
     setStep(tile.step);
@@ -90,11 +104,11 @@ const CreateExperienceModal = ({ open, onClose, onComplete, initialStep = "pick"
           <CreateProductWizard embedded onComplete={handleComplete} onCancel={() => setStep("pick")} />
         )}
 
-        {step === "property" && (
+        {(step === "property" || step === "vehicle") && (
           <CreateListingWizard
             onComplete={handleComplete}
             onCancel={() => setStep("pick")}
-            initialCategory={initialCategory}
+            initialCategory={wizardCategory}
           />
         )}
       </div>

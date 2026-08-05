@@ -5,7 +5,7 @@ import { IoBagHandleOutline } from "react-icons/io5";
 import { HiOutlineSparkles } from "react-icons/hi";
 import { Container, Button } from "../ui";
 import { typography } from "../../design-system/typography";
-import HomeProductCard from "../Home/HomeProductCard";
+import ProductCard from "../Marketplace/ProductCard";
 
 const CheckoutEmptyCart = () => {
   const { allProducts } = useSelector((state) => state.products);
@@ -37,7 +37,7 @@ const CheckoutEmptyCart = () => {
           <div className="marketplace-product-grid mpc-grid--page">
             {suggestions.map((product) => (
               <div key={product._id} className="mpc-card-slot mpc-card-slot--centered">
-                <HomeProductCard data={product} compact fluid />
+                <ProductCard data={product} />
               </div>
             ))}
           </div>

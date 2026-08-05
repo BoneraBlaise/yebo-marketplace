@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { HiOutlineHeart } from "react-icons/hi";
 import { addTocart } from "../../redux/actions/cart";
 import { removeFromWishlist } from "../../redux/actions/wishlist";
-import HomeProductCard from "../Home/HomeProductCard";
+import ProductCard from "../Marketplace/ProductCard";
 import DashboardEmptyState from "./DashboardEmptyState";
 import { MarketplaceCardGrid, MarketplaceCardSlot } from "../Marketplace/cards";
 
@@ -33,7 +33,7 @@ const DashboardWishlist = () => {
         {wishlist.map((item) => (
           <MarketplaceCardSlot key={item._id}>
             <div className="relative w-full">
-              <HomeProductCard data={item} compact fluid />
+              <ProductCard data={item} />
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10 w-[calc(100%-2rem)] max-w-[200px]">
               <button
                 type="button"

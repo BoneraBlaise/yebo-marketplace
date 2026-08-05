@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { MdNavigateNext } from "react-icons/md";
 import { Container, SectionTitle } from "../ui";
 import { PRODUCT_TABS, getProductsByTab } from "./homeProductFilters";
-import HomeProductCard from "./HomeProductCard";
+import ProductCard from "../Marketplace/ProductCard";
 import HomeFlashSaleCard from "./HomeFlashSaleCard";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import { MarketplaceCardRail } from "../Marketplace/cards";
@@ -67,7 +67,7 @@ const HomeProductRails = () => {
               activeTab === "flash" ? (
                 <HomeFlashSaleCard key={item._id} data={item} />
               ) : (
-                <HomeProductCard key={item._id} data={item} fluid />
+                <ProductCard key={item._id} data={item} />
               )
             )}
           </MarketplaceCardRail>

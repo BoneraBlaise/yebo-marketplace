@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   AiFillFacebook,
   AiFillInstagram,
   AiFillYoutube,
   AiOutlineTwitter,
 } from "react-icons/ai";
+import { IoChevronDown } from "react-icons/io5";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Container } from "../ui";
@@ -43,21 +44,51 @@ const FOOTER_LEGAL = [
   { label: "Cookie Policy", to: "/cookie-policy" },
 ];
 
+const useDesktopLayout = () => {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return isDesktop;
+};
+
+const FooterSection = ({ title, links, linkClass, forceOpen }) => (
+  <details className="home-footer__section" open={forceOpen || undefined}>
+    <summary className="home-footer__section-trigger">
+      <span className="home-footer-heading home-footer__heading">{title}</span>
+      <IoChevronDown className="home-footer__accordion-icon" aria-hidden="true" />
+    </summary>
+    <div className="home-footer__section-panel">
+      <ul className="home-footer__links">
+        {links.map((link) => (
+          <li key={`${link.label}-${link.to}`}>
+            <Link to={link.to} className={linkClass}>
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </details>
+);
+
 const HomeFooter = () => {
   const { t } = useTranslation();
   const linkClass = "home-footer-link";
+  const isDesktop = useDesktopLayout();
 
-  const renderLinks = (links) => (
-    <ul className="home-footer__links">
-      {links.map((link) => (
-        <li key={`${link.label}-${link.to}`}>
-          <Link to={link.to} className={linkClass}>
-            {link.label}
-          </Link>
-        </li>
-      ))}
-    </ul>
-  );
+  const footerSections = [
+    { title: "Company", links: FOOTER_COMPANY },
+    { title: "Shop", links: FOOTER_SHOP },
+    { title: "Support", links: FOOTER_SUPPORT },
+    { title: "Legal", links: FOOTER_LEGAL },
+  ];
 
   return (
     <footer className="home-footer mt-auto">
@@ -88,25 +119,15 @@ const HomeFooter = () => {
         </div>
 
         <div className="home-footer__columns">
-          <div className="home-footer__column">
-            <h4 className="home-footer-heading home-footer__heading">Company</h4>
-            {renderLinks(FOOTER_COMPANY)}
-          </div>
-
-          <div className="home-footer__column">
-            <h4 className="home-footer-heading home-footer__heading">Shop</h4>
-            {renderLinks(FOOTER_SHOP)}
-          </div>
-
-          <div className="home-footer__column">
-            <h4 className="home-footer-heading home-footer__heading">Support</h4>
-            {renderLinks(FOOTER_SUPPORT)}
-          </div>
-
-          <div className="home-footer__column">
-            <h4 className="home-footer-heading home-footer__heading">Legal</h4>
-            {renderLinks(FOOTER_LEGAL)}
-          </div>
+          {footerSections.map((section) => (
+            <FooterSection
+              key={section.title}
+              title={section.title}
+              links={section.links}
+              linkClass={linkClass}
+              forceOpen={isDesktop}
+            />
+          ))}
         </div>
       </Container>
 

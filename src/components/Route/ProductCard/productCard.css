@@ -4,8 +4,8 @@
   --ypc-radius: var(--yebo-radius-lg, 0.875rem);
   --ypc-shadow:
     0 1px 2px rgba(15, 23, 20, 0.04),
-    0 4px 16px -4px rgba(41, 98, 93, 0.1);
-  --ypc-shadow-hover: 0 10px 32px -8px rgba(41, 98, 93, 0.2);
+    0 2px 12px -2px rgba(41, 98, 93, 0.08);
+  --ypc-shadow-hover: 0 12px 36px -10px rgba(41, 98, 93, 0.18);
   --ypc-body-min: auto;
   --ypc-min-height: auto;
   --ypc-media-ratio: 1 / 1;
@@ -39,6 +39,92 @@
 
 .ypc--fluid {
   width: 100%;
+}
+
+/* ── Unified marketplace card (browse, search, categories, rails) ── */
+.ypc--marketplace {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  --ypc-media-ratio: 4 / 5;
+  border-radius: 0.75rem;
+}
+
+.ypc--marketplace .ypc__img {
+  object-fit: cover;
+}
+
+.ypc--marketplace .ypc__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.3125rem;
+  padding: 0.625rem 0.75rem 0.75rem;
+  min-height: 0;
+}
+
+.ypc--marketplace .ypc__title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  -webkit-line-clamp: 2;
+}
+
+.ypc--marketplace .ypc__price {
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.ypc--marketplace .ypc__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 0.5rem;
+  margin-top: auto;
+  padding-top: 0.125rem;
+}
+
+.ypc--marketplace .ypc__verified {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ypc--marketplace .ypc__sold {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--home-text-muted, #6b7280);
+}
+
+.ypc--marketplace .ypc__promo-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 2;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  background: #ef4444;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+/* Legacy aliases — map old modifiers to marketplace spec */
+.ypc--grid,
+.ypc--grid.ypc--fluid {
+  width: 100%;
+  height: 100%;
+  --ypc-media-ratio: 4 / 5;
+}
+
+.ypc--grid .ypc__img {
+  object-fit: cover;
 }
 
 .ypc--compact:not(.ypc--fluid) {

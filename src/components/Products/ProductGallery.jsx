@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { RxCross1 } from "react-icons/rx";
 import { AiOutlineExpand } from "react-icons/ai";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
@@ -12,6 +13,7 @@ const ProductGallery = ({ images = [], select, setSelect }) => {
   const [loaded, setLoaded] = useState({});
   const [zoomActive, setZoomActive] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const [zoomAnchor, setZoomAnchor] = useState(null);
   const [mobileZoomed, setMobileZoomed] = useState(false);
   const [heroFade, setHeroFade] = useState(true);
   const touchStartX = useRef(null);
@@ -57,12 +59,36 @@ const ProductGallery = ({ images = [], select, setSelect }) => {
     return () => cancelAnimationFrame(frame);
   }, [current]);
 
+  const updateZoomAnchor = useCallback(() => {
+    if (!heroRef.current) return;
+    const rect = heroRef.current.getBoundingClientRect();
+    setZoomAnchor({
+      top: rect.top,
+      left: rect.right + 10,
+      width: Math.min(400, window.innerWidth * 0.36),
+      height: rect.height,
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!zoomActive) return undefined;
+    updateZoomAnchor();
+    const onScrollOrResize = () => updateZoomAnchor();
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [zoomActive, updateZoomAnchor, current]);
+
   const handleMouseMove = (e) => {
     if (!heroRef.current || !isDesktop.current) return;
     const rect = heroRef.current.getBoundingClientRect();
     const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
     setZoomPos({ x, y });
+    updateZoomAnchor();
   };
 
   const getTouchDistance = (touches) => {
@@ -161,7 +187,12 @@ const ProductGallery = ({ images = [], select, setSelect }) => {
               className={`pdp-gallery-hero group ${
                 mobileZoomed ? "pdp-gallery-hero--mobile-zoom" : ""
               }`}
-              onMouseEnter={() => isDesktop.current && setZoomActive(true)}
+              onMouseEnter={() => {
+                if (isDesktop.current) {
+                  setZoomActive(true);
+                  updateZoomAnchor();
+                }
+              }}
               onMouseLeave={() => setZoomActive(false)}
               onMouseMove={handleMouseMove}
             >
@@ -185,23 +216,39 @@ const ProductGallery = ({ images = [], select, setSelect }) => {
               </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Side zoom — positioned in column gap, does not shrink hero */}
+      {zoomActive &&
+        zoomAnchor &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            className={`pdp-gallery-zoom-wrap hidden lg:block ${zoomActive ? "is-active" : ""}`}
-            aria-hidden={!zoomActive}
+            className="pdp-gallery-zoom-portal"
+            style={{
+              position: "fixed",
+              top: zoomAnchor.top,
+              left: zoomAnchor.left,
+              width: zoomAnchor.width,
+              height: zoomAnchor.height,
+              zIndex: 99999,
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
           >
             <div
               className="pdp-gallery-zoom-pane yebone-surface"
               style={{
+                width: "100%",
+                height: "100%",
                 backgroundImage: zoomSrc ? `url(${zoomSrc})` : undefined,
                 backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
                 backgroundSize: `${ZOOM_SCALE * 100}%`,
               }}
             />
-          </div>
-        </div>
-      </div>
+          </div>,
+          document.body
+        )}
 
       {lightboxOpen && (
         <div

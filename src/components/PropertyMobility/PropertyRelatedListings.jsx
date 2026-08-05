@@ -43,11 +43,17 @@ const PropertyRelatedListings = ({ listing }) => {
 
   if (loading) {
     return (
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Related listings</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <section className="pm-detail__section">
+        <h2 className="pm-detail__section-title">Related listings</h2>
+        <div className="pm-listings-grid">
           {[0, 1].map((i) => (
-            <div key={i} className="h-48 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+            <div key={i} className="pm-skeleton-card">
+              <div className="pm-skeleton-card__media" />
+              <div className="pm-skeleton-card__body">
+                <div className="pm-skeleton-line pm-skeleton-line--short" />
+                <div className="pm-skeleton-line" />
+              </div>
+            </div>
           ))}
         </div>
       </section>
@@ -57,9 +63,9 @@ const PropertyRelatedListings = ({ listing }) => {
   if (!related.length) return null;
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-semibold">Related listings</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <section className="pm-detail__section">
+      <h2 className="pm-detail__section-title">Related listings</h2>
+      <div className="pm-listings-grid">
         {related.map((item) => (
           <PropertyListingCard key={item.listingId} listing={item} compact />
         ))}

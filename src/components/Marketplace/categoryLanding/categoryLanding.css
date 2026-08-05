@@ -154,7 +154,7 @@
 
 /* Shortcuts */
 .cat-landing-shortcuts {
-  margin: 1.25rem 0 0;
+  margin: 0.75rem 0 0;
 }
 
 .cat-landing-shortcuts__label {
@@ -233,8 +233,8 @@
 .cat-landing-collections {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  margin: 1.75rem 0 0;
+  gap: 1.5rem;
+  margin: 1rem 0 0;
 }
 
 .cat-landing-collection__head {
@@ -659,12 +659,14 @@
 .cat-landing-layout {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  align-items: flex-start;
 }
 
 @media (min-width: 1024px) {
   .cat-landing-layout {
-    gap: 2rem;
+    flex-wrap: nowrap;
+    gap: 1.75rem;
   }
 }
 
@@ -676,7 +678,7 @@
 @media (min-width: 1024px) {
   .cat-landing-layout__sidebar {
     display: block;
-    width: 22%;
+    width: 280px;
     flex-shrink: 0;
   }
 }
@@ -685,12 +687,6 @@
   flex: 1;
   min-width: 0;
   width: 100%;
-}
-
-@media (min-width: 1024px) {
-  .cat-landing-layout__main {
-    width: 72%;
-  }
 }
 
 .cat-landing-divider {

@@ -367,7 +367,7 @@ const HomeHeader = () => {
                     aria-haspopup="menu"
                     aria-label={isSeller ? "Create" : "Start selling"}
                   >
-                    <AiOutlinePlus size={16} />
+                    <AiOutlinePlus size={18} />
                   </button>
                   <CreateMenuPopover
                     open={createOpen}

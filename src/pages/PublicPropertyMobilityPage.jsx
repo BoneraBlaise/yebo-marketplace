@@ -4,8 +4,11 @@ import { toast } from "react-toastify";
 import { PageMeta } from "../components/ui";
 import PropertyMobilityFilters, { DEFAULT_PM_FILTERS } from "../components/PropertyMobility/PropertyMobilityFilters";
 import PropertyListingCard from "../components/PropertyMobility/PropertyListingCard";
+import PropertyListingsCarousel from "../components/PropertyMobility/PropertyListingsCarousel";
+import PropertyOfferTabs from "../components/PropertyMobility/PropertyOfferTabs";
 import PropertyMobilityEmptyState from "../components/PropertyMobility/PropertyMobilityEmptyState";
 import {
+  getListingOfferType,
   MOBILITY_CATEGORIES,
   PROPERTY_CATEGORIES,
   resolvePropertyMobilityErrorMessage,
@@ -32,11 +35,23 @@ const parseFiltersFromParams = (params) => ({
   q: params.get("q") || "",
 });
 
+const isActiveSearch = (filters) =>
+  Boolean(
+    filters.q ||
+      filters.location ||
+      filters.category ||
+      filters.minPrice ||
+      filters.maxPrice ||
+      filters.verifiedOnly ||
+      filters.featuredOnly
+  );
+
 const PublicPropertyMobilityPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [listings, setListings] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
+  const [offerTab, setOfferTab] = useState("sale");
   const [filters, setFilters] = useState(() => parseFiltersFromParams(searchParams));
 
   const pageTitle = useMemo(() => {
@@ -50,6 +65,8 @@ const PublicPropertyMobilityPage = () => {
     if (filters.listingType === "vehicle") return MOBILITY_CATEGORIES;
     return [...PROPERTY_CATEGORIES, ...MOBILITY_CATEGORIES];
   }, [filters.listingType]);
+
+  const browsingMode = !isActiveSearch(filters);
 
   useEffect(() => {
     setFilters(parseFiltersFromParams(searchParams));
@@ -92,6 +109,20 @@ const PublicPropertyMobilityPage = () => {
     loadListings(filters);
   }, [filters, loadListings]);
 
+  const saleCount = useMemo(
+    () => listings.filter((item) => getListingOfferType(item) === "sale").length,
+    [listings]
+  );
+  const rentCount = useMemo(
+    () => listings.filter((item) => getListingOfferType(item) === "rent").length,
+    [listings]
+  );
+
+  const visibleListings = useMemo(
+    () => listings.filter((item) => getListingOfferType(item) === offerTab),
+    [listings, offerTab]
+  );
+
   const handleSearch = (e) => {
     e.preventDefault();
     syncParams(filters);
@@ -102,20 +133,6 @@ const PublicPropertyMobilityPage = () => {
     const reset = { ...DEFAULT_PM_FILTERS };
     setFilters(reset);
     syncParams(reset);
-  };
-
-  const handleShare = async (listing) => {
-    const url = `${window.location.origin}/property-mobility/listing/${listing.listingId}`;
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: listing.title, url });
-      } else {
-        await navigator.clipboard.writeText(url);
-        toast.success("Link copied.");
-      }
-    } catch {
-      /* cancelled */
-    }
   };
 
   const handleFavorite = (listingId) => {
@@ -136,67 +153,79 @@ const PublicPropertyMobilityPage = () => {
         title="Property & Mobility"
         description="Browse apartments, houses, land, cars, motorcycles, and commercial property for rent or sale on Yebone."
       />
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-      <header className="space-y-3">
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{pageTitle}</h1>
-        <p className="text-gray-500 text-base max-w-2xl">
-          Browse apartments, houses, land, cars, motorcycles, trucks, and commercial property.
-        </p>
-        <div className="flex flex-wrap gap-2 pt-1">
-          <Link to="/property-mobility?listingType=property" className="pm-filters__chip">
-            Property
-          </Link>
-          <Link to="/property-mobility?listingType=vehicle" className="pm-filters__chip">
-            Mobility
-          </Link>
-          <Link to="/products" className="pm-filters__chip">
-            Shopping
-          </Link>
-        </div>
-      </header>
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        <header className="space-y-3">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {pageTitle}
+          </h1>
+          <p className="text-gray-500 text-sm sm:text-base max-w-2xl">
+            Browse apartments, houses, land, cars, motorcycles, trucks, and commercial property.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Link to="/property-mobility?listingType=property" className="pm-filters__chip">
+              Property
+            </Link>
+            <Link to="/property-mobility?listingType=vehicle" className="pm-filters__chip">
+              Mobility
+            </Link>
+            <Link to="/products" className="pm-filters__chip">
+              Shopping
+            </Link>
+          </div>
+        </header>
 
-      <PropertyMobilityFilters
-        filters={filters}
-        onChange={(next) => {
-          setFilters(next);
-          syncParams(next);
-        }}
-        onSubmit={handleSearch}
-        onReset={handleReset}
-        categoryOptions={categoryOptions}
-      />
+        <PropertyOfferTabs
+          value={offerTab}
+          onChange={setOfferTab}
+          saleCount={saleCount}
+          rentCount={rentCount}
+        />
 
-      {loading ? (
-        <div className="pm-skeleton-grid" aria-busy="true" aria-label="Loading listings">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="pm-skeleton-card">
-              <div className="pm-skeleton-card__media" />
-              <div className="pm-skeleton-card__body">
-                <div className="pm-skeleton-line pm-skeleton-line--short" />
-                <div className="pm-skeleton-line pm-skeleton-line--medium" />
-                <div className="pm-skeleton-line" />
+        <PropertyMobilityFilters
+          filters={filters}
+          onChange={(next) => {
+            setFilters(next);
+            syncParams(next);
+          }}
+          onSubmit={handleSearch}
+          onReset={handleReset}
+          categoryOptions={categoryOptions}
+        />
+
+        {loading ? (
+          <div className="pm-skeleton-grid" aria-busy="true" aria-label="Loading listings">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="pm-skeleton-card">
+                <div className="pm-skeleton-card__media" />
+                <div className="pm-skeleton-card__body">
+                  <div className="pm-skeleton-line pm-skeleton-line--short" />
+                  <div className="pm-skeleton-line pm-skeleton-line--medium" />
+                  <div className="pm-skeleton-line" />
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="pm-listings-grid">
-          {!listings.length ? (
-            <PropertyMobilityEmptyState onReset={handleReset} />
-          ) : (
-            listings.map((listing) => (
+            ))}
+          </div>
+        ) : !visibleListings.length ? (
+          <PropertyMobilityEmptyState onReset={handleReset} />
+        ) : browsingMode ? (
+          <PropertyListingsCarousel
+            listings={visibleListings}
+            favoriteIds={favoriteIds}
+            onToggleSave={handleFavorite}
+          />
+        ) : (
+          <div className="pm-listings-grid">
+            {visibleListings.map((listing) => (
               <PropertyListingCard
                 key={listing.listingId}
                 listing={listing}
                 saved={favoriteIds.includes(listing.listingId)}
                 onToggleSave={handleFavorite}
-                onShare={handleShare}
               />
-            ))
-          )}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 };

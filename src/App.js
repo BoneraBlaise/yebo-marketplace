@@ -1,6 +1,6 @@
 import React, { useEffect, Suspense } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import 'react-quill/dist/quill.snow.css';
@@ -211,6 +211,7 @@ const routerBasename =
             <Route path="/blog/:id" element={<BlogDetailsPage />} />
 
             <Route path="/flashsale/:flashSaleId" element={<FlashSaleDetailsPage />} />
+            <Route path="/cart" element={<Navigate to="/checkout" replace />} />
             <Route
               path="/checkout"
               element={

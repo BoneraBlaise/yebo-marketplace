@@ -1,17 +1,15 @@
 .seller-xp-fab {
   position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
+  right: 1.25rem;
+  bottom: 1.25rem;
   z-index: 85;
-  width: 3.5rem;
-  height: 3.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 9999px;
   border: none;
   background: linear-gradient(135deg, #29625d 0%, #1e4a46 100%);
   color: #fff;
-  box-shadow:
-    0 4px 14px rgba(41, 98, 93, 0.35),
-    0 12px 40px rgba(41, 98, 93, 0.2);
+  box-shadow: 0 2px 6px rgba(41, 98, 93, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,10 +18,8 @@
 }
 
 .seller-xp-fab:hover {
-  transform: translateY(-2px) scale(1.04);
-  box-shadow:
-    0 8px 24px rgba(41, 98, 93, 0.4),
-    0 16px 48px rgba(41, 98, 93, 0.22);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(41, 98, 93, 0.22);
 }
 
 .seller-xp-fab:focus-visible {
@@ -50,13 +46,13 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(41, 98, 93, 0.25);
+  box-shadow: 0 1px 2px rgba(41, 98, 93, 0.12);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .seller-xp-header-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(41, 98, 93, 0.35);
+  box-shadow: 0 2px 6px rgba(41, 98, 93, 0.16);
 }
 
 .seller-xp-header-btn:focus-visible {

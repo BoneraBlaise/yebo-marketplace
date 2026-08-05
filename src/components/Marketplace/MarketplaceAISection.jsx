@@ -4,7 +4,7 @@ import { HiOutlineSparkles, HiOutlineLocationMarker, HiOutlineTrendingUp } from 
 import { useSelector } from "react-redux";
 import Cookies from "js-cookie";
 import { SectionTitle } from "../ui";
-import HomeProductCard from "../Home/HomeProductCard";
+import ProductCard from "./ProductCard";
 import { MarketplaceCardGrid, MarketplaceCardSlot } from "./cards";
 
 const MarketplaceAISection = ({ searchTerm }) => {
@@ -64,7 +64,7 @@ const MarketplaceAISection = ({ searchTerm }) => {
               const product = (allProducts || []).find((p) => p._id === item._id) || item;
               return (
                 <MarketplaceCardSlot key={item._id}>
-                  <HomeProductCard data={product} compact fluid />
+                  <ProductCard data={product} />
                 </MarketplaceCardSlot>
               );
             })}
@@ -81,7 +81,7 @@ const MarketplaceAISection = ({ searchTerm }) => {
           <MarketplaceCardGrid className="mt-4">
             {trending.map((product) => (
               <MarketplaceCardSlot key={product._id}>
-                <HomeProductCard data={product} compact fluid />
+                <ProductCard data={product} />
               </MarketplaceCardSlot>
             ))}
           </MarketplaceCardGrid>
@@ -97,7 +97,7 @@ const MarketplaceAISection = ({ searchTerm }) => {
           <MarketplaceCardGrid className="mt-4">
             {nearby.map((product) => (
               <MarketplaceCardSlot key={product._id}>
-                <HomeProductCard data={product} compact fluid />
+                <ProductCard data={product} />
               </MarketplaceCardSlot>
             ))}
           </MarketplaceCardGrid>

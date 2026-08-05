@@ -1,14 +1,47 @@
-/** Shared create actions — used by modal, mobile sheet, and desktop popover */
+/** Shared create actions — vendor menu (desktop popover + mobile sheet + create modal) */
 export const CREATE_ACTIONS = [
-  { id: "product", icon: "📦", title: "Create Product", desc: "Publish products for sale", step: "product" },
   {
-    id: "property_mobility",
+    id: "product",
+    icon: "📦",
+    title: "Add Product",
+    desc: "List items for sale",
+    step: "product",
+  },
+  {
+    id: "property",
     icon: "🏠",
-    title: "Property & Mobility",
-    desc: "Homes, land, cars & more",
+    title: "Add Property",
+    desc: "Homes, land & commercial",
     step: "property",
   },
-  { id: "event", icon: "📅", title: "Create Event", desc: "Promote sales and occasions", route: "/dashboard-create-event" },
+  {
+    id: "vehicle",
+    icon: "🚗",
+    title: "Add Vehicle",
+    desc: "Cars, bikes & mobility",
+    step: "vehicle",
+  },
+  {
+    id: "event",
+    icon: "📅",
+    title: "Add Event",
+    desc: "Promote sales & occasions",
+    route: "/dashboard-create-event",
+  },
+  {
+    id: "auction",
+    icon: "🔨",
+    title: "Add Auction",
+    desc: "Run a timed auction",
+    route: "/dashboard-start-auction",
+  },
+  {
+    id: "flash_sale",
+    icon: "⚡",
+    title: "Add Flash Sale",
+    desc: "Limited-time deals",
+    route: "/dashboard-create-flashsale",
+  },
 ];
 
 /** Non-vendor create sheet — seller onboarding funnel */

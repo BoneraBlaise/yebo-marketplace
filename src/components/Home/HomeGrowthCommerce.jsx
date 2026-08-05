@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Container } from "../ui";
-import HomeProductCard from "./HomeProductCard";
+import ProductCard from "../Marketplace/ProductCard";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import { fetchGrowthCommerceAvailability, fetchPublicHomepage } from "../../services/growthCommerceService";
 
@@ -163,7 +163,7 @@ const HomeGrowthCommerce = () => {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
                 {sectionProducts.map((product) => (
-                  <HomeProductCard key={`${sectionKey}-${product._id}`} data={product} compact />
+                  <ProductCard key={`${sectionKey}-${product._id}`} data={product} />
                 ))}
               </div>
             </Container>

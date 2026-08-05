@@ -1,11 +1,11 @@
 /* Marketplace discovery — presentation layer only */
 
 .marketplace-page {
-  background: linear-gradient(180deg, rgba(246, 246, 245, 0.6) 0%, #ffffff 24%);
+  background: var(--home-bg, #fafafa);
 }
 
 .dark .marketplace-page {
-  background: linear-gradient(180deg, rgba(17, 24, 23, 0.95) 0%, #1f1f1f 24%);
+  background: #141414;
 }
 
 .marketplace-hero {

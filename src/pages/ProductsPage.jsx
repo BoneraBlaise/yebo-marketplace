@@ -7,14 +7,13 @@ import Cookies from "js-cookie"; // Import js-cookie to handle cookies
 import { IoSearchOutline } from "react-icons/io5";
 import { Container, SectionTitle } from "../components/ui";
 import {
-  MarketplacePageHero,
   MarketplaceActiveFilters,
   MarketplaceSectionTabs,
   MarketplaceSortSelect,
   MarketplaceListingSkeleton,
-  MarketplaceAISection,
   MarketplaceMobileFilterButton,
   MarketplaceEmptyState,
+  ShoppingPageHeader,
   CategoryLandingHero,
   CategoryShortcuts,
   CategoryFeaturedCollections,
@@ -26,7 +25,7 @@ import {
   matchesCategoryScope,
 } from "../components/Marketplace";
 import "../components/Marketplace/categoryLanding/categoryLanding.css";
-import { AISearchNatural } from "../components/ai";
+import "../components/Marketplace/shopping-ui.css";
 import useProductSearch from "../hooks/useProductSearch";
 import SearchResultsPagination from "../components/Search/SearchResultsPagination";
 import SearchStateViews from "../components/Search/SearchStateViews";
@@ -591,21 +590,23 @@ const ProductsPage = () => {
 
   const pageTitle = searchTerm
     ? "Search Results"
-    : categoryData
-    ? categoryData
-    : "All Products";
+    : categoryContext
+    ? categoryContext.displayTitle || categoryContext.title
+    : "Shopping";
 
   const pageSubtitle = searchTerm
-    ? "Find exactly what you need across the Yebone marketplace."
-    : categoryData
-    ? `Browse premium ${categoryData.toLowerCase()} from verified sellers.`
-    : "Discover fashion, tech, home, and more from sellers across Africa.";
+    ? null
+    : categoryContext
+    ? null
+    : "Discover products from verified sellers across Africa.";
 
   const breadcrumbs = [
     { label: "Home", to: "/" },
-    { label: "Marketplace", to: "/products" },
-    ...(categoryData ? [{ label: categoryData }] : searchTerm ? [{ label: "Search" }] : []),
+    { label: "Shopping", to: "/products" },
+    ...(categoryContext?.breadcrumbs?.slice(2) || (searchTerm ? [{ label: "Search" }] : [])),
   ];
+
+  const resultCount = useServerSearch ? serverMeta?.total || serverMeta?.count || 0 : data?.length || 0;
 
   const clearAllFilters = () => {
     const preservedCategory = new URLSearchParams();
@@ -676,26 +677,24 @@ const ProductsPage = () => {
             />
             <script type="application/ld+json">{JSON.stringify(structuredDataString)}</script>
           </Helmet>
-          <div className="marketplace-page yebone-premium-screen dark:text-gray-200 min-h-screen bg-yebone-light-gray dark:bg-gray-950">
-            <Container className="pt-6 lg:pt-8 pb-4">
-              {categoryContext ? (
-                <CategoryLandingHero
-                  context={categoryContext}
-                  count={categoryBaseProducts.length}
-                />
-              ) : (
-                <MarketplacePageHero
+          <div className="marketplace-page marketplace-page--shop yebone-premium-screen dark:text-gray-200 min-h-screen">
+            <Container className="shop-content">
+              {!categoryContext && (
+                <ShoppingPageHeader
                   title={pageTitle}
                   subtitle={pageSubtitle}
-                  breadcrumbs={breadcrumbs}
-                  count={useServerSearch ? serverMeta?.total || 0 : data?.length || 0}
+                  breadcrumbs={location.pathname === "/search" || searchTerm ? breadcrumbs : []}
+                  count={searchTerm || location.pathname === "/search" ? resultCount : undefined}
                   searchTerm={searchTerm}
-                  badge={searchTerm ? "Search" : "Marketplace"}
                 />
               )}
 
               {categoryContext && (
                 <>
+                  <CategoryLandingHero
+                    context={categoryContext}
+                    count={categoryBaseProducts.length}
+                  />
                   <CategoryShortcuts
                     shortcuts={categoryContext.shortcuts}
                     activeChipId={categoryContext.activeChipId || "all"}
@@ -703,169 +702,136 @@ const ProductsPage = () => {
                   />
                   <CategoryFeaturedCollections
                     products={categoryBaseProducts}
+                    allProducts={allProducts}
+                    matchTitles={categoryContext.matchTitles}
                     isLoading={isLoading}
                   />
                   <div className="cat-landing-divider" />
                 </>
               )}
 
-              {!categoryContext && (
-                <div className="mt-6">
-                  <AISearchNatural />
-                </div>
-              )}
-            </Container>
-
-            {/* Related Products Section */}
-            {searchTerm && getRelatedProducts().length > 0 && (
-              <Container className="pb-2">
-                <div className="yebone-surface rounded-2xl p-4">
-                  <span className="text-sm font-semibold text-yebone-primary mb-3 block">
-                    Similar searches
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {getRelatedProducts().map((product) => (
-                      <button
-                        key={product._id}
-                        onClick={() => {
-                          const newParams = new URLSearchParams(searchParams);
-                          newParams.set("search", product.name);
-                          setSearchParams(newParams);
-                        }}
-                        className="marketplace-filter-chip cursor-pointer hover:scale-[1.02]"
-                      >
-                        <span className="truncate max-w-[200px]">{product.name}</span>
-                        {product.stock === 0 && (
-                          <span className="text-xs text-red-500">(Sold Out)</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </Container>
-            )}
-
-            <Container>
               <MarketplaceActiveFilters
                 filters={getActiveFilters()}
                 onRemove={removeFilter}
                 onClearAll={clearAllFilters}
               />
-            </Container>
-            <Container className="cat-landing-layout mb-10">
-              <div className="cat-landing-layout__sidebar">
-                <CategoryFilterSidebar sticky {...filterProps} />
-              </div>
 
-              <MarketplaceMobileFilterButton
-                open={dropdownOpen}
-                onToggle={() => setDropdownOpen(!dropdownOpen)}
-              />
-              <CategoryFilterDrawer
-                open={dropdownOpen}
-                onClose={() => setDropdownOpen(false)}
-                filterProps={filterProps}
-              />
-
-              <div className="cat-landing-layout__main">
-                <div className="marketplace-results-toolbar">
-                  <MarketplaceSectionTabs
-                    sections={sections}
-                    activePath={location.pathname}
-                    onChange={handleSectionChange}
-                  />
-                  <MarketplaceSortSelect
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    options={sortOptions}
-                  />
+              <div className="cat-landing-layout">
+                <div className="cat-landing-layout__sidebar">
+                  <CategoryFilterSidebar sticky {...filterProps} />
                 </div>
 
-                {categoryContext && (
-                  <h2 className="cat-landing-collection__title mb-4">
-                    {categoryContext.type === "main-chip"
-                      ? `${categoryContext.displayTitle} · ${categoryContext.title}`
-                      : `All ${categoryContext.displayTitle || categoryContext.title} products`}
-                  </h2>
-                )}
+                <MarketplaceMobileFilterButton
+                  open={dropdownOpen}
+                  onToggle={() => setDropdownOpen(!dropdownOpen)}
+                />
+                <CategoryFilterDrawer
+                  open={dropdownOpen}
+                  onClose={() => setDropdownOpen(false)}
+                  filterProps={filterProps}
+                />
 
-                <p className="marketplace-results-count mb-4">
-                  Showing {useServerSearch ? serverMeta?.count || 0 : data?.length || 0} products
-                  {useServerSearch && serverMeta?.total ? ` of ${serverMeta.total}` : ""}
-                </p>
-
-                {slowNetwork && useServerSearch && serverLoading && (
-                  <p className="text-sm text-yebone-muted mb-3" role="status">
-                    Search is taking longer than usual. Please wait or try again.
-                  </p>
-                )}
-
-                {useServerSearch ? (
-                  <SearchStateViews
-                    isLoading={serverLoading}
-                    error={serverError}
-                    hasResults={Boolean(data?.length)}
-                    searchTerm={searchTerm}
-                    onRetry={retrySearch}
-                  >
-                    <>
-                      <ProductList products={data} />
-                      <SearchResultsPagination
-                        page={serverMeta?.page || 1}
-                        totalPages={serverMeta?.totalPages || 1}
-                        onPageChange={handleSearchPageChange}
+                <div className="cat-landing-layout__main">
+                  <div className="shop-results-bar">
+                    <p className="shop-results-bar__count">
+                      Showing {useServerSearch ? serverMeta?.count || 0 : data?.length || 0} results
+                      {useServerSearch && serverMeta?.total ? ` of ${serverMeta.total}` : ""}
+                    </p>
+                    <div className="shop-results-bar__actions">
+                      {!searchTerm && location.pathname !== "/search" && (
+                        <MarketplaceSectionTabs
+                          sections={sections}
+                          activePath={location.pathname}
+                          onChange={handleSectionChange}
+                        />
+                      )}
+                      <MarketplaceSortSelect
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        options={sortOptions}
                       />
-                    </>
-                  </SearchStateViews>
-                ) : isLoading ? (
-                  <MarketplaceListingSkeleton count={8} />
-                ) : data && data.length > 0 ? (
-                  <ProductList products={data} />
-                ) : categoryContext ? (
-                  <CategoryEmptyState
-                    context={categoryContext}
-                    searchTerm={searchTerm}
-                    onClearFilters={clearAllFilters}
-                  />
-                ) : (
-                  <MarketplaceEmptyState
-                    icon={IoSearchOutline}
-                    title="No products found"
-                    message={
-                      searchTerm
-                        ? `We couldn't find matches for "${searchTerm}". Try different keywords or clear your filters.`
-                        : "No products match your current filters. Adjust filters or browse the full marketplace."
-                    }
-                    actionLabel="Browse all products"
-                    actionTo="/products"
-                  />
-                )}
-                <div className="md:block hidden">
-                  <div class="bg-gradient-to-r from-[#29625d] to-[#ffd496] h-[320px] flex items-center justify-center p-6 rounded-xl mt-3 shadow-lg">
-                    <div class="flex items-center gap-12 max-w-3xl w-full">           
-                      <div class="flex-shrink-0 mr-8 flex flex-col items-center justify-center">
-                        <img src="https://res.cloudinary.com/djughivxs/image/upload/v1732432017/avatars/cwn1r7anqmdra57zxelr.png" alt="yebone official shop icon" class="h-20 w-20 object-cover rounded-full mb-4" />
-                        <h3 class="text-white text-xl font-semibold mb-2">Yebone Shop</h3>
-                        <p class="text-white text-sm font-medium opacity-80">Sponsored</p>
-                      </div>
-                      <div class="text-white flex-grow">
-                        <h2 class="text-2xl font-semibold mb-4">Discover Great Deals on Used Products at Yebone Shop</h2>
-                        <p class="text-md mb-6">Looking for quality used items at great prices? Search for the best deals today!</p>
-                        <a href="https://www.yebone.com/shop/preview/6742d0af9c4de357667dc0ea" target="_blank" class="bg-[#29625d] text-white text-sm py-2 px-4 rounded-md hover:bg-[#1a4c47] transition duration-300 shadow-md transform hover:scale-105">
-                          Visit Store
-                        </a>
-                      </div>
-
                     </div>
                   </div>
 
-                </div>
-                <MarketplaceAISection searchTerm={searchTerm} />
+                  {searchTerm && getRelatedProducts().length > 0 && (
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      <span className="text-xs font-semibold text-yebone-primary w-full mb-1">
+                        Similar searches
+                      </span>
+                      {getRelatedProducts().map((product) => (
+                        <button
+                          key={product._id}
+                          type="button"
+                          onClick={() => {
+                            const newParams = new URLSearchParams(searchParams);
+                            newParams.set("search", product.name);
+                            setSearchParams(newParams);
+                          }}
+                          className="marketplace-filter-chip cursor-pointer hover:scale-[1.02]"
+                        >
+                          <span className="truncate max-w-[200px]">{product.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                {/* Recommended Products Section */}
-                <div className="recommended-products mt-10">
-                  <SectionTitle title="Recommended for you" subtitle="Based on your recent browsing" align="left" />
-                  <ProductList products={recommendations} />
+                  {slowNetwork && useServerSearch && serverLoading && (
+                    <p className="text-sm text-yebone-muted mb-3" role="status">
+                      Search is taking longer than usual. Please wait or try again.
+                    </p>
+                  )}
+
+                  {useServerSearch ? (
+                    <SearchStateViews
+                      isLoading={serverLoading}
+                      error={serverError}
+                      hasResults={Boolean(data?.length)}
+                      searchTerm={searchTerm}
+                      onRetry={retrySearch}
+                    >
+                      <>
+                        <ProductList products={data} />
+                        <SearchResultsPagination
+                          page={serverMeta?.page || 1}
+                          totalPages={serverMeta?.totalPages || 1}
+                          onPageChange={handleSearchPageChange}
+                        />
+                      </>
+                    </SearchStateViews>
+                  ) : isLoading ? (
+                    <MarketplaceListingSkeleton count={8} />
+                  ) : data && data.length > 0 ? (
+                    <ProductList products={data} />
+                  ) : categoryContext ? (
+                    <CategoryEmptyState
+                      context={categoryContext}
+                      searchTerm={searchTerm}
+                      onClearFilters={clearAllFilters}
+                    />
+                  ) : (
+                    <MarketplaceEmptyState
+                      icon={IoSearchOutline}
+                      title="No products found"
+                      message={
+                        searchTerm
+                          ? `We couldn't find matches for "${searchTerm}". Try different keywords or clear your filters.`
+                          : "No products match your current filters. Adjust filters or browse the full marketplace."
+                      }
+                      actionLabel="Browse all products"
+                      actionTo="/products"
+                    />
+                  )}
+
+                  {!searchTerm && recommendations.length > 0 && (
+                    <div className="recommended-products mt-10 pt-8 border-t border-gray-200/80 dark:border-gray-800">
+                      <SectionTitle
+                        title="Recommended for you"
+                        subtitle="Based on your recent browsing"
+                        align="left"
+                      />
+                      <ProductList products={recommendations.slice(0, 8)} />
+                    </div>
+                  )}
                 </div>
               </div>
             </Container>

@@ -837,7 +837,32 @@
   object-position: center center;
 }
 
-/* Amazon-style side zoom — floats in column gap, never shrinks hero */
+/* Amazon-style side zoom — portal overlay, always above page content */
+.pdp-gallery-zoom-portal {
+  pointer-events: none;
+}
+
+.pdp-gallery-zoom-portal .pdp-gallery-zoom-pane {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.875rem;
+  overflow: hidden;
+  background-repeat: no-repeat;
+  background-color: #fff;
+  will-change: background-position;
+  box-shadow:
+    0 8px 32px rgba(15, 23, 20, 0.12),
+    0 0 0 1px rgba(15, 23, 20, 0.06);
+}
+
+.dark .pdp-gallery-zoom-portal .pdp-gallery-zoom-pane {
+  background-color: #111827;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+/* Legacy in-flow zoom (unused; kept for reference) */
 .pdp-gallery-zoom-wrap {
   position: absolute;
   top: 0;

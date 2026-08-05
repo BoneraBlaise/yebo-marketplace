@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import HomeProductCard from "../Home/HomeProductCard";
+import ProductCard from "../Marketplace/ProductCard";
 import "../Marketplace/cards/marketplaceCards.css";
 
 const buildTabs = (data) => [
@@ -84,7 +84,7 @@ const ProductSimilarRails = ({ data }) => {
       <div className="mpc-rail mpc-rail--carousel mpc-rail--pdp" role="tabpanel">
         {items.map((product) => (
           <div key={product._id} className="mpc-rail__item mpc-rail__item--pdp">
-            <HomeProductCard data={product} compact dense fluid />
+            <ProductCard data={product} />
           </div>
         ))}
       </div>

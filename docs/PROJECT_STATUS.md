@@ -1,8 +1,9 @@
 # Yebone / Guriraline — Project Status
 
-**Last updated:** 2026-07-26 (Phase 15 enterprise certification)  
+**Last updated:** 2026-08-05 (marketplace production polish checkpoint)  
 **Enterprise tag:** `phase15-enterprise-certification-v1`  
-**Authoritative snapshot for resuming work**
+**Authoritative snapshot for resuming work:** `docs/development/CHECKPOINT_2026-08-05.md`  
+**Live project state:** `docs/development/PROJECT_STATE.md`
 
 ---
 
@@ -11,8 +12,9 @@
 | Item | Value |
 |------|-------|
 | **Completed milestone** | **Phase 15 — Marketplace Communication & Commerce Engine** |
-| **Status** | **Enterprise Certified & Frozen** |
-| **Next task** | Phase 16 (TBD — see product roadmap) |
+| **Latest work (2026-08-05)** | **Marketplace production polish** — unified ProductCard, responsive grid, PM browse polish, critical blocker fixes |
+| **Status** | **Web production ~78%** — staged rollout ready; native app not started |
+| **Next task** | E2E verification → PM Agencies/Offers UI → AI wizard wiring |
 
 ---
 

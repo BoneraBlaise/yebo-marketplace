@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
+import { HiOutlineShare, HiOutlineLocationMarker } from "react-icons/hi";
 import { PageMeta } from "../components/ui";
 import ProductGallery from "../components/Products/ProductGallery";
 import PropertyContactCard from "../components/PropertyMobility/PropertyContactCard";
@@ -11,7 +12,7 @@ import { PropertyMobilityStatusBanner } from "../components/PropertyMobility/pro
 import {
   formatCategory,
   formatListingLocation,
-  formatPrice,
+  formatListingPrice,
   resolvePropertyMobilityErrorMessage,
 } from "../components/PropertyMobility/propertyMobilityHelpers";
 import {
@@ -122,13 +123,23 @@ const PropertyMobilityListingDetailPage = () => {
     }
   };
 
+  const handleReport = () =>
+    submitPropertyReport({
+      listingId: listing.listingId,
+      reason: "spam",
+      details: "Reported from listing detail page.",
+    }).then(() => toast.success("Report submitted."));
+
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="h-8 w-48 rounded bg-gray-100 dark:bg-gray-800 animate-pulse mb-6" />
-        <div className="grid lg:grid-cols-[1fr_320px] gap-8">
-          <div className="h-[420px] rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
-          <div className="h-64 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+      <div className="pm-detail">
+        <div className="h-5 w-40 rounded bg-gray-100 dark:bg-gray-800 animate-pulse mb-6" />
+        <div className="pm-detail__layout">
+          <div className="space-y-6">
+            <div className="h-[320px] sm:h-[420px] rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+            <div className="h-48 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
+          </div>
+          <div className="hidden lg:block h-72 rounded-2xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
         </div>
       </div>
     );
@@ -136,13 +147,13 @@ const PropertyMobilityListingDetailPage = () => {
 
   if (!listing) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-10">
+      <div className="pm-detail">
         <PropertyMobilityStatusBanner
           tone="info"
           title="Listing unavailable"
           message="This listing may have been removed or is not published."
         />
-        <Link to="/property-mobility" className="inline-block mt-4 text-[#29625d] font-medium">
+        <Link to="/property-mobility" className="pm-detail__back">
           ← Back to browse
         </Link>
       </div>
@@ -150,13 +161,18 @@ const PropertyMobilityListingDetailPage = () => {
   }
 
   const mapsUrl = listing.location?.mapsUrl;
-  const amenities = listing.amenities || listing.attributes || [];
+  const amenities = listing.amenities?.length ? listing.amenities : [];
+  const locationLabel = formatListingLocation(listing);
+  const priceLabel = formatListingPrice(listing);
 
   return (
     <>
       <PageMeta
         title={listing.title}
-        description={listing.description?.slice(0, 160) || `${formatCategory(listing.category)} in ${formatListingLocation(listing)}`}
+        description={
+          listing.description?.slice(0, 160) ||
+          `${formatCategory(listing.category)} in ${locationLabel}`
+        }
         image={seoImage}
         canonical={canonical}
         jsonLd={{
@@ -167,128 +183,117 @@ const PropertyMobilityListingDetailPage = () => {
           offers: {
             "@type": "Offer",
             price: listing.price,
-            priceCurrency: listing.currency || "RWF",
+            priceCurrency: listing.currency || listing.ownerInfo?.currency || "RWF",
           },
-          address: formatListingLocation(listing),
+          address: locationLabel,
         }}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
-        <Link to="/property-mobility" className="text-sm text-[#29625d] font-medium">
-          ← Back to Property & Mobility
+      <div className="pm-detail pb-24 lg:pb-12">
+        <Link to="/property-mobility" className="pm-detail__back">
+          ← Property & Mobility
         </Link>
 
-        <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-8 items-start">
-          <div className="space-y-6">
-            {galleryImages.length ? (
-              <ProductGallery images={galleryImages} select={galleryIndex} setSelect={setGalleryIndex} />
-            ) : (
-              <div className="h-72 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500">
-                No photos available
-              </div>
-            )}
+        <div className="pm-detail__layout">
+          <div className="pm-detail__main">
+            <div className="pm-detail__gallery-wrap">
+              {galleryImages.length ? (
+                <ProductGallery images={galleryImages} select={galleryIndex} setSelect={setGalleryIndex} />
+              ) : (
+                <div className="h-72 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500">
+                  No photos available
+                </div>
+              )}
+            </div>
 
-            <div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 space-y-4">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-3xl font-semibold">{listing.title}</h1>
-                  <p className="text-gray-500 mt-1">
-                    {formatCategory(listing.category)} · {formatListingLocation(listing)}
+            <header className="pm-detail__header">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h1 className="pm-detail__title">{listing.title}</h1>
+                  <p className="pm-detail__meta">
+                    {formatCategory(listing.category)} · {locationLabel}
                   </p>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    className="min-h-[44px] px-4 rounded-xl border font-medium flex items-center gap-2"
-                    onClick={handleFavorite}
-                  >
-                    {favorite ? <AiFillHeart className="text-red-500" /> : <AiOutlineHeart />}
+                <div className="pm-detail__actions">
+                  <button type="button" className="pm-detail__action-btn" onClick={handleFavorite}>
+                    {favorite ? <AiFillHeart className="text-red-500" size={18} /> : <AiOutlineHeart size={18} />}
                     {favorite ? "Saved" : "Save"}
                   </button>
-                  <button type="button" className="min-h-[44px] px-4 rounded-xl border font-medium" onClick={handleShare}>
+                  <button type="button" className="pm-detail__action-btn" onClick={handleShare}>
+                    <HiOutlineShare size={18} />
                     Share
                   </button>
                 </div>
               </div>
-
-              <p className="text-2xl font-semibold">{formatPrice(listing.price, listing.currency)}</p>
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{listing.description}</p>
-
-              {amenities.length ? (
-                <div>
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">Features</h2>
-                  <ul className="flex flex-wrap gap-2">
-                    {amenities.map((item) => (
-                      <li
-                        key={String(item)}
-                        className="text-sm px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                      >
-                        {String(item).replace(/_/g, " ")}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {mapsUrl ? (
-                <div>
-                  <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500 mb-2">Location</h2>
-                  <a
-                    href={mapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#29625d] font-medium text-sm"
-                  >
-                    View on map →
-                  </a>
-                </div>
-              ) : null}
-
-              <div className="flex flex-wrap gap-2 pt-2 lg:hidden">
-                <button
-                  type="button"
-                  className="min-h-[44px] px-4 rounded-xl bg-[#29625d] text-white text-sm font-medium"
-                  onClick={handleContact}
-                  disabled={contacting}
-                >
-                  Contact Vendor
-                </button>
-                <button
-                  type="button"
-                  className="min-h-[44px] px-4 rounded-xl border text-sm font-medium"
-                  onClick={() =>
-                    submitPropertyReport({
-                      listingId: listing.listingId,
-                      reason: "spam",
-                      details: "Reported from listing detail page.",
-                    }).then(() => toast.success("Report submitted."))
-                  }
-                >
-                  Report
-                </button>
+              <div className="pm-detail__price-row">
+                <p className="pm-detail__price">{priceLabel}</p>
               </div>
-            </div>
+            </header>
+
+            {listing.description ? (
+              <section className="pm-detail__section">
+                <h2 className="pm-detail__section-title">Description</h2>
+                <p className="pm-detail__description">{listing.description}</p>
+              </section>
+            ) : null}
+
+            {amenities.length ? (
+              <section className="pm-detail__section">
+                <h2 className="pm-detail__section-title">Amenities</h2>
+                <ul className="pm-detail__amenities">
+                  {amenities.map((item) => (
+                    <li key={String(item)} className="pm-detail__amenity">
+                      {String(item).replace(/_/g, " ")}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {mapsUrl ? (
+              <section className="pm-detail__section">
+                <h2 className="pm-detail__section-title">Location</h2>
+                <a
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pm-detail__map-link"
+                >
+                  <HiOutlineLocationMarker size={18} />
+                  View on map
+                </a>
+              </section>
+            ) : null}
 
             <PropertyRelatedListings listing={listing} />
           </div>
 
-          <div className="hidden lg:block space-y-4">
+          <aside className="pm-detail__sidebar">
             <PropertyContactCard listing={listing} onContact={handleContact} contacting={contacting} />
             <button
               type="button"
-              className="w-full min-h-[44px] px-4 rounded-xl border text-sm font-medium"
-              onClick={() =>
-                submitPropertyReport({
-                  listingId: listing.listingId,
-                  reason: "spam",
-                  details: "Reported from listing detail page.",
-                }).then(() => toast.success("Report submitted."))
-              }
+              className="w-full mt-3 min-h-[44px] px-4 rounded-xl border text-sm font-medium"
+              onClick={handleReport}
             >
               Report listing
             </button>
-          </div>
+          </aside>
         </div>
+      </div>
+
+      <div className="pm-detail__mobile-bar lg:hidden">
+        <div className="pm-detail__mobile-price">
+          <strong>{priceLabel}</strong>
+          <span>{locationLabel}</span>
+        </div>
+        <button
+          type="button"
+          className="pm-detail__mobile-cta"
+          onClick={handleContact}
+          disabled={contacting}
+        >
+          {contacting ? "Opening…" : "Contact"}
+        </button>
       </div>
     </>
   );
