@@ -15,7 +15,9 @@ import { server } from "../../server";
 import { addToWishlist, removeFromWishlist } from "../../redux/actions/wishlist";
 import { addTocart } from "../../redux/actions/cart";
 import ProductCardReviews from "../Route/ProductCard/ProductCardReviews";
-import { optimizeProductImage } from "../../utils/productImageUtils";
+import { resolveProductDisplayImage } from "../../utils/catalogQuality";
+import { getProductImageFitClassNames } from "../../utils/productImageFit";
+import { handleProductImageError } from "../../utils/productImageUtils";
 import "../Route/ProductCard/productCard.css";
 
 const formatPrice = (price) =>
@@ -104,21 +106,28 @@ const ProductCard = ({ data, isEvent }) => {
   const isVerified = data.shop?.isVerified;
   const rating = data.ratings || 0;
   const reviewCount = data.reviews?.length || 0;
-  const imageSrc = optimizeProductImage(data.images?.[0]?.url, "card");
+  const stock = data.stock ?? 0;
+  const isLowStock = stock > 0 && stock <= 5;
+  const rawImageUrl = data.images?.[0]?.url;
+  const imageSrc = resolveProductDisplayImage(data, "card");
+  const { mediaClass, imgClass } = getProductImageFitClassNames(data);
 
   return (
     <article className="ypc ypc--marketplace home-card-lift group" onClick={saveToRecentlyViewed}>
-      <div className="ypc__media">
+      <div className={`ypc__media ${mediaClass}`}>
         <Link to={productUrl} className="ypc__media-link" onClick={saveToRecentlyViewed}>
           <img
             src={imageSrc}
             alt={data.name || "Yebone product"}
-            className={`ypc__img${data.stock === 0 ? " ypc__img--dimmed" : ""}`}
+            className={`ypc__img ${imgClass}${data.stock === 0 ? " ypc__img--dimmed" : ""}`}
             loading="lazy"
+            decoding="async"
+            onError={(e) => handleProductImageError(e, rawImageUrl)}
           />
         </Link>
 
         {data.stock === 0 ? <span className="ypc__sold-out">Sold out</span> : null}
+        {isLowStock ? <span className="ypc__low-stock">Only {stock} left</span> : null}
 
         {(data.growthCommerce?.promotionBadges || []).slice(0, 1).map((badge) => (
           <span key={badge} className="ypc__promo-badge">
@@ -171,15 +180,19 @@ const ProductCard = ({ data, isEvent }) => {
           ) : null}
         </div>
 
-        <div className="ypc__meta-row">
-          {isVerified ? (
-            <span className="ypc__verified">
-              <MdVerified className="ypc__verified-icon" size={13} aria-hidden="true" />
-              Verified
-            </span>
-          ) : null}
-          <span className="ypc__sold">{soldCount > 0 ? `${soldCount} sold` : "0 sold"}</span>
-        </div>
+        {(isVerified || soldCount > 0) ? (
+          <div className="ypc__meta-row">
+            {isVerified ? (
+              <span className="ypc__verified">
+                <MdVerified className="ypc__verified-icon" size={13} aria-hidden="true" />
+                Verified seller
+              </span>
+            ) : null}
+            {soldCount > 0 ? (
+              <span className="ypc__sold">{soldCount} sold</span>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </article>
   );

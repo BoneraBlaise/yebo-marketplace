@@ -3,15 +3,20 @@ import { Link } from "react-router-dom";
 import { MdVerified } from "react-icons/md";
 import classNames from "classnames";
 import ShopStatusBadge from "../../Shop/storefront/ShopStatusBadge";
+import {
+  getVendorAvatarFallback,
+  getVendorCoverFallback,
+} from "../../../utils/catalogQuality";
 import "../../Shop/storefront/shopStorefront.css";
-
-const PLACEHOLDER_LOGO = "https://via.placeholder.com/80";
 
 const MarketplaceVendorCard = memo(({ shop, featured = false, responsiveRich = true, className = "" }) => {
   if (!shop?._id) return null;
 
-  const ratingLabel = shop.ratings ? `${shop.ratings}★` : "Top rated";
+  const hasRating = shop.ratings && Number(shop.ratings) > 0;
+  const ratingLabel = hasRating ? `${Number(shop.ratings).toFixed(1)}★` : null;
   const previewImages = (shop.previewImages || []).slice(0, 3);
+  const coverSrc = shop.cover?.url || shop.avatar?.url || getVendorCoverFallback();
+  const logoSrc = shop.avatar?.url || getVendorAvatarFallback(shop);
 
   return (
     <Link
@@ -25,14 +30,8 @@ const MarketplaceVendorCard = memo(({ shop, featured = false, responsiveRich = t
     >
       {responsiveRich && (
         <div className="mpc-vendor-card__cover relative" aria-hidden="true">
-          {(shop.cover?.url || shop.avatar?.url) ? (
-            <>
-              <img src={shop.cover?.url || shop.avatar.url} alt="" loading="lazy" decoding="async" />
-              <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent" />
-            </>
-          ) : (
-            <div className="mpc-vendor-card__cover-fallback" />
-          )}
+          <img src={coverSrc} alt="" loading="lazy" decoding="async" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent" />
           <span className="home-chip home-chip--verified mpc-vendor-card__cover-badge">
             <MdVerified size={12} />
             Verified
@@ -43,7 +42,7 @@ const MarketplaceVendorCard = memo(({ shop, featured = false, responsiveRich = t
       <div className="mpc-vendor-card__body">
         <div className="mpc-vendor-card__header">
           <img
-            src={shop.avatar?.url || PLACEHOLDER_LOGO}
+            src={logoSrc}
             alt=""
             className="mpc-vendor-card__logo home-img-fade"
             loading="lazy"
@@ -57,7 +56,7 @@ const MarketplaceVendorCard = memo(({ shop, featured = false, responsiveRich = t
               ) : (
                 <span className="home-chip home-chip--verified !text-[10px] !py-0.5 !px-1.5">
                   <MdVerified size={10} />
-                  Verified
+                  Verified seller
                 </span>
               )}
             </div>
@@ -65,10 +64,10 @@ const MarketplaceVendorCard = memo(({ shop, featured = false, responsiveRich = t
         </div>
 
         <p className="mpc-vendor-card__meta">
-          {ratingLabel} · {shop.productCount || 0} products
+          {[ratingLabel, `${shop.productCount || 0} products`].filter(Boolean).join(" · ")}
         </p>
 
-        {previewImages.length > 0 && (
+        {previewImages.length > 0 ? (
           <div className="mpc-vendor-card__thumbs" aria-hidden="true">
             {previewImages.map((img, index) => (
               <div key={`${shop._id}-thumb-${index}`} className="mpc-vendor-card__thumb">
@@ -76,9 +75,9 @@ const MarketplaceVendorCard = memo(({ shop, featured = false, responsiveRich = t
               </div>
             ))}
           </div>
-        )}
+        ) : null}
 
-        <span className="mpc-vendor-card__cta">Visit Store</span>
+        <span className="mpc-vendor-card__cta">Visit store</span>
       </div>
     </Link>
   );

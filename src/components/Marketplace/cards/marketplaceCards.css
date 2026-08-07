@@ -13,7 +13,7 @@
   --mpc-transition: var(--home-transition, 0.35s cubic-bezier(0.22, 1, 0.36, 1));
   --mpc-rail-width: 260px;
   --mpc-rail-gap: 0.75rem;
-  --mpc-rail-visible: 2;
+  --mpc-rail-visible: 2.15;
   --mpc-mobile-card-min-h: 17.5rem;
   --mpc-mobile-media-ratio: 4 / 5;
 }
@@ -368,6 +368,91 @@
 }
 
 /* ── Premium horizontal product carousel ── */
+.mpc-rail-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.mpc-rail-wrap::before,
+.mpc-rail-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0.25rem;
+  width: 2rem;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mpc-rail-wrap::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--home-surface, #fff) 0%, transparent 100%);
+}
+
+.mpc-rail-wrap::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--home-surface, #fff) 0%, transparent 100%);
+}
+
+.dark .mpc-rail-wrap::before {
+  background: linear-gradient(90deg, var(--home-surface, #0a1211) 0%, transparent 100%);
+}
+
+.dark .mpc-rail-wrap::after {
+  background: linear-gradient(270deg, var(--home-surface, #0a1211) 0%, transparent 100%);
+}
+
+.mpc-rail-wrap--start::before,
+.mpc-rail-wrap--end::after {
+  opacity: 1;
+}
+
+.mpc-rail__arrow {
+  display: none;
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  width: 2.5rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid var(--home-border, rgba(41, 98, 93, 0.12));
+  background: var(--home-surface, #fff);
+  color: var(--yebone-primary-green, #29625d);
+  box-shadow: var(--home-shadow, 0 4px 16px rgba(41, 98, 93, 0.1));
+  transform: translateY(-50%);
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mpc-rail__arrow:hover:not(:disabled) {
+  box-shadow: var(--home-shadow-hover, 0 8px 24px rgba(41, 98, 93, 0.14));
+}
+
+.mpc-rail__arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.mpc-rail__arrow--prev {
+  left: -0.25rem;
+}
+
+.mpc-rail__arrow--next {
+  right: -0.25rem;
+}
+
+@media (min-width: 768px) {
+  .mpc-rail__arrow {
+    display: inline-flex;
+  }
+}
+
 .mpc-rail {
   display: flex;
   gap: var(--mpc-rail-gap);
@@ -390,6 +475,11 @@
 .mpc-rail--carousel {
   cursor: grab;
   padding-bottom: 0.25rem;
+  scroll-padding-inline: 0.5rem;
+}
+
+.mpc-rail--peek {
+  scroll-padding-inline: 0.5rem;
 }
 
 .mpc-rail--carousel.is-dragging {
@@ -446,21 +536,51 @@
   word-break: break-word;
 }
 
+/* ── Mobile product rail — full-width bleed, 2-up + peek (≤767px only) ── */
+@media (max-width: 767px) {
+  .mpc-rail-wrap {
+    --mpc-rail-gap: 0.5rem;
+    --mpc-rail-visible: 2.02;
+    --mpc-rail-edge-inset: max(0.75rem, env(safe-area-inset-left, 0.75rem));
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-inline: var(--mpc-rail-edge-inset);
+    box-sizing: border-box;
+  }
+
+  .mpc-rail--carousel {
+    scroll-padding-inline: var(--mpc-rail-edge-inset);
+    padding-bottom: 0.25rem;
+  }
+
+  .mpc-rail--peek {
+    scroll-padding-inline: var(--mpc-rail-edge-inset);
+  }
+
+  /* PDP similar-products rail keeps its own density on mobile */
+  .mpc-rail-wrap:has(.mpc-rail--pdp) {
+    --mpc-rail-visible: 2.35;
+    --mpc-rail-gap: 0.5rem;
+  }
+}
+
 @media (min-width: 768px) {
   .mpc-rail {
-    --mpc-rail-visible: 3;
+    --mpc-rail-visible: 3.15;
   }
 }
 
 @media (min-width: 1024px) {
   .mpc-rail {
-    --mpc-rail-visible: 4;
+    --mpc-rail-visible: 4.15;
   }
 }
 
 @media (min-width: 1280px) {
   .mpc-rail {
-    --mpc-rail-visible: 5;
+    --mpc-rail-visible: 5.15;
   }
 }
 

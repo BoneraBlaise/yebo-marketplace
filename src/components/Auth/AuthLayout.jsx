@@ -1,7 +1,6 @@
 import React from "react";
-import logo from "../../Assests/Logo/logo.png";
+import YeboneLogo from "../Home/YeboneLogo";
 import { typography } from "../../design-system/typography";
-import { MARKETPLACE_NAME } from "../../ui-polish/brandConstants";
 
 const AuthLayout = ({
   title,
@@ -17,7 +16,7 @@ const AuthLayout = ({
       }`}
     >
       {showLogo && (
-        <img src={logo} alt={MARKETPLACE_NAME} className="auth-logo" />
+        <YeboneLogo to={null} size="md" className="auth-logo" />
       )}
       {title && (
         <h1 className={`${typography.heading} text-center text-xl sm:text-2xl mb-2 font-Poppins`}>

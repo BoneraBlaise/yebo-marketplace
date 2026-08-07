@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { RxCross1 } from "react-icons/rx";
 import { AiOutlineExpand } from "react-icons/ai";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
-import { optimizeProductImage } from "../../utils/productImageUtils";
+import { optimizeProductImage, handleProductImageError } from "../../utils/productImageUtils";
 import "./product-details.css";
 
 const ZOOM_SCALE = 2.25;
@@ -163,6 +163,7 @@ const ProductGallery = ({ images = [], select, setSelect }) => {
                 className="pdp-gallery-thumb-img yebone-img-fade"
                 loading="lazy"
                 onLoad={() => setLoaded((p) => ({ ...p, [index]: true }))}
+                onError={(e) => handleProductImageError(e, img.url)}
               />
             </button>
           ))}
@@ -204,6 +205,7 @@ const ProductGallery = ({ images = [], select, setSelect }) => {
                   heroFade ? "opacity-100" : "opacity-0"
                 }`}
                 onLoad={() => setLoaded((p) => ({ ...p, [`main-${current}`]: true }))}
+                onError={(e) => handleProductImageError(e, mainImage)}
                 draggable={false}
               />
               <button
@@ -300,6 +302,7 @@ const ProductGallery = ({ images = [], select, setSelect }) => {
             alt="Product fullscreen"
             className="max-w-full max-h-[92vh] pdp-lightbox-image yebone-img-fade rounded-lg"
             onClick={(e) => e.stopPropagation()}
+            onError={(e) => handleProductImageError(e, mainImage)}
           />
 
           {safeImages.length > 1 && (

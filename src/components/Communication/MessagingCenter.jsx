@@ -707,17 +707,32 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
           </div>
         </header>
 
-        <div className="mc-conversation-list" role="list">
-          {loading && <p className="mc-muted">Loading...</p>}
+        <div className="mc-conversation-list" role="list" aria-busy={loading}>
+          {loading ? (
+            <div className="mc-conversation-skeleton" aria-label="Loading conversations">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <div key={i} className="mc-conversation-skeleton__row">
+                  <div className="mc-conversation-skeleton__avatar" />
+                  <div className="mc-conversation-skeleton__body">
+                    <div className="mc-conversation-skeleton__line mc-conversation-skeleton__line--title" />
+                    <div className="mc-conversation-skeleton__line" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
           {!loading && conversations.length === 0 && (
             <div className="mc-empty-state mc-empty-state--compact">
               <div className="mc-empty-state__illustration" aria-hidden="true">
                 <HiOutlineInbox size={28} />
               </div>
               <h3>No conversations yet</h3>
-              <p>Start chatting with a seller from any product page.</p>
+              <p>Start chatting with a seller from any product page, or browse the marketplace to find something you love.</p>
               <Link to="/products" className="mc-btn mc-btn--primary mc-empty-state__cta">
                 Browse products
+              </Link>
+              <Link to="/property-mobility" className="mc-btn mc-btn--ghost mc-empty-state__cta">
+                Browse property & vehicles
               </Link>
             </div>
           )}

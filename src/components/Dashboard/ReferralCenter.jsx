@@ -49,7 +49,7 @@ const ReferralCenter = () => {
     <div className="space-y-8 yebone-fade-up">
       <SectionTitle
         title="Referral Center"
-        subtitle="Invite friends and earn on Yebone — presentation preview"
+        subtitle="Invite friends and earn rewards on Yebone"
         align="left"
         className="mb-0"
       />

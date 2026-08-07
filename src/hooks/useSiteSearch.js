@@ -8,6 +8,7 @@ import {
 } from "../utils/propertySearchSuggestions";
 import { searchPropertyListings } from "../services/propertyMobilityService";
 import { addRecentSearch, getRecentSearches } from "../utils/siteSearchMemory";
+import { isDemoCatalogItem } from "../utils/catalogQuality";
 import {
   SEARCH_DEBOUNCE_MS,
   TRENDING_MARKETPLACE_SEARCHES,
@@ -17,6 +18,7 @@ const mergeSuggestions = (items, limit = 8) => {
   const seen = new Set();
   const merged = [];
   items.forEach((item) => {
+    if (isDemoCatalogItem(item)) return;
     const key = `${item.type || "product"}-${item._id || item.name}`;
     if (seen.has(key)) return;
     seen.add(key);

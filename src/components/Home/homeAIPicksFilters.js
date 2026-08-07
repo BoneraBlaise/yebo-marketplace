@@ -3,6 +3,12 @@
  * Does not modify Redux or backend recommendation logic.
  */
 
+import {
+  filterShowcaseCatalog,
+  isDemoCatalogItem,
+  rankCatalogForShowcase,
+} from "../../utils/catalogQuality";
+
 const CATEGORY_TIERS = [
   {
     tier: 1,
@@ -37,7 +43,10 @@ const getProductTier = (product) => {
 export const getAIPicksProducts = (allProducts = [], limit = 4) => {
   if (!allProducts?.length) return [];
 
-  const scored = allProducts.map((product) => ({
+  const eligible = allProducts.filter((product) => !isDemoCatalogItem(product));
+  const source = eligible.length >= limit ? eligible : allProducts;
+
+  const scored = source.map((product) => ({
     product,
     tier: getProductTier(product),
     featured: product.featured ? 1 : 0,
@@ -60,5 +69,8 @@ export const getAIPicksProducts = (allProducts = [], limit = 4) => {
     picks.push(product);
   }
 
-  return picks;
+  return filterShowcaseCatalog(picks.length ? picks : rankCatalogForShowcase(source), {
+    limit,
+    minResults: Math.min(3, limit),
+  });
 };

@@ -29,6 +29,7 @@ import "../components/Marketplace/shopping-ui.css";
 import useProductSearch from "../hooks/useProductSearch";
 import SearchResultsPagination from "../components/Search/SearchResultsPagination";
 import SearchStateViews from "../components/Search/SearchStateViews";
+import { deprioritizeDemoCatalog } from "../utils/catalogQuality";
 
 const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -157,7 +158,7 @@ const ProductsPage = () => {
 
   useEffect(() => {
     if (useServerSearch) {
-      setData(serverProducts || []);
+      setData(deprioritizeDemoCatalog(serverProducts || []));
       return;
     }
 
@@ -297,7 +298,7 @@ const ProductsPage = () => {
       });
     }
 
-    setData(filteredData);
+    setData(deprioritizeDemoCatalog(filteredData));
 
   }, [
     allProducts,

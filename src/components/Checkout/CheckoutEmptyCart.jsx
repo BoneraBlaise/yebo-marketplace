@@ -22,8 +22,13 @@ const CheckoutEmptyCart = () => {
           Discover premium products across Africa on Yebone — fashion, tech, home, and more.
         </p>
         <Link to="/products">
-          <Button size="lg" className="yebone-btn-lift">
+          <Button size="lg" className="yebone-btn-lift min-h-[44px]">
             Continue shopping
+          </Button>
+        </Link>
+        <Link to="/best-selling" className="mt-3 inline-block">
+          <Button variant="outline" size="lg" className="min-h-[44px]">
+            View best sellers
           </Button>
         </Link>
       </div>

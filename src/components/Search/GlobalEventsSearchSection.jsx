@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import EventCard from "../Events/EventCard";
 import { MarketplaceListingSkeleton, MarketplaceEmptyState } from "../Marketplace";
 import { IoCalendarOutline } from "react-icons/io5";
+import { isDemoCatalogItem } from "../../utils/catalogQuality";
 import "./global-marketplace-search.css";
 
 const GlobalEventsSearchSection = ({ searchTerm }) => {
@@ -17,7 +18,9 @@ const GlobalEventsSearchSection = ({ searchTerm }) => {
       return;
     }
 
-    const matches = (allEvents || []).filter((event) => {
+    const matches = (allEvents || [])
+      .filter((event) => !isDemoCatalogItem(event))
+      .filter((event) => {
       const title = event.title?.toLowerCase() || "";
       const description = event.description?.toLowerCase() || "";
       const location = event.location?.toLowerCase() || "";
@@ -42,10 +45,11 @@ const GlobalEventsSearchSection = ({ searchTerm }) => {
         <MarketplaceEmptyState
           icon={IoCalendarOutline}
           title="No events found"
-          message={`No events match "${term}". Try different keywords.`}
+          message={`No events match "${term}". Try different keywords or browse upcoming events.`}
           actionLabel="Browse all events"
           actionTo="/events"
-          compact
+          secondaryLabel="Search products instead"
+          secondaryTo={`/search?q=${encodeURIComponent(term)}`}
         />
       ) : null}
 

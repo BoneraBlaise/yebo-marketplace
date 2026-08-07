@@ -34,11 +34,13 @@ const SearchStateViews = ({
         title="No products found"
         message={
           searchTerm
-            ? `We couldn't find matches for "${searchTerm}". Try different keywords or clear your filters.`
-            : "No products match your current filters. Adjust filters or browse the full marketplace."
+            ? `We couldn't find matches for "${searchTerm}". Try different keywords or browse another category.`
+            : "No products match your current filters. Adjust filters or explore the full marketplace."
         }
         actionLabel="Browse all products"
         actionTo="/products"
+        secondaryLabel={searchTerm ? "Search property & vehicles" : "View best sellers"}
+        secondaryTo={searchTerm ? `/property-mobility?q=${encodeURIComponent(searchTerm)}` : "/best-selling"}
       />
     );
   }

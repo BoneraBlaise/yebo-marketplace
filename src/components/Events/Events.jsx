@@ -1,8 +1,11 @@
-import React, { useState, useRef } from 'react';
-import { useSelector } from 'react-redux';
-import { MdArrowBack, MdArrowForward } from 'react-icons/md'; // Import icons from react-icons
-import styles from '../../styles/styles';
-import EventCard from './EventCard';
+import React, { useState, useRef } from "react";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { HiOutlineCalendar } from "react-icons/hi";
+import { MdArrowBack, MdArrowForward } from "react-icons/md";
+import MarketplaceEmptyState from "../Marketplace/MarketplaceEmptyState";
+import EventCard from "./EventCard";
+import { isDemoCatalogItem } from "../../utils/catalogQuality";
 
 const Events = ({ isMobile }) => {
   const { allEvents = [], isLoading } = useSelector((state) => state.events);
@@ -10,17 +13,15 @@ const Events = ({ isMobile }) => {
   const scrollContainerRef = useRef(null);
   const eventsPerPage = isMobile ? 2 : 4;
 
-  const totalPages = Math.ceil(allEvents.length / eventsPerPage);
-
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
-  const currentEvents = allEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+  const visibleEvents = allEvents.filter((event) => !isDemoCatalogItem(event));
+  const currentEvents = visibleEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+  const totalPages = Math.ceil(visibleEvents.length / eventsPerPage);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
-      
-      // Smooth scroll to the beginning of the container when changing pages
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollLeft = 0;
       }
@@ -30,113 +31,127 @@ const Events = ({ isMobile }) => {
   const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-      
-      // Smooth scroll to the beginning of the container when changing pages
       if (scrollContainerRef.current) {
         scrollContainerRef.current.scrollLeft = 0;
       }
     }
   };
 
-  // Function to handle horizontal scroll with buttons
   const scrollHorizontally = (direction) => {
     if (scrollContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -200 : 200;
+      const scrollAmount = direction === "left" ? -220 : 220;
       scrollContainerRef.current.scrollBy({
         left: scrollAmount,
-        behavior: 'smooth'
+        behavior: "smooth",
       });
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <p>Loading...</p>
+      <div className="home-events-rail__loading" aria-busy="true">
+        <div className="yebone-skeleton h-48 w-full rounded-2xl" />
       </div>
     );
   }
 
-  if (allEvents.length === 0) {
+  if (allEvents.filter((event) => !isDemoCatalogItem(event)).length === 0) {
     return (
-      <div className="w-full home-events-rail dark:text-gray-200">
-        <div className="w-full mb-2 mt-4">
-          <h2 className="yebone-section-title dark:text-white mb-3">Scheduled Events</h2>
-          <h4 className="text-center mt-4 text-sm mb-4 dark:text-gray-400">No Scheduled Events!</h4>
-        </div>
-      </div>
+      <MarketplaceEmptyState
+        icon={HiOutlineCalendar}
+        title="No upcoming events"
+        message="Marketplace events, launches, and festivals will appear here. Explore the events page to see what's coming."
+        actionLabel="Browse events"
+        actionTo="/events"
+        secondaryLabel="Shop marketplace"
+        secondaryTo="/products"
+        className="home-empty-state--inline"
+      />
     );
   }
 
   return (
     <div className="w-full home-events-rail dark:text-gray-200">
-      <div className={`w-full mb-2 ${isMobile ? "mt-2" : "mt-4"}`}>
-        <div className="flex justify-between items-center mb-5">
-          <h2 className="yebone-section-title dark:text-white">Scheduled Events</h2>
-          
-          {isMobile && (
+      <div className={`w-full mb-2 ${isMobile ? "mt-0" : "mt-2"}`}>
+        <div className="flex justify-between items-center mb-4 md:mb-5">
+          <h2 className="yebone-section-title dark:text-white text-lg md:text-xl">Scheduled events</h2>
+
+          {isMobile && totalPages > 1 ? (
             <div className="flex gap-2">
-              <button 
-                onClick={() => scrollHorizontally('left')}
-                className="p-1 bg-gray-100 dark:bg-[#2b2b2b] rounded-full"
+              <button
+                type="button"
+                onClick={() => scrollHorizontally("left")}
+                className="home-events-rail__nav-btn"
+                aria-label="Scroll events left"
               >
-                <MdArrowBack className="text-[#29625D]" />
+                <MdArrowBack size={18} />
               </button>
-              <button 
-                onClick={() => scrollHorizontally('right')}
-                className="p-1 bg-gray-100 dark:bg-[#2b2b2b] rounded-full"
+              <button
+                type="button"
+                onClick={() => scrollHorizontally("right")}
+                className="home-events-rail__nav-btn"
+                aria-label="Scroll events right"
               >
-                <MdArrowForward className="text-[#29625D]" />
+                <MdArrowForward size={18} />
               </button>
             </div>
-          )}
+          ) : null}
         </div>
 
-        <div 
+        <div
           ref={scrollContainerRef}
-          className="overflow-x-auto mb-6 hide-scrollbar scroll-smooth"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="overflow-x-auto mb-6 hide-scrollbar scroll-smooth home-events-rail__scroll"
         >
-          <div className="flex gap-4 py-2">
-            {currentEvents.length > 0 ? (
-              currentEvents.map((event) => (
-                <div key={event._id} className={`${isMobile ? 'min-w-[85%]' : 'min-w-[200px] md:min-w-[250px] lg:min-w-[300px]'} flex-shrink-0`}>
-                  <EventCard data={event} />
-                </div>
-              ))
-            ) : (
-              <h4 className="text-center mt-4">No Events Available!</h4>
-            )}
+          <div className="flex gap-3 md:gap-4 py-1">
+            {currentEvents.map((event) => (
+              <div
+                key={event._id}
+                className={`home-events-rail__item${isMobile ? " home-events-rail__item--mobile" : ""}`}
+              >
+                <EventCard data={event} />
+              </div>
+            ))}
           </div>
         </div>
 
-        {!isMobile && totalPages > 1 && (
-          <div className="flex justify-between items-center mt-2">
-            <button
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-              className={`btn btn-primary flex items-center ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <MdArrowBack className="mr-2 text-[#29625D]" />
-              Previous
-            </button>
-            <span className='text-center text-[14px]'>{currentPage} / {totalPages}</span>
-            <button
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className={`btn btn-primary flex items-center ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              Next
-              <MdArrowForward className="ml-2 text-[#29625D]" />
-            </button>
+        {totalPages > 1 ? (
+          <div className={`flex items-center gap-4 ${isMobile ? "justify-center" : "justify-between"}`}>
+            {!isMobile ? (
+              <button
+                type="button"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="home-events-rail__page-btn"
+              >
+                <MdArrowBack size={18} />
+                Previous
+              </button>
+            ) : null}
+            <span className="text-sm text-gray-500 dark:text-gray-400 tabular-nums">
+              {currentPage} / {totalPages}
+            </span>
+            {!isMobile ? (
+              <button
+                type="button"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="home-events-rail__page-btn"
+              >
+                Next
+                <MdArrowForward size={18} />
+              </button>
+            ) : null}
           </div>
-        )}
-        
-        {isMobile && totalPages > 1 && (
-          <div className="flex justify-center items-center">
-            <span className='text-center text-[14px]'>{currentPage} / {totalPages}</span>
-          </div>
-        )}
+        ) : null}
+
+        <div className="mt-6 flex justify-center">
+          <Link
+            to="/events"
+            className="text-sm font-semibold text-yebone-primary hover:underline min-h-[44px] inline-flex items-center"
+          >
+            View all events →
+          </Link>
+        </div>
       </div>
     </div>
   );

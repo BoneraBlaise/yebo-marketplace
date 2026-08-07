@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { Card, Button, EmptyState } from "../../../design-system/components";
 import { logCustomerUIDiagnostics } from "../../diagnostics/CustomerUIDiagnostics";
 
@@ -19,7 +20,23 @@ export const WishlistItem = ({ item, onMoveToCart, onRemove }) => (
 );
 
 export const WishlistEmpty = () => (
-  <EmptyState title="Your wishlist is empty" description="Save items you love for later." action={<Button>Browse Products</Button>} />
+  <div className="rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 p-8 md:p-12 bg-gray-50/50 dark:bg-gray-900/50 text-center">
+    <span className="text-4xl mb-4 block" aria-hidden="true">💝</span>
+    <EmptyState
+      title="Your wishlist is empty"
+      description="Save items you love and come back to them anytime."
+      action={
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link to="/products">
+            <Button className="min-h-[44px]">Browse products</Button>
+          </Link>
+          <Link to="/best-selling">
+            <Button variant="outline" className="min-h-[44px]">View best sellers</Button>
+          </Link>
+        </div>
+      }
+    />
+  </div>
 );
 
 export const WishlistView = ({ items = [], onMoveToCart, onRemove }) => {

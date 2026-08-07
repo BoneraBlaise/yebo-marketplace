@@ -9,6 +9,7 @@ export { default as CategoryImage } from "./CategoryImage";
 export { default as HomeHero } from "./HomeHero";
 export { default as HomeFeatureStrip } from "./HomeFeatureStrip";
 export { default as HomeAIExperience } from "./HomeAIExperience";
+export { default as HomeYeboneBand } from "./HomeYeboneBand";
 export { default as HomeCategories } from "./HomeCategories";
 export { default as HomeProductRails } from "./HomeProductRails";
 export { default as HomeAIPicks } from "./HomeAIPicks";

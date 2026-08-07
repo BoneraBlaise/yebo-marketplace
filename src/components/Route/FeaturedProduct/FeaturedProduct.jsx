@@ -5,6 +5,8 @@ import { MdNavigateNext, MdOutlineNavigateBefore } from "react-icons/md";
 import { useMediaQuery } from "react-responsive";
 import { Link } from "react-router-dom";
 import ProductCard from "../../Marketplace/ProductCard";
+import { MarketplaceListingSkeleton } from "../../Marketplace";
+import { deprioritizeDemoCatalog } from "../../../utils/catalogQuality";
 import Cookies from "js-cookie";
 import Shopping from './1.jpg'
 
@@ -28,9 +30,11 @@ const FeaturedProduct = () => {
           const viewedCategories = new Set(recentlyViewed.map(p => p.category));
           
           // Filter products based on viewed categories
-          let recommended = allProducts.filter(product => 
-            viewedCategories.has(product.category) && 
-            !recentlyViewed.some(viewed => viewed._id === product._id)
+          let recommended = deprioritizeDemoCatalog(
+            allProducts.filter((product) =>
+              viewedCategories.has(product.category) &&
+              !recentlyViewed.some((viewed) => viewed._id === product._id)
+            )
           );
           
           // Sort by most viewed categories
@@ -81,8 +85,10 @@ const FeaturedProduct = () => {
   // Loading state
   if (!allProducts) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <p>Loading...</p>
+      <div className="max-w-screen dark:bg-[#1f1f1f]">
+        <div className={`${styles.section} mb-20`}>
+          <MarketplaceListingSkeleton count={8} />
+        </div>
       </div>
     );
   }

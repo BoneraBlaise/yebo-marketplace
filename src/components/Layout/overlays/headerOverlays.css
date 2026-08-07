@@ -1038,6 +1038,55 @@
   color: var(--yebone-header-overlay-text-muted, #5c6b66);
 }
 
+.yebone-header-notifications__skeleton {
+  display: grid;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.yebone-header-notifications__skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.yebone-header-notifications__skeleton-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.625rem;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: yebone-notif-shimmer 1.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.yebone-header-notifications__skeleton-lines {
+  flex: 1;
+  display: grid;
+  gap: 0.375rem;
+}
+
+.yebone-header-notifications__skeleton-line {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: yebone-notif-shimmer 1.2s ease-in-out infinite;
+}
+
+.yebone-header-notifications__skeleton-line--short {
+  width: 45%;
+}
+
+@keyframes yebone-notif-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 .yebone-header-notifications__footer {
   padding: 0.625rem;
   border-top: 1px solid var(--yebone-header-overlay-border, rgba(15, 23, 20, 0.08));

@@ -10,6 +10,8 @@ import { server } from "../../../server";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 import ProductCardReviews from "./ProductCardReviews";
+import { resolveProductDisplayImage } from "../../../utils/catalogQuality";
+import { handleProductImageError } from "../../../utils/productImageUtils";
 import "./productCard.css";
 
 const MobileProductCard = ({ data, isEvent }) => {
@@ -95,6 +97,9 @@ const MobileProductCard = ({ data, isEvent }) => {
   const rating = data.ratings || 0;
   const reviewCount = data.reviews?.length || 0;
 
+  const rawImageUrl = data.images?.[0]?.url;
+  const imageSrc = resolveProductDisplayImage(data, "card");
+
   return (
     <article className="ypc ypc--fluid" onClick={handleProductClick}>
       <div className="ypc__media">
@@ -104,10 +109,11 @@ const MobileProductCard = ({ data, isEvent }) => {
           onClick={handleProductClick}
         >
           <img
-            src={data.images && data.images[0]?.url}
+            src={imageSrc}
             alt={data.name || "Yebone product"}
             className={`ypc__img${data.stock === 0 ? " ypc__img--dimmed" : ""}`}
             loading="lazy"
+            onError={(e) => handleProductImageError(e, rawImageUrl)}
           />
         </Link>
 

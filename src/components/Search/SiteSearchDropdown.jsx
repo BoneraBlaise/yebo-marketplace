@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { HiOutlineSearch, HiOutlineTrendingUp } from "react-icons/hi";
+import { resolveProductDisplayImage } from "../../utils/catalogQuality";
 import "./global-marketplace-search.css";
 
 const TYPE_LABELS = {
@@ -20,15 +22,18 @@ const resolveHref = (item, searchTerm) => {
     case "event":
       return `/product/${item._id}?isEvent=true`;
     case "flashsale":
-      return `/product/${item._id}`;
     case "bid":
-      return `/product/${item._id}`;
     default:
       return `/product/${item._id}`;
   }
 };
 
-const resolveThumb = (item) => item.images?.[0]?.url || item.photos?.[0] || item.banner?.url;
+const resolveThumb = (item) => {
+  if (item.type === "product" || item.type === "flashsale" || item.type === "bid") {
+    return resolveProductDisplayImage(item, "thumb");
+  }
+  return item.images?.[0]?.url || item.photos?.[0] || item.banner?.url;
+};
 
 const resolveMeta = (item) => {
   if (item.type === "property_listing" || item.type === "property_curated") {
@@ -63,6 +68,9 @@ const SiteSearchDropdown = ({
 }) => {
   const hasSuggestions = searchData?.length > 0;
   const showPanel = showDiscovery || hasSuggestions || isLoading;
+  const trimmed = searchTerm?.trim();
+  const showEmptyDiscovery =
+    showDiscovery && !trimmed && !recentSearches.length && !trendingSearches.length;
 
   if (!showPanel) return null;
 
@@ -71,9 +79,14 @@ const SiteSearchDropdown = ({
   return (
     <div className={`home-search-suggest ${className}`.trim()} role="listbox" aria-label="Search suggestions">
       <div className="home-search-suggest__scroll">
-        {isLoading ? <div className="home-search-suggest__loading">Searching…</div> : null}
+        {isLoading ? (
+          <div className="home-search-suggest__loading" aria-busy="true">
+            <span className="home-search-suggest__spinner" aria-hidden="true" />
+            Searching marketplace…
+          </div>
+        ) : null}
 
-        {showDiscovery && !searchTerm?.trim() ? (
+        {showDiscovery && !trimmed ? (
           <>
             {recentSearches.length > 0 ? (
               <>
@@ -86,7 +99,7 @@ const SiteSearchDropdown = ({
                       className="home-search-suggest__chip"
                       onClick={() => onQuerySelect?.(query)}
                     >
-                      🕐 {query}
+                      {query}
                     </button>
                   ))}
                 </div>
@@ -95,27 +108,36 @@ const SiteSearchDropdown = ({
 
             {trendingSearches.length > 0 ? (
               <>
-                <div className="home-search-suggest__section-label">Trending</div>
+                <div className="home-search-suggest__section-label">
+                  <HiOutlineTrendingUp size={14} aria-hidden="true" /> Trending on Yebone
+                </div>
                 <div className="home-search-suggest__chip-row">
                   {trendingSearches.map((query) => (
                     <button
                       key={`trend-${query}`}
                       type="button"
-                      className="home-search-suggest__chip"
+                      className="home-search-suggest__chip home-search-suggest__chip--trending"
                       onClick={() => onQuerySelect?.(query)}
                     >
-                      🔥 {query}
+                      {query}
                     </button>
                   ))}
                 </div>
               </>
+            ) : null}
+
+            {showEmptyDiscovery ? (
+              <div className="home-search-suggest__empty">
+                <HiOutlineSearch size={22} aria-hidden="true" />
+                <p>Search products, property, vehicles, and events across Africa.</p>
+              </div>
             ) : null}
           </>
         ) : null}
 
         {hasSuggestions ? (
           <>
-            <div className="home-search-suggest__section-label">Results</div>
+            <div className="home-search-suggest__section-label">Top matches</div>
             {searchData.slice(0, 8).map((item) => {
               const currentIndex = rowIndex++;
               const isActive = currentIndex === activeIndex;
@@ -156,8 +178,11 @@ const SiteSearchDropdown = ({
           </>
         ) : null}
 
-        {searchTerm?.trim() && !isLoading && !hasSuggestions ? (
-          <div className="home-search-suggest__loading">No instant matches — press Enter to search all</div>
+        {trimmed && !isLoading && !hasSuggestions ? (
+          <div className="home-search-suggest__no-results">
+            <p>No instant matches for &ldquo;{trimmed}&rdquo;</p>
+            <span>Press Enter to search the full marketplace</span>
+          </div>
         ) : null}
       </div>
     </div>

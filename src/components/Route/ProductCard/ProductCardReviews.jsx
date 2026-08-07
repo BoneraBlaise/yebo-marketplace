@@ -4,7 +4,7 @@ const ProductCardReviews = ({ rating = 0, reviewCount = 0 }) => {
   const showRating = reviewCount > 0 && rating > 0;
 
   if (!showRating) {
-    return <p className="ypc__reviews-empty">No reviews yet</p>;
+    return null;
   }
 
   const rounded = Math.round(rating);

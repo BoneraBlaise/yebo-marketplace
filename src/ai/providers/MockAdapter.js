@@ -4,11 +4,11 @@ const delay = (ms = 800) => new Promise((r) => setTimeout(r, ms));
 
 const MOCK_RESPONSES = {
   default:
-    "YEBO can help you discover products across Yebone. This is a presentation preview — real AI connects through YIP when a provider is configured.",
+    "I can help you discover products from verified sellers across Yebone. Try asking for a category, brand, or budget.",
   search:
-    "Based on your query, YEBO would surface matching products from verified sellers. Connect a YIP provider adapter to enable live results.",
+    "I'll surface matching products from verified sellers. Try being specific — for example, \"wireless earbuds under RWF 50,000\".",
   style:
-    "For a complete look, YEBO would suggest complementary accessories. Full styling AI launches through YIP soon.",
+    "For a complete look, tell me the occasion or items you already have — I'll suggest complementary pieces from trusted sellers.",
 };
 
 export class MockAdapter extends BaseAdapter {

@@ -38,7 +38,7 @@ Fix any failures before new feature work.
 
 ## Dependencies
 
-- MongoDB running with vendor test account (`bonbreizy@gmail.com` / `YeboneVendorE2E2026!`)
+- MongoDB running; E2E credentials in `e2e/.env.e2e.local` (see `e2e/.env.e2e.example`)
 - Backend `.env` with JWT, Cloudinary, Mongo URI (do not commit)
 - Frontend proxy to `localhost:5000`
 

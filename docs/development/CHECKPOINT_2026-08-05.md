@@ -316,7 +316,7 @@ npm run dev
 npx playwright test e2e/tests/08-vendor-auth-unified.spec.js e2e/tests/09-global-marketplace-search.spec.js
 ```
 
-**Test account:** `bonbreizy@gmail.com` / `YeboneVendorE2E2026!`
+**E2E credentials:** Configure `e2e/.env.e2e.local` from `e2e/.env.e2e.example` (never commit passwords).
 
 ---
 

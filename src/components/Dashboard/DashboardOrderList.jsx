@@ -33,6 +33,8 @@ const DashboardOrderList = ({
         message={emptyMessage}
         actionLabel="Browse products"
         actionTo="/products"
+        secondaryLabel="View your dashboard"
+        secondaryTo="/dashboard-orders"
       />
     );
   }

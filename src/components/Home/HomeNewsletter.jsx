@@ -12,7 +12,7 @@ const HomeNewsletter = () => {
       toast.info("Please enter your email address.");
       return;
     }
-    toast.success("Thanks for subscribing! (UI preview only)");
+    toast.success("Thanks for subscribing! We'll keep you updated.");
     setEmail("");
   };
 

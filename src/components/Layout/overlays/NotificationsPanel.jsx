@@ -101,8 +101,18 @@ const NotificationsPanel = memo(({ onClose, isAuthenticated }) => {
       </div>
 
       {loading ? (
-        <div className="yebone-header-notifications__empty">
-          <p className="yebone-header-notifications__empty-text">Loading...</p>
+        <div className="yebone-header-notifications__empty" aria-busy="true" aria-label="Loading notifications">
+          <div className="yebone-header-notifications__skeleton">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="yebone-header-notifications__skeleton-row">
+                <span className="yebone-header-notifications__skeleton-icon" />
+                <span className="yebone-header-notifications__skeleton-lines">
+                  <span className="yebone-header-notifications__skeleton-line yebone-header-notifications__skeleton-line--short" />
+                  <span className="yebone-header-notifications__skeleton-line" />
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : displayItems.length === 0 ? (
         <div className="yebone-header-notifications__empty">

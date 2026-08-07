@@ -20,6 +20,8 @@ const DashboardWishlist = () => {
         message="Save products you love and come back to them anytime."
         actionLabel="Discover products"
         actionTo="/products"
+        secondaryLabel="View best sellers"
+        secondaryTo="/best-selling"
       />
     );
   }

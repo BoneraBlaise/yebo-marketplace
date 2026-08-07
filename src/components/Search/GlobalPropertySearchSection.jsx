@@ -71,7 +71,13 @@ const GlobalPropertySearchSection = ({ searchTerm, vertical = "all" }) => {
       ) : null}
 
       {!loading && listings.length === 0 ? (
-        <PropertyMobilityEmptyState compact title={`No ${title.toLowerCase()} found`} />
+        <PropertyMobilityEmptyState
+          compact
+          title={`No ${title.toLowerCase()} found`}
+          description={`We couldn't find ${title.toLowerCase()} matching "${term}". Try a nearby city or different keywords.`}
+          secondaryLabel="Browse all listings"
+          secondaryTo="/property-mobility"
+        />
       ) : null}
 
       {!loading && listings.length > 0 ? (

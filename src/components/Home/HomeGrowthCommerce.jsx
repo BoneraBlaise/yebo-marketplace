@@ -6,18 +6,9 @@ import ProductCard from "../Marketplace/ProductCard";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import { fetchGrowthCommerceAvailability, fetchPublicHomepage } from "../../services/growthCommerceService";
 
-const SECTION_ORDER = [
-  "heroBanner",
-  "campaignBanner",
-  "flashSaleSection",
-  "featuredProducts",
-  "trendingProducts",
-  "newArrivals",
-  "bestSellers",
-  "topVendors",
-];
+const BANNER_SECTION_KEYS = ["heroBanner", "campaignBanner"];
 
-const HomeGrowthCommerce = () => {
+const HomeGrowthCommerce = ({ bannersOnly = false }) => {
   const { products } = useSelector((state) => state.products);
   const [homepage, setHomepage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,9 +57,9 @@ const HomeGrowthCommerce = () => {
 
   if (loading) {
     return (
-      <div className="home-section home-section-enter">
+      <div className="home-section home-section--compact home-section-enter">
         <Container>
-          <ProductCardSkeleton count={4} />
+          <ProductCardSkeleton count={2} compact />
         </Container>
       </div>
     );
@@ -76,25 +67,40 @@ const HomeGrowthCommerce = () => {
 
   if (!homepage?.sections) return null;
 
+  const sectionKeys = bannersOnly
+    ? BANNER_SECTION_KEYS
+    : [
+        "heroBanner",
+        "campaignBanner",
+        "flashSaleSection",
+        "featuredProducts",
+        "trendingProducts",
+        "newArrivals",
+        "bestSellers",
+        "topVendors",
+      ];
+
   return (
     <>
-      {SECTION_ORDER.map((sectionKey) => {
+      {sectionKeys.map((sectionKey) => {
         const section = homepage.sections[sectionKey];
         if (!section?.enabled) return null;
 
         if (sectionKey === "heroBanner") {
           return (
-            <section key={sectionKey} className="home-section home-section-enter">
+            <section key={sectionKey} className="home-section home-section--compact home-section-enter">
               <Container>
-                <div className="rounded-3xl overflow-hidden bg-gradient-to-r from-yebone-primary/90 to-yebone-primary p-6 md:p-10 text-white">
+                <div className="rounded-3xl overflow-hidden bg-gradient-to-r from-yebone-primary/90 to-yebone-primary p-5 md:p-8 text-white">
                   <p className="text-sm uppercase tracking-wider opacity-90">Campaign spotlight</p>
-                  <h2 className="text-2xl md:text-4xl font-semibold mt-2">
+                  <h2 className="text-xl md:text-3xl font-semibold mt-2">
                     {section.title || section.campaign?.name || "Shop the latest deals"}
                   </h2>
-                  {section.subtitle && <p className="mt-3 max-w-2xl opacity-90">{section.subtitle}</p>}
+                  {section.subtitle && (
+                    <p className="mt-2 max-w-2xl opacity-90 text-sm md:text-base">{section.subtitle}</p>
+                  )}
                   <Link
                     to={section.ctaLink || "/products"}
-                    className="inline-flex mt-5 px-5 py-3 rounded-xl bg-white text-yebone-primary font-medium"
+                    className="inline-flex mt-4 px-5 py-2.5 rounded-xl bg-white text-yebone-primary font-medium text-sm"
                   >
                     Shop now
                   </Link>
@@ -106,16 +112,16 @@ const HomeGrowthCommerce = () => {
 
         if (sectionKey === "campaignBanner" && section.campaign) {
           return (
-            <section key={sectionKey} className="home-section home-section-enter">
+            <section key={sectionKey} className="home-section home-section--compact home-section-enter">
               <Container>
-                <div className="yebone-surface rounded-2xl p-5 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className="yebone-surface rounded-2xl p-4 md:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <p className="text-xs uppercase tracking-wider text-yebone-primary">Active campaign</p>
-                    <h3 className="text-xl md:text-2xl font-semibold dark:text-white mt-1">
+                    <h3 className="text-lg md:text-xl font-semibold dark:text-white mt-1">
                       {section.title || section.campaign.name}
                     </h3>
                   </div>
-                  <Link to="/products" className="yebone-btn-primary yebone-btn-lift">
+                  <Link to="/products" className="yebone-btn-primary yebone-btn-lift text-sm">
                     View deals
                   </Link>
                 </div>
@@ -123,6 +129,8 @@ const HomeGrowthCommerce = () => {
             </section>
           );
         }
+
+        if (bannersOnly) return null;
 
         const sectionProducts = resolveProducts(section);
         if (sectionProducts.length === 0 && sectionKey !== "topVendors") return null;

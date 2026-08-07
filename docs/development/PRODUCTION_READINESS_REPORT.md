@@ -4,7 +4,7 @@
 **Checkpoint:** `docs/development/CHECKPOINT_2026-08-05.md`  
 **Frontend:** `http://localhost:3000`  
 **Backend:** `http://localhost:5000`  
-**Test account:** `bonbreizy@gmail.com` (unified vendor + super admin)
+**E2E credentials:** Set via `e2e/.env.e2e.local` — not stored in the repository.
 
 ---
 

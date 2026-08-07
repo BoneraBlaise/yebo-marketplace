@@ -84,10 +84,10 @@
 }
 
 .auth-logo {
-  height: 3rem;
-  width: auto;
   margin: 0 auto 1.25rem;
-  display: block;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .auth-floating-field {

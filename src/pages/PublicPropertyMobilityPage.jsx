@@ -206,7 +206,7 @@ const PublicPropertyMobilityPage = () => {
             ))}
           </div>
         ) : !visibleListings.length ? (
-          <PropertyMobilityEmptyState onReset={handleReset} />
+          <PropertyMobilityEmptyState onReset={handleReset} secondaryLabel="Browse shopping" secondaryTo="/products" />
         ) : browsingMode ? (
           <PropertyListingsCarousel
             listings={visibleListings}

@@ -3,12 +3,45 @@
  * Mobile-first; desktop layouts preserved at 901px+
  */
 
+/* Global horizontal scroll guard */
+html {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+#root {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+/*
+ * iOS Safari auto-zooms when focused inputs are below 16px.
+ * Apply minimum 16px to all form fields on touch viewports.
+ */
+@media (max-width: 900px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* Prevent horizontal scroll on small viewports */
 @media (max-width: 900px) {
   .home-page,
   .dashboard-page,
-  .marketplace-page {
+  .marketplace-page,
+  .product-details-page,
+  .auth-page,
+  .checkout-page,
+  .profile-hub,
+  .property-mobility-page {
     overflow-x: clip;
+    max-width: 100%;
   }
 
   /* Minimum touch targets (44px) */

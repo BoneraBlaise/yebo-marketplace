@@ -4,6 +4,7 @@ import {
   HiOutlineShoppingBag,
   HiOutlineHome,
   HiOutlineTruck,
+  HiOutlineArrowRight,
 } from "react-icons/hi";
 import { Container, SectionTitle } from "../ui";
 import {
@@ -15,82 +16,81 @@ const PILLARS = [
   {
     id: "shopping",
     title: "Shopping",
-    description: "Products, fashion, tech, groceries, and everyday marketplace deals.",
+    description: "Fashion, tech, home essentials, and everyday deals from verified sellers.",
     icon: HiOutlineShoppingBag,
     to: "/products",
-    accent: "from-yebone-primary to-yebone-primary-dark",
+    cta: "Browse products",
+    chips: ["Fashion", "Electronics", "Home", "Beauty"],
+    chipTo: (label) => `/products?search=${encodeURIComponent(label)}`,
+    theme: "home-hub-card--shopping",
   },
   {
     id: "property",
-    title: "Property & Real Estate",
-    description: "Apartments, houses, land, and commercial property across Africa.",
+    title: "Property",
+    description: "Apartments, houses, land, and commercial spaces listed across Africa.",
     icon: HiOutlineHome,
     to: "/property-mobility?listingType=property",
-    accent: "from-emerald-600 to-teal-700",
+    cta: "Explore property",
+    chips: PROPERTY_CATEGORIES.slice(0, 4).map((item) => item.label),
+    chipTo: (label) => {
+      const match = PROPERTY_CATEGORIES.find((item) => item.label === label);
+      return match
+        ? `/property-mobility?listingType=property&category=${match.value}`
+        : "/property-mobility?listingType=property";
+    },
+    theme: "home-hub-card--property",
   },
   {
     id: "mobility",
-    title: "Vehicles & Mobility",
-    description: "Cars, motorcycles, trucks, and verified mobility listings.",
+    title: "Mobility",
+    description: "Cars, motorcycles, trucks, and mobility listings from trusted sellers.",
     icon: HiOutlineTruck,
     to: "/property-mobility?listingType=vehicle",
-    accent: "from-blue-600 to-indigo-700",
+    cta: "Explore vehicles",
+    chips: MOBILITY_CATEGORIES.slice(0, 4).map((item) => item.label),
+    chipTo: (label) => {
+      const match = MOBILITY_CATEGORIES.find((item) => item.label === label);
+      return match
+        ? `/property-mobility?listingType=vehicle&category=${match.value}`
+        : "/property-mobility?listingType=vehicle";
+    },
+    theme: "home-hub-card--mobility",
   },
 ];
 
 const HomeMarketplaceHub = () => (
-  <section className="home-section home-surface-0">
+  <section className="home-section home-section--compact home-surface-0" aria-label="Marketplace hub">
     <Container>
       <SectionTitle
-        title="Everything in one marketplace"
-        subtitle="Shop products, browse real estate, and explore vehicles — all on Yebone with one account."
+        title="One marketplace, three worlds"
+        subtitle="Shop products, find property, and browse vehicles — equally at home on Yebone."
         align="left"
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
-        {PILLARS.map(({ id, title, description, icon: Icon, to, accent }) => (
-          <article
-            key={id}
-            className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6 flex flex-col gap-4 shadow-sm hover:shadow-md transition"
-          >
-            <div className={`inline-flex w-12 h-12 rounded-xl items-center justify-center text-white bg-gradient-to-br ${accent}`}>
-              <Icon size={24} />
+      <div className="home-hub-grid">
+        {PILLARS.map(({ id, title, description, icon: Icon, to, cta, chips, chipTo, theme }) => (
+          <article key={id} className={`home-hub-card ${theme}`}>
+            <div className="home-hub-card__header">
+              <div className="home-hub-card__icon" aria-hidden="true">
+                <Icon size={22} />
+              </div>
+              <div>
+                <h3 className="home-hub-card__title">{title}</h3>
+                <p className="home-hub-card__desc">{description}</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">{description}</p>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-auto">
-              {id === "shopping" ? (
-                <Link to="/products" className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200">
-                  Browse products
+
+            <div className="home-hub-card__chips">
+              {chips.map((label) => (
+                <Link key={label} to={chipTo(label)} className="home-hub-card__chip">
+                  {label}
                 </Link>
-              ) : null}
-              {id === "property"
-                ? PROPERTY_CATEGORIES.map((item) => (
-                    <Link
-                      key={item.value}
-                      to={`/property-mobility?listingType=property&category=${item.value}`}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200"
-                    >
-                      {item.label}
-                    </Link>
-                  ))
-                : null}
-              {id === "mobility"
-                ? MOBILITY_CATEGORIES.map((item) => (
-                    <Link
-                      key={item.value}
-                      to={`/property-mobility?listingType=vehicle&category=${item.value}`}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 hover:bg-gray-200"
-                    >
-                      {item.label}
-                    </Link>
-                  ))
-                : null}
+              ))}
             </div>
-            <Link to={to} className="text-sm font-semibold text-yebone-primary hover:underline">
-              Explore {id === "shopping" ? "shopping" : id === "property" ? "property" : "mobility"} →
+
+            <Link to={to} className="home-hub-card__cta">
+              {cta}
+              <HiOutlineArrowRight size={16} aria-hidden="true" />
             </Link>
           </article>
         ))}

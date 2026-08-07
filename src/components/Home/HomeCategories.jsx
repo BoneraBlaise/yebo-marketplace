@@ -2,23 +2,18 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Container, SectionTitle } from "../ui";
 import { HOME_MARKETPLACE_CATEGORIES } from "./homeMarketplaceCategories";
-import { buildMainCategoryUrl } from "./mainCategoryHierarchy";
 import HomeCategoryCard from "./HomeCategoryCard";
 import "./homeCategories.css";
 
 const HomeCategories = () => {
   const navigate = useNavigate();
 
-  const handleMainCategoryClick = (category) => {
-    navigate(buildMainCategoryUrl(category.title));
-  };
-
   return (
-    <section className="home-section home-surface-0">
+    <section className="home-section home-section--compact home-surface-0">
       <Container>
         <SectionTitle
           title="Shop by category"
-          subtitle="Browse main categories — fashion, tech, home, groceries, and more on Yebone."
+          subtitle="Phones, fashion, property, mobility, groceries, and more — curated for Yebone."
           align="left"
         />
 
@@ -27,7 +22,7 @@ const HomeCategories = () => {
             <div key={category.id} role="listitem">
               <HomeCategoryCard
                 title={category.title}
-                onClick={() => handleMainCategoryClick(category)}
+                onClick={() => navigate(category.href)}
               />
             </div>
           ))}

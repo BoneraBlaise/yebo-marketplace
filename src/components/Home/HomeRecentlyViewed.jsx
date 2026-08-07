@@ -3,11 +3,11 @@ import RecentlyViewed from "../Route/Recent/RecentlyViewed";
 import { Container, SectionTitle } from "../ui";
 
 const HomeRecentlyViewed = () => (
-  <section id="recently-viewed" className="home-section home-section--compact home-surface-3">
+    <section id="recently-viewed" className="home-section home-section--compact home-surface-3">
     <Container>
       <SectionTitle
-        title="Continue browsing"
-        subtitle="Pick up where you left off."
+        title="Continue where you left off"
+        subtitle="Your recently viewed products — ready when you are."
         align="left"
         className="mb-2"
       />

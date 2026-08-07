@@ -1,4 +1,4 @@
-import YeboneLogo from "./Logo/logo.png";
+import YeboneLogo from "./Logo/logomobile.png";
 import hero from "./hero.png";
 
 const Hero1 = hero;

@@ -50,6 +50,7 @@ const HomeHeader = () => {
   const breakpoint = useBreakpoint();
   const isCompactHeader = breakpoint === "mobile" || breakpoint === "tablet";
   const isSheetProfile = isCompactHeader;
+  const isHomePage = pathname === "/";
 
   const createActions = isSeller ? CREATE_ACTIONS : GUEST_CREATE_ACTIONS;
   const createSheetTitle = isSeller ? "Create" : "Start selling";
@@ -208,11 +209,15 @@ const HomeHeader = () => {
       <header
         className={`home-header sticky top-0 z-50 home-glass shadow-sm${
           isScrolled ? " home-header--scrolled" : ""
-        }`}
+        }${isHomePage ? " home-header--home" : ""}`}
       >
-        <div className="home-header__utility hidden lg:block">
+        <div className={`home-header__utility hidden lg:block${isHomePage ? " home-header__utility--minimal" : ""}`}>
           <Container className="home-header__utility-inner">
-            <p className="home-header__utility-tagline">Yebone — Everything in one place</p>
+            {!isHomePage ? (
+              <p className="home-header__utility-tagline">Yebone — Everything in one place</p>
+            ) : (
+              <span className="home-header__utility-spacer" aria-hidden="true" />
+            )}
             <div className="home-header__utility-actions">
               <CountrySwitcher />
               <span className="home-header__utility-divider" aria-hidden="true" />
@@ -239,9 +244,11 @@ const HomeHeader = () => {
           <div className="home-header__main-row">
             <div className="home-header__brand shrink-0">
               <YeboneLogo size="md" className="home-header__logo" />
-              <span className="home-header__logo-tagline hidden lg:block">
-                Everything in one place
-              </span>
+              {!isHomePage ? (
+                <span className="home-header__logo-tagline hidden lg:block">
+                  Everything in one place
+                </span>
+              ) : null}
             </div>
 
             <div className={`home-header__categories-wrap hidden lg:block shrink-0${dropDown ? " is-open" : ""}`}>
@@ -409,11 +416,13 @@ const HomeHeader = () => {
           </div>
         </Container>
 
-        <div className="home-header__nav-strip hidden lg:block">
-          <Container className="home-header__nav-inner">
-            <Navbar />
-          </Container>
-        </div>
+        {!isHomePage ? (
+          <div className="home-header__nav-strip hidden lg:block">
+            <Container className="home-header__nav-inner">
+              <Navbar />
+            </Container>
+          </div>
+        ) : null}
       </header>
 
       {isSheetProfile && (

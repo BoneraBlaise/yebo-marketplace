@@ -1,7 +1,7 @@
-/** Presentation-only placeholder data — public brand: YEBO, platform: YIP. */
+/** SAMPLE DATA ONLY — UI layout placeholders, not live marketplace records. */
 
 export const AI_WELCOME_MESSAGE =
-  "Hi! I'm YEBO — your Yebone shopping companion. Ask me anything about products, styles, or deals across Africa. Powered by YIP.";
+  "Hi! I'm YEBO — your Yebone shopping companion. Ask me about products, styles, or deals across Africa.";
 
 export const AI_SUGGESTED_PROMPTS = [
   "Find white sneakers under 50,000 RWF",
@@ -122,9 +122,9 @@ export const PRODUCT_AI_SECTIONS = {
 
 export const MOCK_AI_RESPONSES = {
   default:
-    "YEBO can help you discover products across Yebone. Powered by YIP — real provider integration coming soon.",
+    "I can help you discover products from verified sellers across Yebone. Try asking for a category, brand, or budget.",
   search:
-    "Based on your query, YEBO would surface matching products from verified sellers. Connect a YIP provider when ready.",
+    "I'll surface matching products from verified sellers. Try being specific — for example, \"wireless earbuds under RWF 50,000\".",
   style:
-    "For a complete look, YEBO would suggest complementary accessories. Full styling AI launches through YIP soon.",
+    "For a complete look, tell me the occasion or items you already have — I'll suggest complementary pieces from trusted sellers.",
 };

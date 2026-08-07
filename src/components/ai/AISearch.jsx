@@ -47,7 +47,7 @@ const AISearch = ({ className, placeholder = "Ask YEBO to find products..." }) =
         />
       </div>
       <p className="text-[11px] text-gray-400 mt-3">
-        Tap to chat with YEBO · Powered by YIP
+        Tap to chat with YEBO — your AI shopping assistant
       </p>
     </div>
   );

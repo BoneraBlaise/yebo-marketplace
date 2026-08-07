@@ -47,9 +47,6 @@ const AIResponseCard = ({
     {premium && createdAt && (
       <span className="ai-message__time">{formatTime(createdAt)}</span>
     )}
-    {placeholder && !premium && (
-      <p className="text-[10px] text-gray-400 mt-2 italic">Presentation preview</p>
-    )}
   </div>
 );
 

@@ -26,7 +26,7 @@ import { createProviderFactory } from "../providers/ProviderFactory";
 import { connectOrchestrationToSDK } from "../orchestration/OrchestrationSDKBridge";
 import { YIPContext } from "./YIPContext";
 
-const WELCOME_MESSAGE = `Hi! I'm ${YIP_PUBLIC_NAME} — your Yebone shopping companion. Ask me anything about products, styles, or deals across Africa. Powered by YIP.`;
+const WELCOME_MESSAGE = `Hi! I'm ${YIP_PUBLIC_NAME} — your Yebone shopping companion. Ask me about products, styles, or deals across Africa.`;
 
 export const YIPProvider = ({ children, config: configOverride }) => {
   const sessionRef = useRef(createSession());

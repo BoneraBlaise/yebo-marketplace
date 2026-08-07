@@ -4,9 +4,9 @@
  */
 const { test, expect } = require("@playwright/test");
 const path = require("path");
+const { vendorCredentials, skipIfMissing } = require("../helpers/credentials");
 
-const EMAIL = process.env.E2E_VENDOR_EMAIL || process.env.E2E_SELLER_EMAIL || "bonbreizy@gmail.com";
-const PASSWORD = process.env.E2E_VENDOR_PASSWORD || process.env.E2E_SELLER_PASSWORD || "YeboneVendorE2E2026!";
+const vendorCreds = vendorCredentials();
 const API = process.env.E2E_BACKEND_URL
   ? `${process.env.E2E_BACKEND_URL}/api/v2`
   : "http://127.0.0.1:5000/api/v2";
@@ -46,8 +46,8 @@ async function loginViaUI(page) {
     (res) => res.url().includes("/getSeller") && res.status() === 200,
     { timeout: 45000 }
   );
-  await page.locator("#email").fill(EMAIL);
-  await page.locator("#password").fill(PASSWORD);
+  await page.locator("#email").fill(vendorCreds.email);
+  await page.locator("#password").fill(vendorCreds.password);
   await page.locator('button[type="submit"]').click();
   await page.waitForURL(/\/(profile|dashboard|$)/, { timeout: 30000 });
   await sellerReady;
@@ -97,6 +97,10 @@ async function waitForCreateResponse(page, pathFragment, click) {
 }
 
 test.describe("Unified vendor auth E2E", () => {
+  test.beforeEach(({}, testInfo) => {
+    skipIfMissing(testInfo, vendorCreds, "E2E_VENDOR_EMAIL / E2E_VENDOR_PASSWORD");
+  });
+
   test("vendor session uses single user JWT across create flows", async ({ page, context }) => {
     const authHeaders = [];
 

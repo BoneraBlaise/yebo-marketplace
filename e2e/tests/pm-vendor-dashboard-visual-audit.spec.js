@@ -4,18 +4,19 @@
 const { test, expect } = require("@playwright/test");
 const path = require("path");
 const fs = require("fs");
+const { vendorCredentials, skipIfMissing } = require("../helpers/credentials");
 
-const EMAIL = process.env.E2E_VENDOR_EMAIL || "bonbreizy@gmail.com";
-const PASSWORD = process.env.E2E_VENDOR_PASSWORD || "YeboneVendorE2E2026!";
+const vendorCreds = vendorCredentials();
 const API = "http://127.0.0.1:5000/api/v2";
 const OUT = path.join(__dirname, "..", "audit-screenshots", "pm-vendor-dashboard");
 
 test.describe("PM Vendor Dashboard Visual Audit", () => {
-  test("capture rendered UI evidence", async ({ page, context, request }) => {
+  test("capture rendered UI evidence", async ({ page, context, request }, testInfo) => {
+    skipIfMissing(testInfo, vendorCreds, "E2E_VENDOR_EMAIL / E2E_VENDOR_PASSWORD");
     fs.mkdirSync(OUT, { recursive: true });
 
     const loginRes = await request.post(`${API}/user/login-user`, {
-      data: { email: EMAIL, password: PASSWORD },
+      data: { email: vendorCreds.email, password: vendorCreds.password },
     });
     expect(loginRes.ok()).toBeTruthy();
     const { token } = await loginRes.json();

@@ -1,6 +1,7 @@
 /**
  * Level 1 marketplace category hierarchy (presentation + product scope).
- * Homepage shows MAIN_CATEGORIES only. Subcategories live on category pages as chips.
+ * Homepage grid uses HOME_DISPLAY_CATEGORIES in homeMarketplaceCategories.js.
+ * Subcategories live on category pages as chips.
  */
 import { categoriesData } from "../../static/data";
 import { resolveCategoryPhoto } from "./categoryPhotoMap";

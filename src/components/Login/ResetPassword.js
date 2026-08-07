@@ -80,7 +80,6 @@ const ResetPassword = () => {
       <AuthLayout
         title="Reset password"
         subtitle={`Choose a strong new password for your ${MARKETPLACE_NAME} account.`}
-        showLogo={false}
       >
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
         <div>
