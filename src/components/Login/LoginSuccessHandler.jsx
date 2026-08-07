@@ -1,44 +1,58 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import axios from 'axios';
 import { syncVendorAuthToken } from "../../config/vendorSession";
-import { loadUser } from "../../redux/actions/user";
 import { clearSellerSessionSkip, tryResumeSellerSession } from "../../utils/sellerSession";
+import { server } from "../../server";
 import { toast } from 'react-toastify';
 
 const LoginSuccessHandler = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [searchParams] = useSearchParams();
-  const location = useLocation();
   
   useEffect(() => {
-    const token = searchParams.get('token');
     const error = searchParams.get('error');
 
     if (error) {
       toast.error(error === 'google_auth_failed' 
         ? 'Google authentication failed' 
-        : 'Authentication failed');
+        : decodeURIComponent(error));
       navigate('/login');
       return;
     }
 
-    if (token) {
-      syncVendorAuthToken(token);
-      clearSellerSessionSkip();
-      dispatch(loadUser()).then(() => dispatch(tryResumeSellerSession()));
-      toast.success('Login Successful!');
-      
-      const redirectUrl = searchParams.get('redirect') || '/profile';
-      navigate(redirectUrl);
-    } else {
-      toast.error('Login failed - No token received');
-      navigate('/login');
-    }
-  }, [dispatch, navigate, searchParams, location]);
+    const completeOAuthLogin = async () => {
+      try {
+        const { data } = await axios.get(`${server}/user/getuser`, {
+          withCredentials: true,
+        });
 
-  // Show a loading state while processing
+        if (data.token) {
+          syncVendorAuthToken(data.token);
+        }
+
+        dispatch({
+          type: 'LoadUserSuccess',
+          payload: data.user,
+        });
+        clearSellerSessionSkip();
+        await dispatch(tryResumeSellerSession());
+        toast.success('Login Successful!');
+
+        const redirectUrl = searchParams.get('redirect') || '/profile';
+        navigate(redirectUrl);
+      } catch (err) {
+        console.error('[LoginSuccess] OAuth session restore failed', err);
+        toast.error('Login failed - please try again');
+        navigate('/login');
+      }
+    };
+
+    completeOAuthLogin();
+  }, [dispatch, navigate, searchParams]);
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
@@ -49,4 +63,4 @@ const LoginSuccessHandler = () => {
   );
 };
 
-export default LoginSuccessHandler; 
+export default LoginSuccessHandler;

@@ -36,17 +36,12 @@ const Login = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
     const error = params.get("error");
 
-    if (token) {
-      syncVendorAuthToken(token);
-      toast.success(t("auth.googleLoginSuccess"));
-      navigate("/");
-    } else if (error) {
+    if (error) {
       toast.error(decodeURIComponent(error));
     }
-  }, [navigate, t]);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
