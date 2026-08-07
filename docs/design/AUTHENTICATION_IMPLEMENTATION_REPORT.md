@@ -154,39 +154,118 @@ npm run test:auth
 
 ---
 
-## 6. Remaining Production Tasks
+## 8. Phase 4 — Production SMTP Integration
+
+See audit: [`SMTP_PHASE4_AUDIT.md`](./SMTP_PHASE4_AUDIT.md)
+
+### 8.1 SMTP Configuration (Gmail)
+
+Production auth emails use **existing `utils/sendMail.js`** — no platform email layer.
+
+```env
+EMAIL_FROM=YEBONE <yeboneapp@gmail.com>
+SMPT_HOST=smtp.gmail.com
+SMPT_PORT=587
+SMPT_SERVICE=gmail
+SMPT_MAIL=yeboneapp@gmail.com
+SMPT_PASSWORD=        # Gmail App Password — never commit
+```
+
+| Setting | Value |
+|---------|-------|
+| Provider | Gmail SMTP |
+| Sender | `yeboneapp@gmail.com` |
+| Auth | App Password via `SMPT_PASSWORD` |
+| From header | `EMAIL_FROM` or fallback to `SMPT_MAIL` |
+
+### 8.2 Auth emails implemented
+
+| Email | Trigger | Template |
+|-------|---------|----------|
+| Welcome | Local activation success, dev signup bypass, **new Google signup** | `utils/email/welcomeEmail.js` |
+| Password reset OTP | Forgot password | `utils/email/passwordResetOtpEmail.js` (existing) |
+| Password changed | Successful OTP reset | Same file (existing) |
+
+Activation email remains plain text (not in scope — welcome sent after account is live).
+
+### 8.3 Error handling
+
+- `sendMail` wraps delivery in try/catch → returns `{ sent: false, error }` instead of throwing
+- Welcome emails are fire-and-forget — auth flows never blocked by SMTP failure
+- Audit log records `welcome_email_sent` success/failure
+
+### 8.4 Phase 4 files changed (backend)
+
+| File | Change |
+|------|--------|
+| `utils/sendMail.js` | Gmail service support, graceful errors |
+| `utils/authEmailService.js` | **New** — `sendWelcomeEmail()` |
+| `utils/email/emailBrand.js` | **New** — shared auth branding |
+| `utils/email/welcomeEmail.js` | **New** — welcome HTML template |
+| `utils/email/passwordResetOtpEmail.js` | Uses shared brand |
+| `config/passport.js` | Welcome on new Google signup |
+| `controller/user.js` | Welcome on activation + dev bypass |
+| `utils/googleAccountLink.js` | Returns `isNewUser` flag |
+| `.env.example` | Gmail SMTP documentation |
+| `utils/__tests__/welcomeEmail.test.js` | **New** |
+| `utils/__tests__/sendMail.test.js` | **New** — error handling |
+
+### 8.5 Phase 4 verification
+
+| Scenario | Result |
+|----------|--------|
+| Welcome template builds correctly | ✓ Unit test |
+| SMTP errors handled gracefully | ✓ Unit test |
+| Google new user flagged `isNewUser` | ✓ Unit test |
+| OTP email template unchanged | ✓ Existing Phase 3 |
+| Live Gmail delivery | Requires `SMPT_PASSWORD` in `.env` |
+
+---
+
+## 9. Remaining Production Tasks
 
 | Task | Phase |
 |------|-------|
-| OTP forgot password (6-digit, hashed, 10 min) | Phase 3 |
-| Branded HTML email templates | Phase 4 |
+| Set Gmail App Password in production `.env` | Deploy |
 | Auth-specific rate limiting | Phase 5 |
-| Email enumeration fixes on forgot-password | Phase 5 |
 | `npx playwright install` + full browser E2E in CI | Phase 6 |
-| Google Cloud Console redirect URI for production `BACKEND_URL` | Before prod deploy |
-| Align `BACKEND_URL` in `.env.example` (8000 → 5000 for local) | Config cleanup |
+| Google Cloud Console redirect URI for production `BACKEND_URL` | Deploy |
 
 ---
 
-## 7. Environment Variables (Google Auth)
-
-Required for Google Authentication in production:
+## 10. Environment Variables (Complete Auth)
 
 ```env
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-BACKEND_URL=https://your-api.example.com
-FRONTEND_URL=https://your-app.example.com
+# JWT / OAuth
 JWT_SECRET_KEY=
 JWT_EXPIRES=7d
-```
+ACTIVATION_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+BACKEND_URL=
+FRONTEND_URL=
 
-Google Console redirect URI:
-
-```
-{BACKEND_URL}/api/v2/auth/google/callback
+# Gmail SMTP (auth emails)
+EMAIL_FROM=YEBONE <yeboneapp@gmail.com>
+SMPT_HOST=smtp.gmail.com
+SMPT_PORT=587
+SMPT_SERVICE=gmail
+SMPT_MAIL=yeboneapp@gmail.com
+SMPT_PASSWORD=
 ```
 
 ---
 
-*Phase 3 (OTP Password Reset) will begin after Google Authentication is verified in staging/production.*
+*Sprint 4 Phases 2–5 complete. See [`AUTH_SECURITY_HARDENING_REPORT.md`](./AUTH_SECURITY_HARDENING_REPORT.md) for Phase 5.*
+
+---
+
+## 11. Phase 5 — Security Hardening (Summary)
+
+- Login rate limit: 10/15min per IP+email
+- Forgot/verify OTP IP rate limits
+- `tokenVersion` session invalidation on password reset/change
+- Cookie expiry aligned with `JWT_EXPIRES`
+- Password policy on registration + `PUT /update-user-password`
+- Generic login errors, audit logging, `Cache-Control: no-store`
+- Google duplicate-key race + avatar fallback
