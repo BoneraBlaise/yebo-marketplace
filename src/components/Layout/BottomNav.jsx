@@ -13,6 +13,7 @@ import { IoGridOutline } from "react-icons/io5";
 import { GrHomeRounded } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import UserAvatar from "../Auth/UserAvatar";
 
 const BottomNav = () => {
   const { t } = useTranslation();
@@ -212,9 +213,9 @@ const BottomNav = () => {
             }}
           >
             {isAuthenticated ? (
-              <img
-                src={user?.avatar?.url}
-                className="w-[25px] h-[25px] rounded-full"
+              <UserAvatar
+                user={user}
+                className="w-[25px] h-[25px] rounded-full object-cover"
                 alt="User Avatar"
               />
             ) : (

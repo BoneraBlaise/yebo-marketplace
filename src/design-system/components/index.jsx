@@ -2,6 +2,7 @@ import React from "react";
 import { focusRingClass } from "../accessibility";
 import { motionClasses } from "../motion/MotionSystem";
 import { logDesignSystemDiagnostics } from "../diagnostics/DesignSystemDiagnostics";
+import { getUserAvatarUrl, handleAvatarImgError } from "../../utils/userAvatar";
 
 const baseBtn = `inline-flex items-center justify-center rounded-xl font-Poppins font-semibold shadow-sm ${focusRingClass} ${motionClasses.micro} disabled:opacity-50 disabled:cursor-not-allowed`;
 
@@ -71,7 +72,28 @@ export const Chip = ({ children, onRemove }) => (
 );
 export const Avatar = ({ name, src, size = "md" }) => {
   const s = { sm: "w-8 h-8", md: "w-10 h-10", lg: "w-12 h-12" };
-  return src ? <img src={src} alt={name} className={`${s[size]} rounded-full object-cover`} /> : <div className={`${s[size]} rounded-full bg-yebone-primary text-white flex items-center justify-center text-sm font-bold`}>{name?.[0]}</div>;
+  if (!src && !name) {
+    return (
+      <div className={`${s[size]} rounded-full bg-yebone-primary text-white flex items-center justify-center text-sm font-bold`}>
+        ?
+      </div>
+    );
+  }
+  if (src) {
+    return (
+      <img
+        src={getUserAvatarUrl(src)}
+        alt={name}
+        className={`${s[size]} rounded-full object-cover`}
+        onError={handleAvatarImgError}
+      />
+    );
+  }
+  return (
+    <div className={`${s[size]} rounded-full bg-yebone-primary text-white flex items-center justify-center text-sm font-bold`}>
+      {name?.[0]}
+    </div>
+  );
 };
 export const Tooltip = ({ children, text }) => <span title={text} className="relative">{children}</span>;
 export const Popover = ({ open, children }) => open ? <div className="absolute z-[1500] mt-1 p-2 rounded-lg shadow-lg bg-white dark:bg-gray-900 border">{children}</div> : null;

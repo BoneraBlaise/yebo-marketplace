@@ -12,6 +12,7 @@ import DashboardSidebar, { DASHBOARD_TITLES } from "./DashboardSidebar";
 import VendorSidebar, { VENDOR_TITLES } from "./VendorSidebar";
 import AdminSidebar, { ADMIN_TITLES } from "./AdminSidebar";
 import AdminTopbar from "./AdminTopbar";
+import UserAvatar from "../Auth/UserAvatar";
 import PageMeta from "../ui/PageMeta";
 import SellerCreateTrigger from "../seller-experience/SellerCreateTrigger";
 
@@ -130,8 +131,8 @@ const DashboardLayout = ({
                     to={`/shop/${seller?._id}`}
                     className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl yebone-surface"
                   >
-                    <img
-                      src={seller?.avatar?.url}
+                    <UserAvatar
+                      user={seller}
                       alt=""
                       className="w-8 h-8 rounded-full object-cover border border-yebone-primary/20"
                     />
@@ -152,8 +153,8 @@ const DashboardLayout = ({
                     className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl yebone-surface"
                     onClick={() => setActive(1)}
                   >
-                    <img
-                      src={user?.avatar?.url}
+                    <UserAvatar
+                      user={user}
                       alt=""
                       className="w-8 h-8 rounded-full object-cover border border-yebone-primary/20"
                     />

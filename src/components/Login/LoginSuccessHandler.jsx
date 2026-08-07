@@ -39,8 +39,15 @@ const LoginSuccessHandler = () => {
         });
         clearSellerSessionSkip();
         await dispatch(tryResumeSellerSession());
-        toast.success('Login Successful!');
 
+        const isNewGoogleUser = searchParams.get('newUser') === '1';
+        if (isNewGoogleUser) {
+          toast.success('Welcome to YEBONE');
+          navigate('/');
+          return;
+        }
+
+        toast.success('Login Successful!');
         const redirectUrl = searchParams.get('redirect') || '/profile';
         navigate(redirectUrl);
       } catch (err) {

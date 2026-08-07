@@ -7,7 +7,7 @@ import { socketUrl } from "../config/serverConfig";
 import { COMMUNICATION_IDENTITY, getTokenForIdentity } from "../config/communicationIdentity";
 import { getAuthToken, getSellerToken } from "../config/authStorage";
 import { inboxPathForIdentity } from "../config/inboxIdentity";
-import { notifyInboxRefresh, optimizeProductImage } from "../utils/productImageUtils";
+import { getUserAvatarUrl } from "../utils/userAvatar";
 import MessageToast from "../components/Communication/MessageToast";
 
 const isMessagingRoute = (pathname) =>
@@ -57,13 +57,16 @@ const useInboxRealtimeSync = () => {
 
       if (isBuyerIdentity) {
         senderName = seller?.name || "Seller";
-        avatarUrl = seller?.avatar?.url || null;
+        avatarUrl = getUserAvatarUrl(seller);
         if (senderId && String(seller?._id) !== senderId) {
           senderName = "Seller";
         }
       } else {
         senderName = user?.name && senderId === String(user?._id) ? user.name : "Customer";
-        avatarUrl = user?.avatar?.url && senderId === String(user?._id) ? user.avatar.url : null;
+        avatarUrl =
+          user?.avatar?.url && senderId === String(user?._id)
+            ? getUserAvatarUrl(user)
+            : null;
         if (senderId && String(user?._id) !== senderId) {
           senderName = "Customer";
         }

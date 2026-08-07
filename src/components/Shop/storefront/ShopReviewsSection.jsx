@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import Ratings from "../../Products/Ratings";
 import ShopEmptyState from "./ShopEmptyState";
 import { aggregateReviews } from "../../../utils/shopStorefrontUtils";
+import UserAvatar from "../../Auth/UserAvatar";
 
 const ShopReviewsSection = ({ products = [], stats }) => {
   const [helpful, setHelpful] = useState({});
@@ -48,12 +49,10 @@ const ShopReviewsSection = ({ products = [], stats }) => {
         {reviews.slice(0, 12).map((review, index) => (
           <article key={`${review._id || index}-${review.createdAt}`} className="shop-review-card">
             <div className="flex gap-3">
-              <img
-                src={review.user?.avatar?.url || "https://via.placeholder.com/48"}
+              <UserAvatar
+                user={review.user}
                 alt=""
                 className="w-10 h-10 rounded-full object-cover"
-                width={40}
-                height={40}
               />
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-2">

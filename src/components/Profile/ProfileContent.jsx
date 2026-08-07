@@ -33,6 +33,7 @@ import {
 import CommissionDashboard from "../Commission/CommissionDashboard";
 import { resolveSellerNavAction } from "../../utils/sellerNav";
 import { Button, Badge } from "../ui";
+import UserAvatar from "../Auth/UserAvatar";
 
 const ProfileContent = ({ active, setActive }) => {
   const { user, error, successMessage, loading } = useSelector((state) => state.user);
@@ -122,8 +123,8 @@ const ProfileContent = ({ active, setActive }) => {
           </div>
           <div className="flex justify-center w-full">
             <div className="relative">
-              <img
-                src={user?.avatar?.url}
+              <UserAvatar
+                user={user}
                 className="w-[140px] h-[140px] rounded-full object-cover border-[3px] border-yebone-primary shadow-lg"
                 alt={user?.name || "Profile"}
               />

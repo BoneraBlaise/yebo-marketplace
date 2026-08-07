@@ -27,6 +27,7 @@ import MobileCreateActionSheet from "../seller-experience/MobileCreateActionShee
 import ProfileHub from "../Layout/ProfileHub";
 import CreateMenuPopover from "../Layout/CreateMenuPopover";
 import AuthGuestModal from "../Auth/AuthGuestModal";
+import UserAvatar from "../Auth/UserAvatar";
 import YeboneLogo from "./YeboneLogo";
 import SkipToContent from "../Layout/SkipToContent";
 import { useBreakpoint } from "../../design-system/responsive/useBreakpoint";
@@ -395,8 +396,8 @@ const HomeHeader = () => {
                   aria-haspopup="dialog"
                   aria-label={isAuthenticated ? "Account menu" : "Sign in"}
                 >
-                  {isAuthenticated && user?.avatar?.url ? (
-                    <img src={user.avatar.url} alt="" className="home-header__avatar" />
+                  {isAuthenticated ? (
+                    <UserAvatar user={user} alt="" className="home-header__avatar" />
                   ) : (
                     <div className="home-header__avatar home-header__avatar--placeholder">
                       <CgProfile size={20} className="text-yebone-primary" />

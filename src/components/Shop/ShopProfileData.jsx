@@ -5,6 +5,7 @@ import { getAllProductsShop } from "../../redux/actions/product";
 import ProductCard from "../Route/ProductCard/ProductCard";
 import Ratings from "../Products/Ratings";
 import { getAllEventsShop } from "../../redux/actions/event";
+import UserAvatar from "../Auth/UserAvatar";
 
 const ShopProfileData = ({ isOwner }) => {
   const { products } = useSelector((state) => state.products);
@@ -82,8 +83,8 @@ const ShopProfileData = ({ isOwner }) => {
         <div className="w-full">
           {allReviews && allReviews.map((item, index) => (
             <div className="w-full flex mx-2 my-4" key={index}>
-              <img
-                src={item.user.avatar?.url}
+              <UserAvatar
+                user={item.user}
                 className="w-12 h-12 rounded-full shadow-md hover:scale-105 transform transition-all duration-300"
                 alt="reviewer_image"
               />

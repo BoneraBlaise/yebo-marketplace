@@ -27,6 +27,8 @@ function formatCountdown(ms) {
   return `${min}:${String(sec).padStart(2, "0")}`;
 }
 
+const SESSION_EXPIRED_PATTERN = /session has expired|reset session has expired|reset link has expired/i;
+
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -66,9 +68,12 @@ const ForgotPassword = () => {
           }
         })
         .catch((err) => {
-          toast.error(
-            err.response?.data?.message || "Invalid or expired reset link."
-          );
+          const message = err.response?.data?.message || "Invalid or expired reset link.";
+          if (SESSION_EXPIRED_PATTERN.test(message)) {
+            setStep("sessionExpired");
+          } else {
+            toast.error(message);
+          }
         })
         .finally(() => setProcessing(false));
     }
@@ -174,7 +179,12 @@ const ForgotPassword = () => {
         setTimeout(() => navigate("/login"), 3000);
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to reset password");
+      const message = err.response?.data?.message || "Failed to reset password";
+      if (SESSION_EXPIRED_PATTERN.test(message)) {
+        setStep("sessionExpired");
+      } else {
+        toast.error(message);
+      }
     } finally {
       setProcessing(false);
     }
@@ -182,6 +192,37 @@ const ForgotPassword = () => {
 
   const passwordsMatch =
     confirmPassword.length > 0 && newPassword === confirmPassword;
+
+  if (step === "sessionExpired") {
+    return (
+      <AuthPageChrome>
+        <AuthLayout
+          title="Session expired"
+          subtitle="Your password reset session has expired. Request a new verification code to continue."
+        >
+          <div className="space-y-4 py-2">
+            <Button
+              type="button"
+              size="lg"
+              className="w-full yebone-btn-lift"
+              onClick={() => {
+                setResetSessionToken("");
+                setOtp("");
+                setStep("email");
+              }}
+            >
+              Request New Code
+            </Button>
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+              <Link to="/login" className="font-semibold text-yebone-primary hover:underline">
+                Back to Login
+              </Link>
+            </p>
+          </div>
+        </AuthLayout>
+      </AuthPageChrome>
+    );
+  }
 
   if (step === "success") {
     return (

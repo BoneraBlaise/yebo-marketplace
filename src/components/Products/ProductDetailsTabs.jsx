@@ -10,6 +10,7 @@ import { Button } from "../ui";
 import { typography } from "../../design-system/typography";
 import Ratings from "./Ratings";
 import verified from "../verify/verified.png";
+import UserAvatar from "../Auth/UserAvatar";
 
 const TABS = [
   { id: "description", label: "Description" },
@@ -200,8 +201,8 @@ const ProductDetailsTabs = ({
                           className="pdp-card-lift p-5 rounded-2xl border border-gray-100 dark:border-gray-800 yebone-card-lift bg-white/80 dark:bg-gray-900/60"
                         >
                           <div className="flex gap-4">
-                            <img
-                              src={item.user?.avatar?.url}
+                            <UserAvatar
+                              user={item.user}
                               alt=""
                               className="w-12 h-12 rounded-full object-cover shrink-0"
                             />

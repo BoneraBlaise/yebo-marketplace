@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { HiOutlineBell, HiOutlineSearch, HiOutlineChevronDown } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { resolveAdminTier } from "./admin/adminRoleConfig";
+import UserAvatar from "../Auth/UserAvatar";
 
 const AdminTopbar = ({ onSearch, collapsed, onToggleSidebar }) => (
   <div className="admin-topbar flex flex-wrap items-center gap-2 sm:gap-3">
@@ -53,8 +54,8 @@ export const AdminTopbarActions = () => {
           onClick={() => setMenuOpen((v) => !v)}
           className="flex items-center gap-2 px-2 py-1.5 rounded-xl yebone-surface"
         >
-          <img
-            src={user?.avatar?.url}
+          <UserAvatar
+            user={user}
             alt=""
             className="w-8 h-8 rounded-full object-cover border border-yebone-primary/20"
           />

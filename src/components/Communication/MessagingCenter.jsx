@@ -17,6 +17,7 @@ import { HiOutlineInbox, HiOutlinePhone, HiOutlineMenu } from "react-icons/hi";
 import { socketUrl, server } from "../../config/serverConfig";
 import { COMMUNICATION_IDENTITY, getTokenForIdentity } from "../../config/communicationIdentity";
 import { inboxPathForIdentity } from "../../config/inboxIdentity";
+import { getUserAvatarUrl } from "../../utils/userAvatar";
 import {
   archiveConversation,
   counterProductOffer,
@@ -158,11 +159,13 @@ const MessagingCenter = ({ mode = "buyer", title = "Messages" }) => {
       const senderId = String(incoming?.sender || data?.senderId || "");
       const isBuyerMode = mode === "buyer";
       let senderName = isBuyerMode ? seller?.name || "Seller" : "Customer";
-      let avatarUrl = isBuyerMode ? seller?.avatar?.url : null;
+      let avatarUrl = isBuyerMode
+        ? getUserAvatarUrl(seller?.avatar?.url)
+        : null;
 
       if (!isBuyerMode && senderId === String(user?._id)) {
         senderName = user?.name || "Customer";
-        avatarUrl = user?.avatar?.url || null;
+        avatarUrl = getUserAvatarUrl(user);
       }
 
       const snapshot = incoming?.productSnapshot || data?.productSnapshot;
