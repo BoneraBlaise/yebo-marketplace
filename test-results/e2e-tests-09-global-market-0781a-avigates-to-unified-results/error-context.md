@@ -6,15 +6,11 @@
 # Error details
 
 ```
-Error: browserType.launch: Executable doesn't exist at C:\Users\boner\AppData\Local\Temp\cursor-sandbox-cache\827a9a36bdea7468daf0fd119d18575b\playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
-╔═════════════════════════════════════════════════════════════════════════╗
-║ Looks like Playwright Test or Playwright was just installed or updated. ║
-║ Please run the following command to download new browsers:              ║
-║                                                                         ║
-║     npx playwright install                                              ║
-║                                                                         ║
-║ <3 Playwright Team                                                      ║
-╚═════════════════════════════════════════════════════════════════════════╝
+Error: page.goto: Protocol error (Page.navigate): Cannot navigate to invalid URL
+Call log:
+  - navigating to "/", waiting until "load"
+
+    at D:\GURIRALINE PROJECT\GURIRALINE PROJECT\WEBSITE\guriraline_app-main\guriraline_app-main\e2e\tests\09-global-marketplace-search.spec.js:8:16
 ```
 
 # Test source
@@ -26,9 +22,9 @@ Error: browserType.launch: Executable doesn't exist at C:\Users\boner\AppData\Lo
    4 | const { test, expect } = require("@playwright/test");
    5 |
    6 | test.describe("Global Marketplace Search", () => {
->  7 |   test("header search shows discovery panel and navigates to unified results", async ({ page }) => {
-     |   ^ Error: browserType.launch: Executable doesn't exist at C:\Users\boner\AppData\Local\Temp\cursor-sandbox-cache\827a9a36bdea7468daf0fd119d18575b\playwright\chromium_headless_shell-1169\chrome-win\headless_shell.exe
-   8 |     await page.goto("/");
+   7 |   test("header search shows discovery panel and navigates to unified results", async ({ page }) => {
+>  8 |     await page.goto("/");
+     |                ^ Error: page.goto: Protocol error (Page.navigate): Cannot navigate to invalid URL
    9 |     await page.evaluate(() => {
   10 |       document.querySelector("#webpack-dev-server-client-overlay")?.remove();
   11 |     });
