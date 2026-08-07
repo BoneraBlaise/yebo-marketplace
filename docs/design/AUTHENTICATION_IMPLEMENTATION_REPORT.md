@@ -1,8 +1,8 @@
 # YEBONE Sprint 4 — Authentication Implementation Report (Phase 2)
 
 **Date:** 2026-08-07  
-**Scope:** Critical password fix + Google Authentication  
-**Status:** Phase 2 complete — OTP reset deferred to Phase 3
+**Scope:** Sprint 4 Phases 2–4 — Auth, OTP reset, production SMTP  
+**Status:** Phases 2–4 complete
 
 ---
 
