@@ -8,6 +8,7 @@ import { COMMUNICATION_IDENTITY, getTokenForIdentity } from "../config/communica
 import { getAuthToken, getSellerToken } from "../config/authStorage";
 import { inboxPathForIdentity } from "../config/inboxIdentity";
 import { getUserAvatarUrl } from "../utils/userAvatar";
+import { notifyInboxRefresh, optimizeProductImage } from "../utils/productImageUtils";
 import MessageToast from "../components/Communication/MessageToast";
 
 const isMessagingRoute = (pathname) =>
