@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useLocation } from "react-router-dom";
 import ProductDetails from "../components/Products/ProductDetails";
 import SuggestedProduct from "../components/Products/SuggestedProduct";
 import { useSelector } from "react-redux";
+import { getProductById } from "../redux/actions/product";
 import { Container, PageMeta, ErrorState } from "../components/ui";
 import "../components/Products/product-details.css";
 
@@ -34,26 +35,67 @@ const ProductDetailsPage = () => {
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
-    setNotFound(false);
-    if (eventData !== null) {
-      const found = allEvents && allEvents.find((i) => i._id === id);
-      setData(found || null);
-      if (allEvents?.length && !found) setNotFound(true);
-    } else if (previewProduct?._id === id) {
-      setData(previewProduct);
-    } else {
-      const found = allProducts && allProducts.find((i) => i._id === id);
-      setData(found || null);
-      if (allProducts?.length && !found) setNotFound(true);
-    }
-  }, [allProducts, allEvents, id, eventData, previewProduct]);
+    let cancelled = false;
 
-  useEffect(() => {
-    if (data !== null || notFound) {
-      setIsLoading(false);
-    }
-  }, [data, notFound]);
+    const resolveProduct = async () => {
+      setIsLoading(true);
+      setNotFound(false);
+
+      if (eventData !== null) {
+        const found = allEvents && allEvents.find((item) => item._id === id);
+        if (cancelled) return;
+        setData(found || null);
+        if (allEvents?.length && !found) setNotFound(true);
+        setIsLoading(false);
+        return;
+      }
+
+      const listProduct = allProducts && allProducts.find((item) => item._id === id);
+      const candidate = previewProduct?._id === id ? previewProduct : listProduct;
+
+      if (candidate?.hasVariants) {
+        const result = await getProductById(id)();
+        if (cancelled) return;
+        if (result?.success && result.product) {
+          setData(result.product);
+        } else {
+          setData(candidate);
+          if (!candidate) setNotFound(true);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (candidate) {
+        setData(candidate);
+        setIsLoading(false);
+        return;
+      }
+
+      if (allProducts?.length) {
+        const result = await getProductById(id)();
+        if (cancelled) return;
+        if (result?.success && result.product) {
+          setData(result.product);
+        } else {
+          setNotFound(true);
+          setData(null);
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      if (cancelled) return;
+      setData(null);
+      setIsLoading(true);
+    };
+
+    resolveProduct();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [allProducts, allEvents, id, eventData, previewProduct]);
 
   const metaTitle = data?.name || (notFound ? "Product not found" : "Product");
   const metaDescription =

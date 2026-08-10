@@ -364,6 +364,50 @@
   color: var(--yebone-primary, #29625d);
 }
 
+.pdp-variants__chip.is-unavailable {
+  opacity: 0.45;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+.pdp-purchase__sku {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+}
+
+.pdp-cart-variant-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: 0.25rem;
+}
+
+.pdp-cart-variant-summary__line {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgb(107 114 128);
+}
+
+.pdp-cart-variant-summary__label {
+  font-weight: 600;
+}
+
+.yebone-header-notifications__variant {
+  margin-top: 0.125rem;
+}
+
+@media (max-width: 480px) {
+  .pdp-variants__options {
+    gap: 0.375rem;
+  }
+
+  .pdp-variants__chip {
+    min-height: 2.5rem;
+    padding: 0.625rem 0.875rem;
+  }
+}
+
 /* ── Seller card ── */
 .pdp-seller-card__inner {
   display: flex;

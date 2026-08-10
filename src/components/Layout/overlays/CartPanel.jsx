@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { IoBagHandleOutline } from "react-icons/io5";
 import { HiOutlineMinus, HiOutlineTrash, HiPlus } from "react-icons/hi";
 import { toast } from "react-toastify";
-import { addTocart, removeFromCart } from "../../../redux/actions/cart";
+import { removeFromCart, setCartItemQuantity } from "../../../redux/actions/cart";
+import { getCartLineKey } from "../../../utils/cartLineIdentity";
+import CartVariantSummary from "../../cart/CartVariantSummary";
 import { useReferral } from "../../../context/ReferralContext";
 import HeaderDropdownPanel from "./HeaderDropdownPanel";
 
@@ -31,7 +33,7 @@ const CartPopoverItem = memo(({
   const updateQty = (next) => {
     setUpdating(true);
     setValue(next);
-    quantityChangeHandler({ ...data, qty: next });
+    quantityChangeHandler(data, next);
     window.setTimeout(() => setUpdating(false), 180);
   };
 
@@ -70,6 +72,7 @@ const CartPopoverItem = memo(({
           {vendor}
           {hasReferral ? " · Referred" : ""}
         </p>
+        <CartVariantSummary item={data} className="yebone-header-notifications__variant" />
         <span className="yebone-header-notifications__item-time">
           RWF {formatPrice(data.discountPrice)} each · Subtotal RWF {formatPrice(lineTotal)}
         </span>
@@ -127,7 +130,7 @@ const CartPanel = memo(({ onClose, anchor = "top" }) => {
   );
 
   const removeHandler = (data) => dispatch(removeFromCart(data));
-  const quantityChangeHandler = (data) => dispatch(addTocart(data));
+  const quantityChangeHandler = (data, qty) => dispatch(setCartItemQuantity(data, qty));
 
   return (
     <HeaderDropdownPanel
@@ -160,9 +163,9 @@ const CartPanel = memo(({ onClose, anchor = "top" }) => {
         </div>
       ) : (
         <div className="yebone-header-notifications__list" role="list">
-          {cart.map((item, index) => (
+          {cart.map((item) => (
             <CartPopoverItem
-              key={item._id || index}
+              key={getCartLineKey(item)}
               data={item}
               quantityChangeHandler={quantityChangeHandler}
               removeFromCartHandler={removeHandler}

@@ -33,6 +33,7 @@ import {
 import {
   ShopDashboardPage,
   ShopCreateProduct,
+  ShopEditProduct,
   ShopAllProducts,
   ShopCreateEvents,
   ShopCreateFlashSale,
@@ -309,6 +310,14 @@ const routerBasename =
               element={
                 <SellerProtectedRoute>
                   <ShopCreateProduct />
+                </SellerProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard-edit-product/:id"
+              element={
+                <SellerProtectedRoute>
+                  <ShopEditProduct />
                 </SellerProtectedRoute>
               }
             />

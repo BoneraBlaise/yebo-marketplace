@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useProductVariantSelection } from "../../hooks/useProductVariantSelection";
+import { getAvailableStock, isVariantPurchasable } from "../../utils/productVariantSelection";
 import { getAllProductsShop } from "../../redux/actions/product";
 import { server } from "../../server";
 import {
@@ -8,6 +10,7 @@ import {
   removeFromWishlist,
 } from "../../redux/actions/wishlist";
 import { addTocart } from "../../redux/actions/cart";
+import { buildVariantCartItem } from "../../utils/cartLineIdentity";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { startProductConversation } from "../../services/communicationService";
@@ -70,6 +73,60 @@ const ProductDetails = ({ data }) => {
   const [tryOnUnavailableOpen, setTryOnUnavailableOpen] = useState(false);
   const location = useLocation();
   const { addReferralProduct } = useReferral();
+
+  const {
+    hasVariantSelector,
+    selection: variantSelection,
+    selectedVariant,
+    displayOffer,
+    displayImages,
+    handleSelectionChange,
+  } = useProductVariantSelection(data);
+
+  useEffect(() => {
+    setSelect(0);
+  }, [selectedVariant?.id, displayImages]);
+
+  useEffect(() => {
+    if (!hasVariantSelector) return;
+    const maxStock = getAvailableStock(selectedVariant);
+    if (maxStock > 0 && count > maxStock) {
+      setCount(maxStock);
+    }
+  }, [hasVariantSelector, selectedVariant, count]);
+
+  const activeOffer = useMemo(() => {
+    if (!hasVariantSelector) {
+      return {
+        discountPrice: data?.discountPrice,
+        originalPrice: data?.originalPrice,
+        stock: data?.stock,
+      };
+    }
+    return displayOffer;
+  }, [hasVariantSelector, data, displayOffer]);
+
+  const discountPct = useMemo(() => {
+    const original = Number(activeOffer?.originalPrice);
+    const discount = Number(activeOffer?.discountPrice);
+    if (!Number.isFinite(original) || !Number.isFinite(discount) || original <= discount) {
+      return 0;
+    }
+    return Math.round(((original - discount) / original) * 100);
+  }, [activeOffer]);
+
+  const moneySaved = useMemo(() => {
+    const original = Number(activeOffer?.originalPrice);
+    const discount = Number(activeOffer?.discountPrice);
+    if (!Number.isFinite(original) || !Number.isFinite(discount) || original <= discount) {
+      return 0;
+    }
+    return original - discount;
+  }, [activeOffer]);
+
+  const canPurchase = hasVariantSelector
+    ? Boolean(selectedVariant && displayOffer?.isAvailable !== false && getAvailableStock(selectedVariant) > 0)
+    : Number(data?.stock) > 0;
 
   // Slice the description to 200 characters
   const shortDescription = data?.description?.slice(0, 350);
@@ -139,7 +196,27 @@ const ProductDetails = ({ data }) => {
   const addToCartHandler = (id) => {
     if (!data) return;
 
-    const isItemExists = cart && cart.find((i) => i._id === id);
+    if (hasVariantSelector) {
+      if (!selectedVariant) {
+        toast.error("Select a product option before adding to cart.");
+        return;
+      }
+      if (!isVariantPurchasable(selectedVariant)) {
+        toast.error("Selected option is unavailable.");
+        return;
+      }
+      const availableStock = getAvailableStock(selectedVariant);
+      if (count > availableStock) {
+        toast.error("Product stock limited!");
+        return;
+      }
+
+      dispatch(addTocart(buildVariantCartItem(data, selectedVariant, count)));
+      toast.success("Item added to cart successfully!");
+      return;
+    }
+
+    const isItemExists = cart && cart.find((i) => i._id === id && !i.variantId);
     if (isItemExists) {
       toast.error("Item already in cart!");
       return;
@@ -150,10 +227,9 @@ const ProductDetails = ({ data }) => {
       return;
     }
 
-    // Create cart item
     const cartItem = {
       ...data,
-      qty: count
+      qty: count,
     };
 
     dispatch(addTocart(cartItem));
@@ -162,7 +238,33 @@ const ProductDetails = ({ data }) => {
 
   const buyNowHandler = () => {
     if (!data) return;
-    const isItemExists = cart && cart.find((i) => i._id === data._id);
+
+    if (hasVariantSelector) {
+      if (!selectedVariant) {
+        toast.error("Select a product option before checkout.");
+        return;
+      }
+      if (!isVariantPurchasable(selectedVariant)) {
+        toast.error("Selected option is unavailable.");
+        return;
+      }
+      if (getAvailableStock(selectedVariant) < count) {
+        toast.error("Product stock limited!");
+        return;
+      }
+
+      const lineKey = `${data._id}:${selectedVariant.id}`;
+      const isItemExists = cart && cart.find(
+        (item) => (item.cartLineKey || `${item._id}:${item.variantId || ""}`) === lineKey
+      );
+      if (!isItemExists) {
+        dispatch(addTocart(buildVariantCartItem(data, selectedVariant, count)));
+      }
+      navigate("/checkout");
+      return;
+    }
+
+    const isItemExists = cart && cart.find((i) => i._id === data._id && !i.variantId);
     if (!isItemExists) {
       if (data.stock < count) {
         toast.error("Product stock limited!");
@@ -271,9 +373,14 @@ const ProductDetails = ({ data }) => {
         <>
           <Container className="pdp-page__hero">
             <div className="pdp-hero-grid">
-              <ProductGallery images={data.images} select={select} setSelect={setSelect} />
+              <ProductGallery images={displayImages} select={select} setSelect={setSelect} />
               <ProductPurchasePanel
                 data={data}
+                offer={displayOffer}
+                hasVariantSelector={hasVariantSelector}
+                selectedVariant={selectedVariant}
+                variantSelection={variantSelection}
+                onVariantSelect={handleSelectionChange}
                 count={count}
                 incrementCount={incrementCount}
                 decrementCount={decrementCount}
@@ -282,16 +389,8 @@ const ProductDetails = ({ data }) => {
                 click={click}
                 toggleWishlist={toggleWishlist}
                 formatPrice={formatPrice}
-                discountPct={
-                  data.originalPrice > data.discountPrice
-                    ? Math.round(((data.originalPrice - data.discountPrice) / data.originalPrice) * 100)
-                    : 0
-                }
-                moneySaved={
-                  data.originalPrice > data.discountPrice
-                    ? data.originalPrice - data.discountPrice
-                    : 0
-                }
+                discountPct={discountPct}
+                moneySaved={moneySaved}
                 reviewCount={data.reviews?.length || 0}
                 showRating={(data.reviews?.length || 0) > 0 && (data.ratings || 0) > 0}
                 shortDescription={shortDescription}
@@ -325,12 +424,14 @@ const ProductDetails = ({ data }) => {
           <ProductAISections category={data.category} onTryOn={handleTryOn} />
 
           <div className="pdp-mobile-bar">
-            <p className="pdp-mobile-bar__price">RWF {formatPrice(data.discountPrice)}</p>
+            <p className="pdp-mobile-bar__price">
+              RWF {formatPrice(activeOffer?.discountPrice ?? data.discountPrice)}
+            </p>
             <button
               type="button"
               className="pdp-mobile-bar__cart"
               onClick={() => addToCartHandler(data._id)}
-              disabled={data.stock < 1}
+              disabled={!canPurchase}
             >
               Add to Cart
             </button>
@@ -338,7 +439,7 @@ const ProductDetails = ({ data }) => {
               type="button"
               className="pdp-mobile-bar__buy"
               onClick={buyNowHandler}
-              disabled={data.stock < 1}
+              disabled={!canPurchase}
             >
               Buy Now
             </button>

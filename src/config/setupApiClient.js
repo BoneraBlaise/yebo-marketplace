@@ -11,6 +11,7 @@ const isVendorApiPath = (url = "") => {
   const path = String(url);
   if (path.includes("/marketplace/") && path.includes("/owner/")) return true;
   if (path.includes("/create-product")) return true;
+  if (path.includes("/update-product/")) return true;
   if (path.includes("/create-event") || path.includes("/event/create-event")) return true;
   if (path.includes("/create-flashsale")) return true;
   if (path.includes("/create-coupon")) return true;

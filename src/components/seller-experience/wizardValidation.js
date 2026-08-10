@@ -14,6 +14,57 @@ export const isEmptyDescription = (html) => {
   return !text || text.length < 3;
 };
 
+export const validateProductVariants = (values) => {
+  const errors = {};
+
+  if (!values.hasVariants) {
+    return errors;
+  }
+
+  if (!values.optionGroupName?.trim()) {
+    errors.optionGroupName = "Option group name is required.";
+  }
+
+  const optionValues = (values.optionValues || []).map((value) => String(value).trim()).filter(Boolean);
+  if (!optionValues.length) {
+    errors.optionValues = "Add at least one option value.";
+  }
+
+  if (!values.variants?.length) {
+    errors.variants = "Add at least one variant row.";
+    return errors;
+  }
+
+  values.variants.forEach((variant, index) => {
+    if (!variant.sku?.trim()) {
+      errors[`variantSku_${index}`] = "SKU is required.";
+    }
+    if (variant.discountPrice === "" || variant.discountPrice == null) {
+      errors[`variantPrice_${index}`] = "Price is required.";
+    } else if (Number(variant.discountPrice) < 0) {
+      errors[`variantPrice_${index}`] = "Enter a valid price.";
+    }
+    if (variant.stock === "" || variant.stock == null) {
+      errors[`variantStock_${index}`] = "Stock is required.";
+    } else if (Number(variant.stock) < 0) {
+      errors[`variantStock_${index}`] = "Stock cannot be negative.";
+    }
+    if (
+      variant.originalPrice !== "" &&
+      variant.originalPrice != null &&
+      Number(variant.originalPrice) < Number(variant.discountPrice)
+    ) {
+      errors[`variantCompare_${index}`] = "Compare-at price must be greater than or equal to price.";
+    }
+  });
+
+  if (Object.keys(errors).some((key) => key.startsWith("variant"))) {
+    errors.variants = "Complete SKU, price, and stock for each variant.";
+  }
+
+  return errors;
+};
+
 export const validateProductStep = (stepIndex, values) => {
   const errors = {};
 
@@ -28,15 +79,19 @@ export const validateProductStep = (stepIndex, values) => {
   }
 
   if (stepIndex === 1) {
-    if (values.discountPrice === "" || values.discountPrice == null) {
-      errors.discountPrice = "Price is required.";
-    } else if (Number(values.discountPrice) <= 0) {
-      errors.discountPrice = "Enter a valid price.";
-    }
-    if (values.stock === "" || values.stock == null) {
-      errors.stock = "Stock is required.";
-    } else if (Number(values.stock) < 0) {
-      errors.stock = "Stock cannot be negative.";
+    if (values.hasVariants) {
+      Object.assign(errors, validateProductVariants(values));
+    } else {
+      if (values.discountPrice === "" || values.discountPrice == null) {
+        errors.discountPrice = "Price is required.";
+      } else if (Number(values.discountPrice) <= 0) {
+        errors.discountPrice = "Enter a valid price.";
+      }
+      if (values.stock === "" || values.stock == null) {
+        errors.stock = "Stock is required.";
+      } else if (Number(values.stock) < 0) {
+        errors.stock = "Stock cannot be negative.";
+      }
     }
   }
 

@@ -1,36 +1,55 @@
-import { toast } from "react-toastify";
+import { getCartLineKey, normalizeCartItem } from "../../utils/cartLineIdentity";
 
-// add to cart
+const persistCart = (getState) => {
+  localStorage.setItem("cartItems", JSON.stringify(getState().cart.cart));
+};
+
+const applyReferralCode = (cartItem) => {
+  const referralProducts = JSON.parse(localStorage.getItem("referralProducts") || "{}");
+  const productId = cartItem.productId || cartItem._id;
+  if (referralProducts[productId]) {
+    cartItem.referralCode = referralProducts[productId];
+  }
+  return cartItem;
+};
+
 export const addTocart = (data) => async (dispatch, getState) => {
   try {
-    // Create cart item without referral code first
-    const cartItem = { ...data };
-
-    // Check if this product has a referral code in localStorage
-    const referralProducts = JSON.parse(localStorage.getItem('referralProducts') || '{}');
-    if (referralProducts[data._id]) {
-      cartItem.referralCode = referralProducts[data._id];
-      console.log(`Applied referral code ${referralProducts[data._id]} to cart item ${data._id}`);
-    }
+    const cartItem = applyReferralCode(normalizeCartItem({ ...data }));
 
     dispatch({
       type: "addToCart",
       payload: cartItem,
     });
 
-    localStorage.setItem("cartItems", JSON.stringify(getState().cart.cart));
+    persistCart(getState);
     return cartItem;
   } catch (error) {
     console.error("Error adding to cart:", error);
   }
 };
 
-// remove from cart
+export const setCartItemQuantity = (data, qty) => async (dispatch, getState) => {
+  try {
+    const cartItem = normalizeCartItem(data);
+    dispatch({
+      type: "setCartItemQuantity",
+      payload: { item: cartItem, qty },
+    });
+    persistCart(getState);
+    return cartItem;
+  } catch (error) {
+    console.error("Error updating cart quantity:", error);
+  }
+};
+
 export const removeFromCart = (data) => async (dispatch, getState) => {
   dispatch({
     type: "removeFromCart",
-    payload: data._id,
+    payload: data,
   });
-  localStorage.setItem("cartItems", JSON.stringify(getState().cart.cart));
+  persistCart(getState);
   return data;
 };
+
+export const getCartLineKeyForItem = getCartLineKey;

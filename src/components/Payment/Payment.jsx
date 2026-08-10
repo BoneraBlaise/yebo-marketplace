@@ -1,3 +1,4 @@
+import { getCartLineKey } from "../../utils/cartLineIdentity";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -81,7 +82,10 @@ const Payment = () => {
           clearAllReferrals?.();
         } else {
           const updatedCart = JSON.parse(localStorage.getItem("cartItems") || "[]").filter(
-            (item) => !orderData.cart.find((orderItem) => orderItem._id === item._id)
+            (item) =>
+              !orderData.cart.find(
+                (orderItem) => getCartLineKey(orderItem) === getCartLineKey(item)
+              )
           );
           localStorage.setItem("cartItems", JSON.stringify(updatedCart));
         }

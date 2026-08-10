@@ -1,4 +1,9 @@
 import React, { useState } from "react";
+import {
+  getOptionValueState,
+  productHasVariantSelector,
+  sortOptionGroups,
+} from "../../utils/productVariantSelection";
 
 const normalizeOptions = (value) => {
   if (!value) return [];
@@ -7,7 +12,7 @@ const normalizeOptions = (value) => {
   return [];
 };
 
-const ProductVariants = ({ data }) => {
+const LegacyProductVariants = ({ data }) => {
   const sizes = normalizeOptions(data?.sizes || data?.availableSizes || data?.sizeOptions);
   const colors = normalizeOptions(data?.colors || data?.availableColors || data?.colorOptions);
   const [selectedSize, setSelectedSize] = useState(sizes[0] || null);
@@ -55,6 +60,54 @@ const ProductVariants = ({ data }) => {
           </div>
         </div>
       )}
+    </section>
+  );
+};
+
+const ProductVariants = ({ product, selection = {}, onSelect }) => {
+  if (!productHasVariantSelector(product)) {
+    return <LegacyProductVariants data={product} />;
+  }
+
+  const groups = sortOptionGroups(product.optionGroups);
+
+  return (
+    <section className="pdp-variants" aria-label="Product options">
+      {groups.map((group) => (
+        <div className="pdp-variants__group" key={group.id}>
+          <p className="pdp-variants__label">{group.name}</p>
+          <div
+            className="pdp-variants__options"
+            role="listbox"
+            aria-label={group.name}
+          >
+            {(group.values || []).map((value) => {
+              const state = getOptionValueState(product, group.id, value.id, selection);
+              const isSelected = state === "selected";
+              const isUnavailable = state === "unavailable";
+
+              return (
+                <button
+                  key={value.id}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  aria-disabled={isUnavailable}
+                  disabled={isUnavailable}
+                  className={`pdp-variants__chip${isSelected ? " is-selected" : ""}${
+                    isUnavailable ? " is-unavailable" : ""
+                  }`}
+                  onClick={() => {
+                    if (!isUnavailable) onSelect(group.id, value.id);
+                  }}
+                >
+                  {value.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
     </section>
   );
 };

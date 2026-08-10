@@ -1,6 +1,8 @@
 import React from "react";
 import { Badge } from "../ui";
 import { getOrderStatusVariant } from "./orderStatus";
+import CartVariantSummary from "../cart/CartVariantSummary";
+import { getCartLineKey } from "../../utils/cartLineIdentity";
 
 const OrderItemsList = ({ items = [], className = "" }) => {
   if (!items.length) {
@@ -15,7 +17,7 @@ const OrderItemsList = ({ items = [], className = "" }) => {
 
         return (
           <div
-            key={`${item._id || index}-${index}`}
+            key={getCartLineKey(item) || `${item._id || index}-${index}`}
             className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4 pb-4 border-b border-gray-100 dark:border-gray-800 last:border-0"
           >
             <div className="w-full sm:w-20 h-40 sm:h-20 rounded-xl overflow-hidden bg-yebone-light-gray shrink-0">
@@ -27,6 +29,7 @@ const OrderItemsList = ({ items = [], className = "" }) => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold dark:text-white">{item.name}</p>
+              <CartVariantSummary item={item} className="mt-1" />
               <p className="text-yebone-primary font-medium mt-1 text-sm sm:text-base">
                 RWF {price} x {item.qty || 1}
               </p>

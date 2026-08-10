@@ -9,9 +9,15 @@ import { Button, Badge } from "../ui";
 import { typography } from "../../design-system/typography";
 import Ratings from "./Ratings";
 import ProductVariants from "./ProductVariants";
+import { getAvailableStock } from "../../utils/productVariantSelection";
 
 const ProductPurchasePanel = ({
   data,
+  offer,
+  hasVariantSelector = false,
+  selectedVariant = null,
+  variantSelection = {},
+  onVariantSelect,
   count,
   incrementCount,
   decrementCount,
@@ -28,12 +34,27 @@ const ProductPurchasePanel = ({
   isDescriptionLong,
   onShowMore,
 }) => {
-  const inStock = data.stock > 0;
-  const stockLabel = data.stock === 0
+  const discountPrice = offer?.discountPrice ?? data.discountPrice;
+  const originalPrice = offer?.originalPrice ?? data.originalPrice;
+  const availableStock = hasVariantSelector
+    ? getAvailableStock(selectedVariant)
+    : Math.max(0, Number(data.stock) || 0);
+  const inStock = hasVariantSelector
+    ? Boolean(selectedVariant && offer?.isAvailable !== false && availableStock > 0)
+    : availableStock > 0;
+
+  const stockLabel = !selectedVariant && hasVariantSelector
+    ? "Select options"
+    : !inStock
     ? "Out of stock"
-    : data.stock < 5
-    ? `Only ${data.stock} left`
+    : availableStock < 5
+    ? `Only ${availableStock} left`
     : "In stock";
+
+  const showCompareAt =
+    originalPrice !== undefined &&
+    originalPrice !== null &&
+    Number(originalPrice) > Number(discountPrice);
 
   return (
     <div className="pdp-sticky-panel pdp-purchase">
@@ -51,10 +72,10 @@ const ProductPurchasePanel = ({
 
         <div className="pdp-purchase__price-block">
           <div className="pdp-purchase__price-row">
-            <span className="pdp-purchase__price">RWF {formatPrice(data.discountPrice)}</span>
-            {data.originalPrice > data.discountPrice && (
+            <span className="pdp-purchase__price">RWF {formatPrice(discountPrice)}</span>
+            {showCompareAt && (
               <>
-                <span className="pdp-purchase__price-old">RWF {formatPrice(data.originalPrice)}</span>
+                <span className="pdp-purchase__price-old">RWF {formatPrice(originalPrice)}</span>
                 <Badge variant="muted">-{discountPct}%</Badge>
               </>
             )}
@@ -62,6 +83,9 @@ const ProductPurchasePanel = ({
           {moneySaved > 0 && (
             <p className="pdp-purchase__savings">Save RWF {formatPrice(moneySaved)}</p>
           )}
+          {hasVariantSelector && offer?.sku ? (
+            <p className="pdp-purchase__sku">SKU: {offer.sku}</p>
+          ) : null}
           <p className={`pdp-purchase__stock${!inStock ? " is-out" : ""}`}>{stockLabel}</p>
         </div>
 
@@ -83,7 +107,11 @@ const ProductPurchasePanel = ({
           </button>
         </div>
 
-        <ProductVariants data={data} />
+        <ProductVariants
+          product={data}
+          selection={variantSelection}
+          onSelect={onVariantSelect}
+        />
 
         <p className="pdp-purchase__delivery">
           Delivery typically 3–7 business days depending on location.

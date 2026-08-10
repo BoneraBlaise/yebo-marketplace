@@ -4,7 +4,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { trackCommissionClick } from "../../redux/actions/order";
-import { addTocart, removeFromCart } from "../../redux/actions/cart";
+import { removeFromCart, setCartItemQuantity } from "../../redux/actions/cart";
+import { getCartLineKey } from "../../utils/cartLineIdentity";
 import { useReferral } from "../../context/ReferralContext";
 import { validateGrowthCoupon } from "../../services/growthConfigurationService";
 import { fetchNegotiatedCheckout } from "../../services/communicationService";
@@ -234,8 +235,8 @@ const Checkout = () => {
   const discountAmount = couponCodeData ? Number(discountPrice || 0) : 0;
   const totalPrice = (parseFloat(subTotalPrice) + shipping - discountAmount).toFixed(2);
 
-  const quantityChangeHandler = (data) => {
-    dispatch(addTocart(data));
+  const quantityChangeHandler = (data, qty) => {
+    dispatch(setCartItemQuantity(data, qty));
   };
 
   const removeFromCartHandler = (data) => {
@@ -285,9 +286,9 @@ const Checkout = () => {
                   Cart ({cart.length})
                 </h2>
                 <div className="checkout-cart-list">
-                  {cart.map((item, index) => (
+                  {cart.map((item) => (
                     <CheckoutCartItem
-                      key={item._id || index}
+                      key={getCartLineKey(item)}
                       data={item}
                       quantityChangeHandler={quantityChangeHandler}
                       removeFromCartHandler={removeFromCartHandler}

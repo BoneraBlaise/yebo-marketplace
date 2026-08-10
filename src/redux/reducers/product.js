@@ -31,6 +31,32 @@ export const productReducer = createReducer(initialState, {
     state.success = false;
   },
 
+  productUpdateRequest: (state) => {
+    state.isLoading = true;
+    state.error = null;
+    state.success = false;
+  },
+  productUpdateSuccess: (state, action) => {
+    state.isLoading = false;
+    state.error = null;
+    state.product = action.payload;
+    state.success = true;
+    const updated = action.payload;
+    if (updated?._id) {
+      const upsert = (list) => {
+        const arr = Array.isArray(list) ? list : [];
+        return arr.map((item) => (item._id === updated._id ? updated : item));
+      };
+      state.products = upsert(state.products);
+      state.allProducts = upsert(state.allProducts);
+    }
+  },
+  productUpdateFail: (state, action) => {
+    state.isLoading = false;
+    state.error = action.payload;
+    state.success = false;
+  },
+
   // get all products of shop
   getAllProductsShopRequest: (state) => {
     state.isLoading = true;

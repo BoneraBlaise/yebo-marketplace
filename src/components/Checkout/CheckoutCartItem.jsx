@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { HiOutlineMinus, HiPlus, HiOutlineTrash } from "react-icons/hi";
 import { toast } from "react-toastify";
 import verified from "../verify/verified.png";
+import CartVariantSummary from "../cart/CartVariantSummary";
 
 const formatPrice = (price) =>
   (price ?? 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -19,6 +20,11 @@ const CheckoutCartItem = ({
   const lineTotal = data.discountPrice * value;
   const inStock = data.stock > 0;
   const isVerified = Boolean(data.shop?.isVerified);
+  const legacyVariantText = [data.color, data.size].filter(Boolean).join(" · ");
+
+  useEffect(() => {
+    setValue(data.qty || 1);
+  }, [data.qty]);
 
   const increment = () => {
     if (data.stock < value) {
@@ -26,14 +32,14 @@ const CheckoutCartItem = ({
     } else {
       const next = value + 1;
       setValue(next);
-      quantityChangeHandler({ ...data, qty: next });
+      quantityChangeHandler(data, next);
     }
   };
 
   const decrement = () => {
     const next = value === 1 ? 1 : value - 1;
     setValue(next);
-    quantityChangeHandler({ ...data, qty: next });
+    quantityChangeHandler(data, next);
   };
 
   return (
@@ -56,11 +62,15 @@ const CheckoutCartItem = ({
                 )}
               </p>
             )}
-            {(data.color || data.size || hasReferral) && (
+            {(legacyVariantText || hasReferral) && !data.variantId && (
               <p className="checkout-cart-item__variants">
-                {[data.color, data.size, hasReferral ? "Referred" : null].filter(Boolean).join(" · ")}
+                {[legacyVariantText, hasReferral ? "Referred" : null].filter(Boolean).join(" · ")}
               </p>
             )}
+            {data.variantId ? <CartVariantSummary item={data} /> : null}
+            {hasReferral && data.variantId ? (
+              <p className="checkout-cart-item__variants">Referred</p>
+            ) : null}
             {!inStock && <span className="checkout-cart-item__oos">Out of stock</span>}
           </div>
           {!compact && (

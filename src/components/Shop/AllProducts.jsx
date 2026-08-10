@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@material-ui/core";
 import { DataGrid } from "@material-ui/data-grid";
-import { AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEye, AiOutlineEdit } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import axios from "axios";  // Import axios for API requests
 import Loader from "../Layout/Loader";
@@ -106,6 +106,18 @@ const AllProducts = () => {
       cellClassName: 'dark:text-white',
     },
     {
+      field: "variants",
+      headerName: "Variants",
+      minWidth: 90,
+      flex: 0.5,
+      headerClassName: 'dark:text-white',
+      cellClassName: 'dark:text-white',
+      sortable: false,
+      renderCell: (params) => (
+        <span>{params.row.hasVariants ? `${params.row.variantCount} SKUs` : "Flat"}</span>
+      ),
+    },
+    {
       field: "Preview",
       flex: 0.8,
       minWidth: 100,
@@ -118,6 +130,22 @@ const AllProducts = () => {
         <Link to={`/product/${params.id}`}>
           <Button>
             <AiOutlineEye size={20} className="dark:text-white" />
+          </Button>
+        </Link>
+      ),
+    },
+    {
+      field: "Edit",
+      flex: 0.8,
+      minWidth: 100,
+      headerName: "",
+      headerClassName: 'dark:text-white',
+      cellClassName: 'dark:text-white',
+      sortable: false,
+      renderCell: (params) => (
+        <Link to={`/dashboard-edit-product/${params.id}`}>
+          <Button aria-label="Edit product">
+            <AiOutlineEdit size={20} className="dark:text-white" />
           </Button>
         </Link>
       ),
@@ -148,7 +176,9 @@ const AllProducts = () => {
     name: item.name,
     price: "RWF " + (item.discountPrice || "N/A"),  
     Stock: item.stock || 0,  
-    sold: item?.sold_out || 0,  
+    sold: item?.sold_out || 0,
+    hasVariants: Boolean(item.hasVariants),
+    variantCount: item.hasVariants ? (item.variants?.length || 0) : 0,
     headerClassName: 'dark:text-white',
     cellClassName: 'dark:text-white',
   }));

@@ -1,8 +1,14 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import ReactQuill from "react-quill";
-import { createProduct, getAllProducts, getAllProductsShop } from "../../redux/actions/product";
+import {
+  createProduct,
+  getAllProducts,
+  getAllProductsShop,
+  getProductById,
+  updateProduct,
+} from "../../redux/actions/product";
 import { categoriesData } from "../../static/data";
 import { toast } from "react-toastify";
 import useVendor from "../../hooks/useVendor";
@@ -14,16 +20,29 @@ import {
   isProductWizardValid,
   validateProductStep,
 } from "./wizardValidation";
+import ProductVariantEditor from "./ProductVariantEditor";
+import {
+  buildProductApiPayload,
+  createEmptyProductWizardValues,
+  getVariantSummary,
+  productToWizardValues,
+} from "./productVariantForm";
 import "./seller-experience.css";
 
 const STEPS = [
   { id: "basics", label: "Basic Information" },
-  { id: "pricing", label: "Pricing" },
+  { id: "pricing", label: "Pricing & Variants" },
   { id: "images", label: "Media" },
   { id: "review", label: "Review & Publish" },
 ];
 
-const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
+const CreateProductWizard = ({
+  embedded = false,
+  onComplete,
+  onCancel,
+  mode = "create",
+  productId = null,
+}) => {
   const { vendorId, isVendorReady } = useVendor();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -33,20 +52,8 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
   const [submitting, setSubmitting] = useState(false);
   const [dragOver, setDragOver] = useState(false);
 
-  const [values, setValues] = useState({
-    name: "",
-    description: "",
-    category: "",
-    tags: "",
-    originalPrice: "",
-    discountPrice: "",
-    stock: "",
-    productType: "normal",
-    condition: "new",
-    location: "Kigali-Rwanda",
-    images: [],
-    coverIndex: 0,
-  });
+  const [loadingProduct, setLoadingProduct] = useState(mode === "edit");
+  const [values, setValues] = useState(createEmptyProductWizardValues());
 
   const categoryOptions = useMemo(
     () =>
@@ -59,9 +66,39 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
   const stepErrors = useMemo(() => validateProductStep(stepIndex, values), [stepIndex, values]);
   const showError = (field) => (touched[field] ? stepErrors[field] : undefined);
 
+  const isEditMode = mode === "edit" && Boolean(productId);
+  const variantSummary = useMemo(() => getVariantSummary(values), [values]);
+
+  useEffect(() => {
+    if (!isEditMode) return undefined;
+
+    let cancelled = false;
+    (async () => {
+      setLoadingProduct(true);
+      const result = await dispatch(getProductById(productId));
+      if (cancelled) return;
+      if (result?.success && result.product) {
+        setValues(productToWizardValues(result.product));
+      } else {
+        toast.error(result?.message || "Failed to load product");
+        navigate("/dashboard-products");
+      }
+      setLoadingProduct(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, isEditMode, navigate, productId]);
+
   const setField = (field, value) => {
     setValues((prev) => ({ ...prev, [field]: value }));
     setTouched((prev) => ({ ...prev, [field]: true }));
+  };
+
+  const handleVariantChange = (updater) => {
+    setValues((prev) => (typeof updater === "function" ? updater(prev) : { ...prev, ...updater }));
+    setTouched((prev) => ({ ...prev, variants: true, optionValues: true, optionGroupName: true }));
   };
 
   const reorderImages = (from, to) => {
@@ -135,31 +172,24 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
         : values.images;
 
     try {
-      const result = await dispatch(
-        createProduct(
-          values.name,
-          values.description,
-          values.category,
-          values.tags,
-          values.originalPrice,
-          values.discountPrice,
-          values.stock,
-          vendorId,
-          orderedImages
-        )
-      );
+      const payload = buildProductApiPayload(values, vendorId, orderedImages);
+      const result = isEditMode
+        ? await dispatch(updateProduct(productId, payload))
+        : await dispatch(createProduct(payload));
 
       if (result?.success) {
-        toast.success("Product published successfully!");
+        toast.success(isEditMode ? "Product updated successfully!" : "Product published successfully!");
         dispatch(getAllProductsShop(vendorId));
         dispatch(getAllProducts());
         if (embedded && onComplete) {
           onComplete();
         }
-        if (result.product?._id) {
+        if (!isEditMode && result.product?._id) {
           navigate(`/product/${result.product._id}`, {
             state: { product: result.product },
           });
+        } else if (isEditMode) {
+          navigate("/dashboard-products");
         } else if (!embedded) {
           navigate("/dashboard-products");
         }
@@ -176,10 +206,22 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
       ? isProductWizardValid(values)
       : Object.keys(validateProductStep(stepIndex, values)).length === 0;
 
+  if (loadingProduct) {
+    return (
+      <div className="seller-xp-wizard">
+        <p className="text-sm text-gray-500">Loading product…</p>
+      </div>
+    );
+  }
+
   return (
     <WizardShell
-      title="Create Product"
-      subtitle="A guided flow — publish when everything looks right."
+      title={isEditMode ? "Edit Product" : "Create Product"}
+      subtitle={
+        isEditMode
+          ? "Update your listing — changes apply when you save."
+          : "A guided flow — publish when everything looks right."
+      }
       steps={STEPS}
       currentStep={stepIndex}
       isFirstStep={stepIndex === 0}
@@ -190,7 +232,7 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
       onFirstBack={onCancel}
       onNext={handleNext}
       onPublish={handlePublish}
-      publishLabel="Publish product"
+      publishLabel={isEditMode ? "Save changes" : "Publish product"}
     >
       {stepIndex === 0 && (
         <>
@@ -237,40 +279,12 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
 
       {stepIndex === 1 && (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InlineField label="Original price" htmlFor="original-price">
-              <input
-                id="original-price"
-                type="number"
-                className="seller-xp-input dark:text-white"
-                value={values.originalPrice}
-                onChange={(e) => setField("originalPrice", e.target.value)}
-                placeholder="RWF"
-              />
-            </InlineField>
-            <InlineField label="Selling price" required error={showError("discountPrice")} htmlFor="discount-price">
-              <input
-                id="discount-price"
-                type="number"
-                className={`seller-xp-input dark:text-white ${showError("discountPrice") ? "has-error" : ""}`}
-                value={values.discountPrice}
-                onChange={(e) => setField("discountPrice", e.target.value)}
-                onBlur={() => setTouched((p) => ({ ...p, discountPrice: true }))}
-                placeholder="RWF"
-              />
-            </InlineField>
-          </div>
-          <InlineField label="Stock" required error={showError("stock")} htmlFor="product-stock">
-            <input
-              id="product-stock"
-              type="number"
-              className={`seller-xp-input dark:text-white ${showError("stock") ? "has-error" : ""}`}
-              value={values.stock}
-              onChange={(e) => setField("stock", e.target.value)}
-              onBlur={() => setTouched((p) => ({ ...p, stock: true }))}
-              min="0"
-            />
-          </InlineField>
+          <ProductVariantEditor
+            values={values}
+            onChange={handleVariantChange}
+            errors={stepErrors}
+            touched={touched}
+          />
           <details className="mt-4 text-sm">
             <summary className="cursor-pointer text-gray-500 font-medium">Additional options</summary>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
@@ -369,15 +383,21 @@ const CreateProductWizard = ({ embedded = false, onComplete, onCancel }) => {
 
       {stepIndex === 3 && (
         <div>
-          <p className="text-sm text-gray-500 mb-4">Review your listing before publishing.</p>
+          <p className="text-sm text-gray-500 mb-4">
+            {isEditMode ? "Review your changes before saving." : "Review your listing before publishing."}
+          </p>
           {[
             ["Name", values.name],
             ["Category", values.category],
-            ["Price", `${values.discountPrice} RWF`],
-            ["Stock", values.stock],
+            ["Pricing mode", values.hasVariants ? "Variants" : "Single product"],
+            ["Price", variantSummary.priceLabel],
+            ["Stock", variantSummary.stockLabel],
+            values.hasVariants ? ["Variants", `${variantSummary.variantCount}`] : null,
             ["Images", `${values.images.length} uploaded`],
             ["Type", values.productType],
-          ].map(([label, val]) => (
+          ]
+            .filter(Boolean)
+            .map(([label, val]) => (
             <div key={label} className="seller-xp-review-row dark:text-gray-200">
               <span className="text-gray-500">{label}</span>
               <span className="font-medium">{val}</span>
