@@ -21,24 +21,63 @@ export const validateProductVariants = (values) => {
     return errors;
   }
 
-  if (!values.optionGroupName?.trim()) {
-    errors.optionGroupName = "Option group name is required.";
-  }
-
-  const optionValues = (values.optionValues || []).map((value) => String(value).trim()).filter(Boolean);
-  if (!optionValues.length) {
-    errors.optionValues = "Add at least one option value.";
-  }
-
-  if (!values.variants?.length) {
-    errors.variants = "Add at least one variant row.";
+  const optionGroups = values.optionGroups || [];
+  if (!optionGroups.length) {
+    errors.optionGroups = "Add at least one option group.";
     return errors;
   }
 
-  values.variants.forEach((variant, index) => {
-    if (!variant.sku?.trim()) {
-      errors[`variantSku_${index}`] = "SKU is required.";
+  const groupNames = new Set();
+  optionGroups.forEach((group, groupIndex) => {
+    const name = String(group.name || "").trim();
+    if (!name) {
+      errors[`optionGroupName_${groupIndex}`] = "Option group name is required.";
+    } else {
+      const normalized = name.toLowerCase();
+      if (groupNames.has(normalized)) {
+        errors[`optionGroupName_${groupIndex}`] = "Duplicate option group name.";
+      }
+      groupNames.add(normalized);
     }
+
+    const labels = (group.values || []).map((value) => String(value.label || "").trim()).filter(Boolean);
+    if (!labels.length) {
+      errors[`optionGroupValues_${groupIndex}`] = "Add at least one option value.";
+    }
+
+    const seenValues = new Set();
+    (group.values || []).forEach((value, valueIndex) => {
+      const label = String(value.label || "").trim();
+      if (!label) {
+        errors[`optionValue_${groupIndex}_${valueIndex}`] = "Option value is required.";
+        return;
+      }
+      const normalized = label.toLowerCase();
+      if (seenValues.has(normalized)) {
+        errors[`optionValue_${groupIndex}_${valueIndex}`] = "Duplicate option value.";
+      }
+      seenValues.add(normalized);
+    });
+  });
+
+  if (!values.variants?.length) {
+    errors.variants = "Add at least one variant combination.";
+    return errors;
+  }
+
+  const seenCombinations = new Set();
+  values.variants.forEach((variant, index) => {
+    const combinationKey =
+      variant.combinationKey ||
+      (Array.isArray(variant.optionValueIds) ? variant.optionValueIds.slice().sort().join("|") : "");
+
+    if (combinationKey) {
+      if (seenCombinations.has(combinationKey)) {
+        errors[`variantCombination_${index}`] = "Duplicate variant combination.";
+      }
+      seenCombinations.add(combinationKey);
+    }
+
     if (variant.discountPrice === "" || variant.discountPrice == null) {
       errors[`variantPrice_${index}`] = "Price is required.";
     } else if (Number(variant.discountPrice) < 0) {
@@ -59,7 +98,7 @@ export const validateProductVariants = (values) => {
   });
 
   if (Object.keys(errors).some((key) => key.startsWith("variant"))) {
-    errors.variants = "Complete SKU, price, and stock for each variant.";
+    errors.variants = "Complete price and stock for each variant.";
   }
 
   return errors;

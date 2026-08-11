@@ -27,6 +27,10 @@ import {
   getVariantSummary,
   productToWizardValues,
 } from "./productVariantForm";
+import {
+  generateProductDescriptionWithAI,
+  hasMeaningfulDescription,
+} from "./productDescriptionAI";
 import "./seller-experience.css";
 
 const STEPS = [
@@ -35,6 +39,16 @@ const STEPS = [
   { id: "images", label: "Media" },
   { id: "review", label: "Review & Publish" },
 ];
+
+const DESCRIPTION_MODULES = {
+  toolbar: [
+    ["bold", "italic", "underline"],
+    [{ list: "ordered" }, { list: "bullet" }],
+    ["link"],
+  ],
+};
+
+const DESCRIPTION_FORMATS = ["bold", "italic", "underline", "list", "bullet", "link"];
 
 const CreateProductWizard = ({
   embedded = false,
@@ -53,6 +67,7 @@ const CreateProductWizard = ({
   const [dragOver, setDragOver] = useState(false);
 
   const [loadingProduct, setLoadingProduct] = useState(mode === "edit");
+  const [generatingDescription, setGeneratingDescription] = useState(false);
   const [values, setValues] = useState(createEmptyProductWizardValues());
 
   const categoryOptions = useMemo(
@@ -98,7 +113,35 @@ const CreateProductWizard = ({
 
   const handleVariantChange = (updater) => {
     setValues((prev) => (typeof updater === "function" ? updater(prev) : { ...prev, ...updater }));
-    setTouched((prev) => ({ ...prev, variants: true, optionValues: true, optionGroupName: true }));
+    setTouched((prev) => ({ ...prev, variants: true, optionGroups: true }));
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!values.name?.trim()) {
+      toast.error("Add a product name before generating a description.");
+      return;
+    }
+    if (!isVendorReady || !vendorId) {
+      toast.error("Login required to use YEBO AI.");
+      return;
+    }
+    if (hasMeaningfulDescription(values.description)) {
+      const confirmed = window.confirm(
+        "Replace your current description with a YEBO AI generated draft?"
+      );
+      if (!confirmed) return;
+    }
+
+    setGeneratingDescription(true);
+    try {
+      const generated = await generateProductDescriptionWithAI(values, vendorId);
+      setField("description", generated);
+      toast.success("Description generated with YEBO AI.");
+    } catch (error) {
+      toast.error(error?.message || "YEBO AI description is unavailable right now.");
+    } finally {
+      setGeneratingDescription(false);
+    }
   };
 
   const reorderImages = (from, to) => {
@@ -235,7 +278,7 @@ const CreateProductWizard = ({
       publishLabel={isEditMode ? "Save changes" : "Publish product"}
     >
       {stepIndex === 0 && (
-        <>
+        <div className="seller-xp-step seller-xp-step--basics">
           <InlineField label="Product name" required error={showError("name")} htmlFor="product-name">
             <input
               id="product-name"
@@ -258,13 +301,25 @@ const CreateProductWizard = ({
             />
           </InlineField>
           <InlineField label="Description" required error={showError("description")}>
-            <ReactQuill
-              value={values.description}
-              onChange={(v) => setField("description", v)}
-              onBlur={() => setTouched((p) => ({ ...p, description: true }))}
-              placeholder="Describe your product…"
-              className="mt-1 bg-white dark:bg-gray-900 rounded-xl"
-            />
+            <div className="seller-xp-quill">
+              <ReactQuill
+                theme="snow"
+                modules={DESCRIPTION_MODULES}
+                formats={DESCRIPTION_FORMATS}
+                value={values.description}
+                onChange={(v) => setField("description", v)}
+                onBlur={() => setTouched((p) => ({ ...p, description: true }))}
+                placeholder="Describe your product…"
+              />
+            </div>
+            <button
+              type="button"
+              className="seller-xp-ai-description-btn"
+              onClick={handleGenerateDescription}
+              disabled={generatingDescription}
+            >
+              {generatingDescription ? "Generating with YEBO AI…" : "✨ Generate with YEBO AI"}
+            </button>
           </InlineField>
           <InlineField label="Tags" hint="Optional — comma separated">
             <input
@@ -274,7 +329,7 @@ const CreateProductWizard = ({
               placeholder="e.g. electronics, audio"
             />
           </InlineField>
-        </>
+        </div>
       )}
 
       {stepIndex === 1 && (
@@ -324,7 +379,7 @@ const CreateProductWizard = ({
       )}
 
       {stepIndex === 2 && (
-        <>
+        <div className="seller-xp-step seller-xp-step--media">
           <InlineField label="Product images" required error={showError("images")}>
             <div
               className={`seller-xp-dropzone ${dragOver ? "is-dragover" : ""}`}
@@ -345,8 +400,8 @@ const CreateProductWizard = ({
                 if (e.key === "Enter" || e.key === " ") document.getElementById("product-images-input")?.click();
               }}
             >
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Drag & drop images here</p>
-              <p className="text-xs text-gray-400 mt-1">Up to 5 images · Click to browse</p>
+              <p className="seller-xp-dropzone__title">Add product images</p>
+              <p className="seller-xp-dropzone__hint">Up to 5 · Tap or drag here</p>
             </div>
             <input
               id="product-images-input"
@@ -377,8 +432,8 @@ const CreateProductWizard = ({
               ))}
             </div>
           )}
-          <p className="text-xs text-gray-400 mt-2">Tap an image to set as cover. Use arrow keys to reorder focus.</p>
-        </>
+          <p className="seller-xp-media-hint">Tap an image to set as cover.</p>
+        </div>
       )}
 
       {stepIndex === 3 && (

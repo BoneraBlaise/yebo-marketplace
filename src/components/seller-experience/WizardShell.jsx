@@ -17,27 +17,40 @@ const WizardShell = ({
   nextLabel = "Continue",
   publishLabel = "Publish",
 }) => (
-  <div className="seller-xp-wizard">
+  <div className="seller-xp-wizard seller-xp-wizard--product">
     <div className="seller-xp-wizard__header">
-      <h2 className="seller-xp-wizard__title dark:text-white">{title}</h2>
-      {subtitle && <p className="seller-xp-wizard__subtitle">{subtitle}</p>}
-      <div className="seller-xp-wizard__progress" role="progressbar" aria-valuenow={currentStep + 1} aria-valuemin={1} aria-valuemax={steps.length}>
+      <div className="seller-xp-wizard__header-top">
+        <h2 className="seller-xp-wizard__title dark:text-white">{title}</h2>
+        {subtitle && <p className="seller-xp-wizard__subtitle">{subtitle}</p>}
+      </div>
+      <div
+        className="seller-xp-wizard__progress"
+        role="progressbar"
+        aria-valuenow={currentStep + 1}
+        aria-valuemin={1}
+        aria-valuemax={steps.length}
+        aria-label={`Step ${currentStep + 1} of ${steps.length}: ${steps[currentStep]?.label}`}
+      >
+        <div className="seller-xp-wizard__progress-meta">
+          <span className="seller-xp-wizard__progress-label">
+            Step {currentStep + 1} of {steps.length}
+          </span>
+          <span className="seller-xp-wizard__step-name">{steps[currentStep]?.label}</span>
+        </div>
         <div className="seller-xp-wizard__progress-track">
           <div
             className="seller-xp-wizard__progress-fill"
             style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
           />
         </div>
-        <span className="seller-xp-wizard__progress-label">
-          Step {currentStep + 1} of {steps.length}
-        </span>
       </div>
-      <p className="seller-xp-wizard__step-name">{steps[currentStep]?.label}</p>
     </div>
 
-    <div key={currentStep} className="seller-xp-wizard__body seller-xp-wizard__body--animate">{children}</div>
+    <div key={currentStep} className="seller-xp-wizard__body seller-xp-wizard__body--animate">
+      {children}
+    </div>
 
-    <div className="seller-xp-actions">
+    <div className="seller-xp-actions seller-xp-actions--sticky">
       <button
         type="button"
         className="seller-xp-btn seller-xp-btn--ghost"

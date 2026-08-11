@@ -5,16 +5,76 @@ const slugify = (value = "") =>
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "") || "option";
 
-export const createVariantRow = (overrides = {}) => ({
-  id: overrides.id || `var_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-  optionValueId: overrides.optionValueId || "",
-  label: overrides.label || "",
-  sku: overrides.sku || "",
-  discountPrice: overrides.discountPrice ?? "",
-  originalPrice: overrides.originalPrice ?? "",
-  stock: overrides.stock ?? "",
-  isAvailable: overrides.isAvailable !== false,
-  images: Array.isArray(overrides.images) ? overrides.images : [],
+const MAX_OPTION_GROUPS = 3;
+
+const extractSkuToken = (variantId = "", fallbackIndex = 0) => {
+  const cleaned = String(variantId).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
+  if (cleaned.length >= 4) {
+    return cleaned.slice(-8).padStart(8, "0").slice(0, 8);
+  }
+  return String(fallbackIndex + 1).padStart(8, "0");
+};
+
+export const generateVariantSku = (variantId, index = 0, usedSkus = new Set()) => {
+  const token = extractSkuToken(variantId, index);
+  let candidate = `YB-${token}-${String(index + 1).padStart(3, "0")}`;
+  let attempt = 0;
+
+  while (usedSkus.has(candidate.toUpperCase()) && attempt < 100) {
+    attempt += 1;
+    candidate = `YB-${token}-${String(index + 1).padStart(3, "0")}${attempt}`;
+  }
+
+  usedSkus.add(candidate.toUpperCase());
+  return candidate;
+};
+
+export const ensureVariantSkus = (variants = []) => {
+  const usedSkus = new Set();
+
+  return variants.map((variant, index) => {
+    const existing = String(variant.sku || "").trim();
+    if (existing) {
+      usedSkus.add(existing.toUpperCase());
+      return variant;
+    }
+
+    return {
+      ...variant,
+      sku: generateVariantSku(variant.id, index, usedSkus),
+    };
+  });
+};
+
+export const createVariantRow = (overrides = {}) => {
+  const optionValueIds = Array.isArray(overrides.optionValueIds)
+    ? overrides.optionValueIds.filter(Boolean)
+    : overrides.optionValueId
+      ? [overrides.optionValueId]
+      : [];
+
+  const combinationKey =
+    overrides.combinationKey || buildCombinationKey(optionValueIds);
+
+  return {
+    id: overrides.id || `var_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    optionValueIds,
+    optionValueId: optionValueIds[0] || "",
+    combinationKey,
+    label: overrides.label || "",
+    sku: overrides.sku || "",
+    discountPrice: overrides.discountPrice ?? "",
+    originalPrice: overrides.originalPrice ?? "",
+    stock: overrides.stock ?? "",
+    isAvailable: overrides.isAvailable !== false,
+    images: Array.isArray(overrides.images) ? overrides.images : [],
+  };
+};
+
+export const createEmptyOptionGroup = (name = "Option") => ({
+  id: `opt_${slugify(name)}_${Date.now()}`,
+  name,
+  values: [{ id: createOptionValueId(name, 0), label: "" }],
 });
 
 export const createEmptyProductWizardValues = () => ({
@@ -31,42 +91,167 @@ export const createEmptyProductWizardValues = () => ({
   images: [],
   coverIndex: 0,
   hasVariants: false,
-  optionGroupId: "",
-  optionGroupName: "Package",
-  optionValues: [],
-  optionValueIds: [],
+  optionGroups: [],
+  excludedCombinationKeys: [],
   variants: [],
 });
 
 export const createOptionValueId = (label, index = 0) =>
   `val_${slugify(label)}_${index}_${Math.random().toString(36).slice(2, 6)}`;
 
+export const buildCombinationKey = (optionValueIds = []) =>
+  [...optionValueIds].filter(Boolean).sort().join("|");
+
+export const sortOptionGroups = (optionGroups = []) =>
+  [...optionGroups].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0));
+
+export const buildVariantLabel = (optionGroups = [], optionValueIds = []) => {
+  const groups = sortOptionGroups(optionGroups);
+  const labels = optionValueIds
+    .map((valueId) => {
+      for (const group of groups) {
+        const value = (group.values || []).find((entry) => entry.id === valueId);
+        if (value?.label) return String(value.label).trim();
+      }
+      return null;
+    })
+    .filter(Boolean);
+
+  return labels.join(" · ");
+};
+
+export const generateVariantCombinations = (optionGroups = []) => {
+  const groups = sortOptionGroups(optionGroups)
+    .map((group) => ({
+      ...group,
+      values: (group.values || []).filter((value) => String(value.label || "").trim()),
+    }))
+    .filter((group) => group.values.length > 0);
+
+  if (!groups.length) return [];
+
+  return groups.reduce((acc, group) => {
+    if (!acc.length) {
+      return group.values.map((value) => [value.id]);
+    }
+
+    const next = [];
+    for (const combo of acc) {
+      for (const value of group.values) {
+        next.push([...combo, value.id]);
+      }
+    }
+    return next;
+  }, []);
+};
+
+export const normalizeWizardOptionGroups = (values = {}) => {
+  if (Array.isArray(values.optionGroups) && values.optionGroups.length > 0) {
+    return values.optionGroups.map((group, index) => ({
+      id: group.id || `opt_${slugify(group.name || "option")}_${index}`,
+      name: group.name || "Option",
+      position: Number.isFinite(Number(group.position)) ? Number(group.position) : index,
+      values: (group.values || []).map((value, valueIndex) => ({
+        id: value.id || createOptionValueId(value.label || "option", valueIndex),
+        label: String(value.label ?? "").trim(),
+      })),
+    }));
+  }
+
+  if ((values.optionValues || []).length > 0 || values.optionGroupName) {
+    return [
+      {
+        id: values.optionGroupId || `opt_${slugify(values.optionGroupName || "package")}`,
+        name: values.optionGroupName || "Package",
+        position: 0,
+        values: (values.optionValues || []).map((label, index) => ({
+          id: values.optionValueIds?.[index] || createOptionValueId(label, index),
+          label: String(label ?? "").trim(),
+        })),
+      },
+    ];
+  }
+
+  return [];
+};
+
+const migrateLegacyVariants = (variants = []) =>
+  variants.map((variant) => {
+    const optionValueIds = Array.isArray(variant.optionValueIds)
+      ? variant.optionValueIds.filter(Boolean)
+      : variant.optionValueId
+        ? [variant.optionValueId]
+        : [];
+
+    return {
+      ...variant,
+      optionValueIds,
+      combinationKey: variant.combinationKey || buildCombinationKey(optionValueIds),
+    };
+  });
+
+export const syncVariantsWithOptionGroups = ({
+  optionGroups = [],
+  variants = [],
+  excludedCombinationKeys = [],
+} = {}) => {
+  const excluded = new Set(excludedCombinationKeys || []);
+  const normalizedGroups = sortOptionGroups(optionGroups);
+  const combinations = generateVariantCombinations(normalizedGroups);
+  const existingByKey = new Map();
+
+  for (const variant of migrateLegacyVariants(variants)) {
+    const key =
+      variant.combinationKey ||
+      buildCombinationKey(variant.optionValueIds || []);
+    if (key) existingByKey.set(key, variant);
+  }
+
+  const nextVariants = combinations
+    .map((optionValueIds) => {
+      const combinationKey = buildCombinationKey(optionValueIds);
+      if (excluded.has(combinationKey)) return null;
+
+      const existing = existingByKey.get(combinationKey);
+      return createVariantRow({
+        ...existing,
+        optionValueIds,
+        combinationKey,
+        label: buildVariantLabel(normalizedGroups, optionValueIds),
+      });
+    })
+    .filter(Boolean);
+
+  return {
+    optionGroups: normalizedGroups,
+    variants: ensureVariantSkus(nextVariants),
+    excludedCombinationKeys: [...excluded],
+  };
+};
+
 export const syncVariantsWithOptionValues = ({
   optionValues = [],
   optionValueIds = [],
   variants = [],
-} = {}) => {
-  const nextIds = optionValues.map(
-    (label, index) => optionValueIds[index] || createOptionValueId(label, index)
-  );
-
-  const nextVariants = optionValues.map((label, index) => {
-    const existing =
-      variants.find((variant) => variant.optionValueId === nextIds[index]) ||
-      variants[index];
-
-    return createVariantRow({
-      ...existing,
-      label,
-      optionValueId: nextIds[index],
-    });
+  optionGroupId = "",
+  optionGroupName = "Package",
+  excludedCombinationKeys = [],
+} = {}) =>
+  syncVariantsWithOptionGroups({
+    optionGroups: [
+      {
+        id: optionGroupId || `opt_${slugify(optionGroupName || "package")}`,
+        name: optionGroupName || "Package",
+        position: 0,
+        values: optionValues.map((label, index) => ({
+          id: optionValueIds[index] || createOptionValueId(label, index),
+          label: String(label ?? "").trim(),
+        })),
+      },
+    ],
+    variants,
+    excludedCombinationKeys,
   });
-
-  return {
-    optionValueIds: nextIds,
-    variants: nextVariants,
-  };
-};
 
 export const productToWizardValues = (product = {}) => {
   const base = {
@@ -96,20 +281,25 @@ export const productToWizardValues = (product = {}) => {
     return base;
   }
 
-  const group = product.optionGroups?.[0] || { id: "", name: "Package", values: [] };
-  const optionValues = (group.values || []).map((value) => value.label);
-  const optionValueIds = (group.values || []).map((value) => value.id);
+  const optionGroups = (product.optionGroups || []).map((group, index) => ({
+    id: group.id || `opt_${slugify(group.name || "option")}_${index}`,
+    name: group.name || "Option",
+    position: Number.isFinite(Number(group.position)) ? Number(group.position) : index,
+    values: (group.values || []).map((value, valueIndex) => ({
+      id: value.id || createOptionValueId(value.label, valueIndex),
+      label: value.label || "",
+    })),
+  }));
 
   const variants = (product.variants || []).map((variant) => {
-    const label =
-      group.values?.find((value) => value.id === variant.optionValueIds?.[0])?.label ||
-      variant.title ||
-      "";
+    const optionValueIds = Array.isArray(variant.optionValueIds)
+      ? variant.optionValueIds.filter(Boolean)
+      : [];
 
     return createVariantRow({
       id: variant.id,
-      optionValueId: variant.optionValueIds?.[0] || "",
-      label,
+      optionValueIds,
+      label: buildVariantLabel(optionGroups, optionValueIds) || variant.title || "",
       sku: variant.sku || "",
       discountPrice:
         variant.discountPrice === undefined || variant.discountPrice === null
@@ -127,11 +317,9 @@ export const productToWizardValues = (product = {}) => {
 
   return {
     ...base,
-    optionGroupId: group.id || `opt_${slugify(group.name || "package")}`,
-    optionGroupName: group.name || "Package",
-    optionValues,
-    optionValueIds,
+    optionGroups,
     variants,
+    excludedCombinationKeys: [],
   };
 };
 
@@ -160,25 +348,26 @@ export const buildProductApiPayload = (values, shopId, orderedImages = []) => {
     };
   }
 
-  const groupId = values.optionGroupId || `opt_${slugify(values.optionGroupName || "package")}`;
-  const optionGroups = [
-    {
-      id: groupId,
-      name: values.optionGroupName?.trim() || "Package",
-      position: 0,
-      values: (values.optionValues || []).map((label, index) => ({
-        id: values.optionValueIds?.[index] || createOptionValueId(label, index),
-        label: String(label).trim(),
-        position: index,
-      })),
-    },
-  ];
+  const normalizedGroups = normalizeWizardOptionGroups(values);
+  const optionGroups = normalizedGroups.map((group, index) => ({
+    id: group.id,
+    name: String(group.name || "Option").trim() || "Option",
+    position: index,
+    values: (group.values || [])
+      .map((value, valueIndex) => ({
+        id: value.id,
+        label: String(value.label || "").trim(),
+        position: valueIndex,
+      }))
+      .filter((value) => value.label),
+  }));
 
-  const variants = (values.variants || []).map((variant, index) => ({
+  const variantsWithSkus = ensureVariantSkus(values.variants || []);
+  const variants = variantsWithSkus.map((variant) => ({
     id: variant.id,
     sku: String(variant.sku || "").trim(),
-    optionValueIds: [optionGroups[0].values[index]?.id || variant.optionValueId].filter(Boolean),
-    title: optionGroups[0].values[index]?.label || variant.label || undefined,
+    optionValueIds: variant.optionValueIds || [],
+    title: variant.label || undefined,
     discountPrice: Number(variant.discountPrice),
     originalPrice:
       variant.originalPrice === "" || variant.originalPrice == null
@@ -231,3 +420,5 @@ export const getVariantSummary = (values = {}) => {
     variantCount: values.variants?.length || 0,
   };
 };
+
+export const MAX_VENDOR_OPTION_GROUPS = MAX_OPTION_GROUPS;
